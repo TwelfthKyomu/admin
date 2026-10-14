@@ -1,0 +1,54 @@
+export const Icon = () => (
+    <svg
+        width="56"
+        height="56"
+        viewBox="0 0 32 32"
+        fill="none"
+        aria-hidden="true"
+        focusable="false"
+        className="h-full w-fit"
+    >
+        <rect
+            width="32"
+            height="32"
+            rx="8"
+            fill="#000"
+            stroke="oklch(1 0 0 / 15%)"
+            data-om-id="3848f4ef:32"
+        />
+        <rect
+            x="6"
+            y="8"
+            width="13"
+            height="4"
+            rx="2"
+            fill="#ebebeb"
+            data-om-id="3848f4ef:33"
+        />
+        <rect
+            x="9"
+            y="14"
+            width="17"
+            height="4"
+            rx="2"
+            fill="#ebebeb"
+            data-om-id="3848f4ef:34"
+        />
+        <rect
+            x="6"
+            y="20"
+            width="11"
+            height="4"
+            rx="2"
+            fill="#8b5cf6"
+            data-om-id="3848f4ef:35"
+        />
+        <circle
+            cx="19"
+            cy="22"
+            r="1.6"
+            fill="#8b5cf6"
+            data-om-id="3848f4ef:36"
+        />
+    </svg>
+);

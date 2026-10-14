@@ -1,0 +1,14 @@
+{
+    "$schema": "https://unpkg.com/knip@latest/schema.json",
+    "entry": [
+        "src/app/**/{page,layout,loading,error,not-found,template,route}.{ts,tsx}",
+        "src/**/*.stories.tsx",
+        "src/**/*.{test,spec}.ts"
+    ],
+    "project": ["src/**/*.{ts,tsx}", "i18n/**/*.ts"],
+    "ignoreDependencies": ["tailwindcss", "tw-animate-css"],
+    "rules": {
+        "types": "off",
+        "enumMembers": "off"
+    }
+}

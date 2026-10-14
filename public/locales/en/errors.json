@@ -1,0 +1,29 @@
+{
+  "validation": {
+    "required": "This field is required",
+    "email": "Please enter a valid email address",
+    "minLength": "Minimum length is {{count}} characters",
+    "maxLength": "Maximum length is {{count}} characters",
+    "passwordMismatch": "Passwords do not match",
+    "invalidFormat": "Invalid format",
+    "twoFactorCode": "Two-factor authentication code must contain exactly 6 characters",
+    "invalidIp": "Invalid IP address"
+  },
+  "auth": {
+    "loginFailed": "Login failed",
+    "invalidCredentials": "Invalid credentials",
+    "accountLocked": "Account is locked",
+    "twoFactorRequired": "Two-factor authentication code required",
+    "sessionExpired": "Session expired",
+    "accessDenied": "Access denied"
+  },
+  "network": {
+    "connectionError": "Connection error",
+    "serverError": "Server error",
+    "timeout": "Request timeout"
+  },
+  "generic": {
+    "unexpectedError": "An unexpected error occurred",
+    "tryAgain": "Please try again"
+  }
+}

@@ -1,0 +1,28 @@
+services:
+  postgres:
+    image: postgres:18.2-alpine
+    container_name: adminpanel-postgres
+    labels:
+      com.admin.project: adminpanel
+      com.admin.service: postgres
+    restart: unless-stopped
+    ports:
+      - '${POSTGRES_HOST_PORT:-55432}:5432'
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-adminpanel}
+      POSTGRES_USER: ${POSTGRES_USER:-postgres}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-postgres}
+    volumes:
+      - postgres_root:/var/lib/postgresql
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U "$$POSTGRES_USER" -d "$$POSTGRES_DB"']
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+volumes:
+  postgres_root:
+    driver: local
+  postgres_data:
+    driver: local
