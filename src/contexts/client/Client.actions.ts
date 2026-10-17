@@ -21,6 +21,7 @@ import {
 import { and, desc, eq, inArray } from 'drizzle-orm';
 import { findClientInProject, toClientView } from './Client.lib';
 import {
+    CLIENTS_LIST_LIMIT,
     ClientsActionInputSchema,
     CreateClientActionInputSchema,
     UpdateClientActionInputSchema,
@@ -29,60 +30,69 @@ import { clients } from './Clients.table';
 
 export const clientsAction = projectReadAction(CLIENT_READ_PERMISSIONS)
     .inputSchema(ClientsActionInputSchema)
-    .action(async ({ parsedInput: { projectId, search }, ctx: { userId } }) => {
-        const filters = [eq(clients.projectId, projectId)];
+    .action(
+        async ({
+            parsedInput: { projectId, search, limit },
+            ctx: { userId },
+        }) => {
+            const filters = [eq(clients.projectId, projectId)];
 
-        const ownEmployeeId = await visibleBookingsEmployeeId(
-            userId,
-            projectId,
-        );
-
-        if (ownEmployeeId) {
-            filters.push(
-                inArray(
-                    clients.id,
-                    db
-                        .select({ id: orders.clientId })
-                        .from(orders)
-                        .where(
-                            and(
-                                eq(orders.projectId, projectId),
-                                eq(orders.assignedEmployeeId, ownEmployeeId),
-                            ),
-                        ),
-                ),
+            const ownEmployeeId = await visibleBookingsEmployeeId(
+                userId,
+                projectId,
             );
-        }
 
-        filters.push(
-            ...searchFilters(search, [
-                clients.firstName,
-                clients.lastName,
-                clients.middleName,
-                clients.email,
-                clients.phone,
-            ]),
-        );
+            if (ownEmployeeId) {
+                filters.push(
+                    inArray(
+                        clients.id,
+                        db
+                            .select({ id: orders.clientId })
+                            .from(orders)
+                            .where(
+                                and(
+                                    eq(orders.projectId, projectId),
+                                    eq(
+                                        orders.assignedEmployeeId,
+                                        ownEmployeeId,
+                                    ),
+                                ),
+                            ),
+                    ),
+                );
+            }
 
-        return db
-            .select({
-                id: clients.id,
-                projectId: clients.projectId,
-                email: clients.email,
-                firstName: clients.firstName,
-                lastName: clients.lastName,
-                middleName: clients.middleName,
-                phone: clients.phone,
-                totalOrders: clients.totalOrders,
-                totalSpentAmount: clients.totalSpentAmount,
-                lastVisitAt: clients.lastVisitAt,
-                emailVerifiedAt: clients.emailVerifiedAt,
-                createdAt: clients.createdAt,
-            })
-            .from(clients)
-            .where(and(...filters))
-            .orderBy(desc(clients.createdAt));
-    });
+            filters.push(
+                ...searchFilters(search, [
+                    clients.firstName,
+                    clients.lastName,
+                    clients.middleName,
+                    clients.email,
+                    clients.phone,
+                ]),
+            );
+
+            return db
+                .select({
+                    id: clients.id,
+                    projectId: clients.projectId,
+                    email: clients.email,
+                    firstName: clients.firstName,
+                    lastName: clients.lastName,
+                    middleName: clients.middleName,
+                    phone: clients.phone,
+                    totalOrders: clients.totalOrders,
+                    totalSpentAmount: clients.totalSpentAmount,
+                    lastVisitAt: clients.lastVisitAt,
+                    emailVerifiedAt: clients.emailVerifiedAt,
+                    createdAt: clients.createdAt,
+                })
+                .from(clients)
+                .where(and(...filters))
+                .orderBy(desc(clients.createdAt))
+                .limit(limit ?? CLIENTS_LIST_LIMIT);
+        },
+    );
 
 function clientValues(input: {
     firstName: string;

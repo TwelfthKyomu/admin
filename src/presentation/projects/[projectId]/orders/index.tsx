@@ -3,10 +3,11 @@
 import { QueryBoundary } from '@/shared/components/common';
 import { ORDERS_LIST_LIMIT } from '@/contexts/order';
 import { Button, Input, Table } from '@/ui/Base';
-import { Plus } from 'lucide-react';
+import { Download, Plus } from 'lucide-react';
 import { COLUMNS } from './components/Column';
 import { StatusFilter } from './components/StatusFilter';
 import { useOrdersPage } from './hooks/useOrdersPage';
+import { exportOrders } from './lib/exportOrders';
 
 export const OrdersPage = () => {
     const { query, search, setSearch, status, setStatus, onOpen, canCreateSale, onCreateSale } =
@@ -25,16 +26,25 @@ export const OrdersPage = () => {
                     value={status}
                     onChange={setStatus}
                 />
-                {canCreateSale && (
+                <div className="ml-auto flex items-center gap-2">
                     <Button
-                        className="ml-auto"
-                        variant="outline"
-                        onClick={onCreateSale}
+                        variant="ghost"
+                        disabled={!query.data?.length}
+                        onClick={() => exportOrders(query.data ?? [])}
                     >
-                        <Plus />
-                        Продажа
+                        <Download />
+                        CSV
                     </Button>
-                )}
+                    {canCreateSale && (
+                        <Button
+                            variant="outline"
+                            onClick={onCreateSale}
+                        >
+                            <Plus />
+                            Продажа
+                        </Button>
+                    )}
+                </div>
             </div>
             <QueryBoundary
                 query={query}

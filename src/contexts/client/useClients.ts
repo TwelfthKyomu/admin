@@ -12,15 +12,21 @@ import {
 interface ListOptions {
     projectId: string;
     search?: string;
+    limit?: number;
     enabled?: boolean;
 }
 
 const clientQueries = {
     all: ['clients'] as const,
-    list: ({ projectId, search = '', enabled = true }: ListOptions) =>
+    list: ({ projectId, search = '', limit, enabled = true }: ListOptions) =>
         listQuery(
-            [...clientQueries.all, 'list', projectId, search],
-            () => clientsAction({ projectId, search: search || undefined }),
+            [...clientQueries.all, 'list', projectId, search, limit],
+            () =>
+                clientsAction({
+                    projectId,
+                    search: search || undefined,
+                    limit,
+                }),
             { enabled: enabled && projectId.length > 0 },
         ),
 };
