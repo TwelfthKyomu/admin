@@ -1,3 +1,4 @@
+import { useEffect, useState } from 'react';
 import { useStaticData } from '@/app/providers';
 import { ROUTES } from '@/shared/constants';
 import { useActiveUrl } from '@/shared/hooks/useActiveUrl';
@@ -26,11 +27,17 @@ export const NavProjectItem = ({ id, name }: NavProjectItemProps) => {
     const sections = groupedProjectTabs(projectPermissions[id] ?? []);
 
     const inProject = isActive(ROUTES.project(id));
+    const [open, setOpen] = useState(inProject);
+
+    useEffect(() => {
+        if (inProject) setOpen(true);
+    }, [inProject]);
 
     return (
         <Collapsible
             asChild
-            defaultOpen={inProject}
+            open={open}
+            onOpenChange={setOpen}
             className="group/collapsible"
         >
             <SidebarMenuItem>
