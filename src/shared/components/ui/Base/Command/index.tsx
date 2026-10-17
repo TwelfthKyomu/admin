@@ -85,4 +85,38 @@ const CommandItem = ({
     );
 };
 
-export { Command, CommandEmpty, CommandInput, CommandItem, CommandList };
+const CommandGroup = ({ className, ...props }: ComponentProps<typeof CommandPrimitive.Group>) => {
+    return (
+        <CommandPrimitive.Group
+            data-slot="command-group"
+            className={cn(
+                'overflow-hidden p-1 text-foreground **:[[cmdk-group-heading]]:px-2 **:[[cmdk-group-heading]]:py-1.5 **:[[cmdk-group-heading]]:font-medium **:[[cmdk-group-heading]]:text-muted-foreground **:[[cmdk-group-heading]]:text-xs',
+                className,
+            )}
+            {...props}
+        />
+    );
+};
+
+const CommandShortcut = ({ className, ...props }: ComponentProps<'kbd'>) => {
+    return (
+        <kbd
+            data-slot="command-shortcut"
+            className={cn(
+                'ml-auto font-sans text-muted-foreground text-xs tracking-widest',
+                className,
+            )}
+            {...props}
+        />
+    );
+};
+
+export {
+    Command,
+    CommandEmpty,
+    CommandGroup,
+    CommandInput,
+    CommandItem,
+    CommandList,
+    CommandShortcut,
+};
