@@ -8,6 +8,7 @@ import {
 import { isApplicationError } from '@/shared/api/errors';
 import { BEARER_PREFIX, HTTP } from '@/shared/constants/http';
 import { getErrorMessage } from '@/shared/lib/errors';
+import { isPublicHttpUrl } from '@/shared/security/public-url';
 import {
     enforceRateLimit,
     RateLimitError,
@@ -132,20 +133,20 @@ export async function revalidateStorefronts(projectId: string): Promise<void> {
         );
 
     await Promise.allSettled(
-        sites.map(({ siteUrl, apiKeyHash }) =>
-            siteUrl && apiKeyHash
-                ? fetch(
-                      `${siteUrl.replace(/\/+$/, '')}${STOREFRONT_REVALIDATE_PATH}`,
-                      {
-                          method: 'POST',
-                          headers: {
-                              [STOREFRONT_SIGNATURE_HEADER]: apiKeyHash,
-                          },
-                          signal: AbortSignal.timeout(REVALIDATE_TIMEOUT_MS),
-                      },
-                  )
-                : undefined,
-        ),
+        sites.map(async ({ siteUrl, apiKeyHash }) => {
+            if (!siteUrl || !apiKeyHash) return;
+            if (!(await isPublicHttpUrl(siteUrl))) return;
+
+            await fetch(
+                `${siteUrl.replace(/\/+$/, '')}${STOREFRONT_REVALIDATE_PATH}`,
+                {
+                    method: 'POST',
+                    redirect: 'manual',
+                    headers: { [STOREFRONT_SIGNATURE_HEADER]: apiKeyHash },
+                    signal: AbortSignal.timeout(REVALIDATE_TIMEOUT_MS),
+                },
+            );
+        }),
     );
 }
 
