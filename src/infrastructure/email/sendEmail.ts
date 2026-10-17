@@ -11,7 +11,7 @@ interface EmailEnvelope {
 }
 
 export type SendEmailInput = EmailEnvelope &
-    ({ react: ReactElement } | { text: string; html?: string });
+    ({ react: ReactElement; text?: string } | { text: string; html?: string });
 
 const UNDELIVERABLE_DOMAIN =
     /@(.+\.)?(example\.(com|net|org)|example|test|invalid|localhost)$/i;
@@ -47,7 +47,7 @@ export async function sendEmail({
 
         console.warn(
             `[email] RESEND_API_KEY/EMAIL_FROM не заданы, письмо не отправлено.\n` +
-                `To: ${to}\nSubject: ${subject}\n${'text' in content ? content.text : ''}`,
+                `To: ${to}\nSubject: ${subject}\n${content.text ?? ''}`,
         );
 
         return;

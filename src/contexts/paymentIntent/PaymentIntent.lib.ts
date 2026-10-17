@@ -1,6 +1,6 @@
 import 'server-only';
 
-import { db } from '@/infrastructure/database/client';
+import { db, type Tx } from '@/infrastructure/database/client';
 import type {
     CreatePaymentOutput,
     PaymentProviderCredentials,
@@ -83,6 +83,47 @@ export async function findActiveProviderId(projectId: string): Promise<string> {
     return provider.id;
 }
 
+function amountMismatch(
+    intent: PaymentIntentRecord,
+    event: PaymentWebhookEvent,
+): string | null {
+    const amountDiffers =
+        event.amount !== undefined && event.amount !== intent.amount;
+
+    const currencyDiffers =
+        event.currency !== undefined && event.currency !== intent.currency;
+
+    return amountDiffers || currencyDiffers
+        ? `Провайдер сообщил ${event.amount} ${event.currency}, ожидалось ${intent.amount} ${intent.currency}`
+        : null;
+}
+
+async function recordIntentPayment(
+    tx: Tx,
+    intent: PaymentIntentRecord,
+): Promise<string | null> {
+    try {
+        await tx.transaction(async (savepoint) => {
+            const order = await lockOrder(
+                savepoint,
+                intent.orderId,
+                intent.projectId,
+            );
+
+            await applyOrderPayment(savepoint, order, {
+                amount: intent.amount,
+                method: PaymentMethod.ONLINE,
+                sourceIntentId: intent.id,
+                recordedBy: null,
+            });
+        });
+
+        return null;
+    } catch (error) {
+        return getErrorMessage(error);
+    }
+}
+
 export async function applyPaymentWebhookEvent(
     integrationId: string,
     event: PaymentWebhookEvent,
@@ -119,26 +160,9 @@ export async function applyPaymentWebhookEvent(
         }
         if (event.status !== PaymentIntentStatus.SUCCEEDED) return 'ignored';
 
-        let applyError: string | null = null;
-
-        try {
-            await tx.transaction(async (savepoint) => {
-                const order = await lockOrder(
-                    savepoint,
-                    intent.orderId,
-                    intent.projectId,
-                );
-
-                await applyOrderPayment(savepoint, order, {
-                    amount: intent.amount,
-                    method: PaymentMethod.ONLINE,
-                    sourceIntentId: intent.id,
-                    recordedBy: null,
-                });
-            });
-        } catch (error) {
-            applyError = getErrorMessage(error);
-        }
+        const applyError =
+            amountMismatch(intent, event) ??
+            (await recordIntentPayment(tx, intent));
 
         await tx
             .update(paymentIntents)

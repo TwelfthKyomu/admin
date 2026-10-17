@@ -7,6 +7,18 @@ import { CATALOG_SORT_VALUES } from '@/contexts/storefront/Storefront.types';
 import { loadStorefrontCatalog } from '@/contexts/storefront/StorefrontCatalog.lib';
 import { connection } from 'next/server';
 
+const MAX_LIMIT = 1000;
+const MAX_PAGE = 100_000;
+const SEARCH_MAX = 100;
+
+function positiveInt(value: string | null, max: number): number | undefined {
+    const parsed = value ? Number(value) : Number.NaN;
+
+    return Number.isInteger(parsed) && parsed > 0
+        ? Math.min(parsed, max)
+        : undefined;
+}
+
 export async function GET(request: Request) {
     await connection();
 
@@ -19,12 +31,12 @@ export async function GET(request: Request) {
     const sort = searchParams.get('sort');
 
     const options = {
-        page: page ? Number.parseInt(page, 10) : undefined,
-        limit: limit ? Number.parseInt(limit, 10) : undefined,
+        page: positiveInt(page, MAX_PAGE),
+        limit: positiveInt(limit, MAX_LIMIT),
         categorySlug: categorySlug ?? undefined,
         featured: featured === 'true' ? true : undefined,
         type: PRODUCT_TYPE_VALUES.find((value) => value === type),
-        search: searchParams.get('search') ?? undefined,
+        search: searchParams.get('search')?.slice(0, SEARCH_MAX) || undefined,
         inStock: searchParams.get('inStock') === 'true' ? true : undefined,
         sort: CATALOG_SORT_VALUES.find((value) => value === sort),
     };

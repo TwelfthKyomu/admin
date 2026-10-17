@@ -13,6 +13,11 @@ const HEX_COLOR_PATTERN = /^#[0-9a-f]{6}$/i;
 
 const HEX_COLOR_ALPHA_PATTERN = /^#(?:[0-9a-f]{3}|[0-9a-f]{6}|[0-9a-f]{8})$/i;
 
+export const httpUrlField = z.url({
+    protocol: /^https?$/,
+    error: 'Нужна ссылка http(s)',
+});
+
 export function textField(max: number, min = 1) {
     return z.string().check(z.minLength(min), z.maxLength(max));
 }

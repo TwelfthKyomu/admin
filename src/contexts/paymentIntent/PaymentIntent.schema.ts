@@ -5,6 +5,7 @@ import {
     idSchema,
     positiveIntSchema,
 } from '@/shared/validation/base';
+import { httpUrlField } from '@/shared/validation/fields';
 import * as z from 'zod/mini';
 import { PAYMENT_PROVIDER_VALUES } from './PaymentIntent.types';
 
@@ -22,7 +23,7 @@ export const CreatePaymentIntentActionInputSchema = z.object({
     orderId: idSchema,
     amount: positiveIntSchema,
     currency: z.enum(CURRENCY_VALUES),
-    returnUrl: z.url(),
+    returnUrl: httpUrlField,
     description: z.optional(z.string().check(z.maxLength(LABEL_MAX))),
 });
 

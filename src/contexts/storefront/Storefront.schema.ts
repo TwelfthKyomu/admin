@@ -6,6 +6,7 @@ import {
     PHONE_MAX,
 } from '@/shared/constants/default';
 import { idSchema } from '@/shared/validation/base';
+import { httpUrlField } from '@/shared/validation/fields';
 import {
     ORDER_ITEM_QUANTITY_MAX,
     ORDER_ITEMS_MAX,
@@ -41,7 +42,7 @@ export const StorefrontOrderInputSchema = z
             z.string().check(z.trim(), z.maxLength(CODE_MAX)),
         ),
         notes: z.optional(z.string().check(z.maxLength(DESCRIPTION_LONG_MAX))),
-        payment: z.optional(z.object({ returnUrl: z.url() })),
+        payment: z.optional(z.object({ returnUrl: httpUrlField })),
     })
     .check(
         z.refine(

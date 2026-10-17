@@ -17,6 +17,7 @@ const LIMITS_PER_MINUTE = {
     'storefront:read': 300,
     'storefront:order': 30,
     'storefront:auth': 10,
+    realtime: 120,
 };
 
 export type RateLimitKey = keyof typeof LIMITS_PER_MINUTE;
@@ -26,7 +27,17 @@ interface Bucket {
     resetAt: number;
 }
 
+const SWEEP_THRESHOLD = 10_000;
+
 const buckets = new Map<string, Bucket>();
+
+function sweepExpired(now: number): void {
+    if (buckets.size < SWEEP_THRESHOLD) return;
+
+    for (const [key, bucket] of buckets) {
+        if (bucket.resetAt <= now) buckets.delete(key);
+    }
+}
 
 export class RateLimitError extends ApplicationError {}
 
@@ -36,6 +47,7 @@ export function enforceRateLimit(key: RateLimitKey, identifier: string): void {
     const bucket = buckets.get(bucketKey);
 
     if (!bucket || bucket.resetAt <= now) {
+        sweepExpired(now);
         buckets.set(bucketKey, { count: 1, resetAt: now + WINDOW_MS });
 
         return;

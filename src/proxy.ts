@@ -1,13 +1,19 @@
 import {
     AUTH_COOKIE_PREFIX,
     AUTH_ROUTE,
+    CALLBACK_URL_PARAM,
     STALE_SESSION_PARAM,
     STALE_SESSION_VALUE,
+    safeCallbackPath,
 } from '@/shared/constants/auth';
 import { getSessionCookie } from 'better-auth/cookies';
 import { type NextRequest, NextResponse } from 'next/server';
 
 const PUBLIC_PREFIXES = [AUTH_ROUTE, '/api', '/invite', '/terms'];
+
+function matchesPrefix(pathname: string, prefix: string): boolean {
+    return pathname === prefix || pathname.startsWith(`${prefix}/`);
+}
 
 function stripCookiePrefix(name: string) {
     if (name.startsWith('__Secure-')) return name.slice('__Secure-'.length);
@@ -36,10 +42,11 @@ export function proxy(request: NextRequest) {
     const { pathname, searchParams } = request.nextUrl;
 
     const sessionCookie = getSessionCookie(request);
-    const isAuthRoute = pathname.startsWith(AUTH_ROUTE);
+    const isAuthRoute = matchesPrefix(pathname, AUTH_ROUTE);
+    const isLoginPage = pathname === AUTH_ROUTE;
 
     const isPublic = PUBLIC_PREFIXES.some((prefix) =>
-        pathname.startsWith(prefix),
+        matchesPrefix(pathname, prefix),
     );
 
     if (
@@ -49,17 +56,21 @@ export function proxy(request: NextRequest) {
         return clearAuthCookies(request, NextResponse.next());
     }
 
-    if (sessionCookie && isAuthRoute) {
-        return NextResponse.redirect(new URL('/', request.url));
+    if (sessionCookie && isLoginPage) {
+        const target = safeCallbackPath(searchParams.get(CALLBACK_URL_PARAM));
+
+        return NextResponse.redirect(new URL(target, request.url));
     }
 
     if (!sessionCookie && !isPublic) {
         const loginUrl = new URL(AUTH_ROUTE, request.url);
 
-        loginUrl.searchParams.set(
-            'callbackUrl',
-            pathname + request.nextUrl.search,
-        );
+        if (pathname !== '/') {
+            loginUrl.searchParams.set(
+                CALLBACK_URL_PARAM,
+                pathname + request.nextUrl.search,
+            );
+        }
 
         return NextResponse.redirect(loginUrl);
     }

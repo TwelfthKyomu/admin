@@ -1,15 +1,41 @@
+import { createElement } from 'react';
 import { db } from '@/infrastructure/database/client';
 import * as schema from '@/infrastructure/database/schemas';
 import { sendEmail } from '@/infrastructure/email/sendEmail';
+import {
+    ActionEmail,
+    type ActionEmailProps,
+} from '@/infrastructure/email/templates/ActionEmail';
 import { env } from '@/env';
 import { betterAuth } from 'better-auth';
 import { drizzleAdapter } from 'better-auth/adapters/drizzle';
 import { localization } from 'better-auth-localization';
 
+const BRAND = 'Flowsy';
+
 const trustedProxies = (env.TRUSTED_PROXY_IPS ?? '')
     .split(',')
     .map((entry) => entry.trim())
     .filter(Boolean);
+
+function greeting(name: string | null | undefined): string {
+    return name ? `Здравствуйте, ${name}!` : 'Здравствуйте!';
+}
+
+function sendInBackground(
+    to: string,
+    subject: string,
+    props: ActionEmailProps,
+): void {
+    sendEmail({
+        to,
+        subject: `${subject} — ${BRAND}`,
+        react: createElement(ActionEmail, props),
+        text: [...props.lines, props.action.url, props.footer].join('\n\n'),
+    }).catch((error: unknown) => {
+        console.error(`[email] «${subject}» для ${to} не отправлено:`, error);
+    });
+}
 
 export const auth = betterAuth({
     secret: env.AUTH_SECRET,
@@ -29,14 +55,17 @@ export const auth = betterAuth({
         minPasswordLength: 8,
         maxPasswordLength: 128,
         resetPasswordTokenExpiresIn: 60 * 60,
+        revokeSessionsOnPasswordReset: true,
         sendResetPassword: async ({ user, url }) => {
-            await sendEmail({
-                to: user.email,
-                subject: 'Сброс пароля — Flowsy',
-                text:
-                    `Здравствуйте${user.name ? `, ${user.name}` : ''}!\n\n` +
-                    `Вы запросили сброс пароля. Перейдите по ссылке, чтобы задать новый:\n${url}\n\n` +
-                    'Ссылка действует 1 час. Если вы не запрашивали сброс — просто проигнорируйте это письмо.',
+            sendInBackground(user.email, 'Сброс пароля', {
+                brand: BRAND,
+                heading: 'Сброс пароля',
+                lines: [
+                    greeting(user.name),
+                    'Вы запросили сброс пароля. Ссылка действует 1 час.',
+                ],
+                action: { label: 'Задать новый пароль', url },
+                footer: 'Если вы не запрашивали сброс — просто проигнорируйте это письмо.',
             });
         },
     },
@@ -44,16 +73,15 @@ export const auth = betterAuth({
         sendOnSignUp: true,
         autoSignInAfterVerification: true,
         sendVerificationEmail: async ({ user, url }) => {
-            const greeting = user.name ? `, ${user.name}` : '';
-
-            await sendEmail({
-                to: user.email,
-                subject: 'Подтверждение почты — Flowsy',
-                text:
-                    `Здравствуйте${greeting}!\n\n` +
-                    `Подтвердите адрес почты по ссылке:\n${url}\n\n` +
-                    'Если вы не регистрировались — просто проигнорируйте это письмо.',
-                html: htmlRegistration(greeting, url),
+            sendInBackground(user.email, 'Подтверждение почты', {
+                brand: BRAND,
+                heading: 'Подтвердите почту',
+                lines: [
+                    greeting(user.name),
+                    'Подтвердите адрес почты, чтобы завершить регистрацию.',
+                ],
+                action: { label: 'Подтвердить почту', url },
+                footer: `Если вы не регистрировались в ${BRAND} — просто проигнорируйте это письмо.`,
             });
         },
     },
@@ -106,28 +134,3 @@ export const auth = betterAuth({
         },
     },
 });
-
-function htmlRegistration(greeting: string, url: string): string {
-    return `
-                <div style="font-family: -apple-system, Segoe UI, Roboto, Arial, sans-serif; max-width: 480px; margin: 0 auto; padding: 32px 24px; color: #1a1a1a;">
-                    <h1 style="font-size: 20px; margin: 0 0 16px;">Flowsy</h1>
-                    <p style="font-size: 15px; line-height: 1.5; margin: 0 0 16px;">
-                        Здравствуйте${greeting}!
-                    </p>
-                    <p style="font-size: 15px; line-height: 1.5; margin: 0 0 24px;">
-                        Подтвердите адрес почты, чтобы завершить регистрацию:
-                    </p>
-                    <a href="${url}"
-                       style="display: inline-block; background: #4f46e5; color: #ffffff; text-decoration: none; padding: 12px 24px; border-radius: 8px; font-size: 15px; font-weight: 500;">
-                        Подтвердить почту
-                    </a>
-                    <p style="font-size: 13px; line-height: 1.5; color: #6b7280; margin: 24px 0 0;">
-                        Если ссылка не открывается, скопируйте и вставьте её в браузер:<br>
-                        <span style="word-break: break-all;">${url}</span>
-                    </p>
-                    <p style="font-size: 13px; line-height: 1.5; color: #9ca3af; margin: 24px 0 0;">
-                        Если вы не регистрировались в Flowsy — просто проигнорируйте это письмо.
-                    </p>
-                </div>
-            `;
-}

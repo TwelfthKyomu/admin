@@ -39,14 +39,14 @@ export async function POST(request: Request) {
 
     if (!projectId) {
         return NextResponse.json(
-            { error: 'projectId is required' },
+            { error: 'Не передан projectId' },
             { status: HTTP.BAD_REQUEST },
         );
     }
 
     if (!(file instanceof Blob)) {
         return NextResponse.json(
-            { error: 'file is required' },
+            { error: 'Файл не передан' },
             { status: HTTP.BAD_REQUEST },
         );
     }
@@ -57,16 +57,6 @@ export async function POST(request: Request) {
                 error: `Файл слишком большой (макс. ${MAX_BYTES / 1024 / 1024}MB)`,
             },
             { status: HTTP.PAYLOAD_TOO_LARGE },
-        );
-    }
-
-    const buffer = Buffer.from(await file.arrayBuffer());
-    const fileType = await detectImageType(buffer);
-
-    if (!fileType) {
-        return NextResponse.json(
-            { error: 'Unsupported file type' },
-            { status: HTTP.UNSUPPORTED_MEDIA_TYPE },
         );
     }
 
@@ -82,6 +72,16 @@ export async function POST(request: Request) {
         return NextResponse.json(
             { error: getErrorMessage(error) },
             { status: HTTP.FORBIDDEN },
+        );
+    }
+
+    const buffer = Buffer.from(await file.arrayBuffer());
+    const fileType = await detectImageType(buffer);
+
+    if (!fileType) {
+        return NextResponse.json(
+            { error: 'Поддерживаются только JPG, PNG, GIF и WebP' },
+            { status: HTTP.UNSUPPORTED_MEDIA_TYPE },
         );
     }
 

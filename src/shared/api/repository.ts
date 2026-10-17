@@ -185,7 +185,7 @@ export function searchFilters(
 
     if (!value) return [];
 
-    const pattern = `%${value}%`;
+    const pattern = `%${value.replace(/[\\%_]/g, '\\$&')}%`;
     const clause = or(...columns.map((column) => ilike(column, pattern)));
 
     return clause ? [clause] : [];

@@ -5,6 +5,7 @@ import {
     type ScopeEvent,
     subscribeToScope,
 } from '@/shared/realtime/scopeEvents';
+import { enforceRateLimit } from '@/shared/security/rate-limit';
 import { findChatChannelById } from '@/contexts/chat/Chat.lib';
 import {
     CHAT_SCOPE_PREFIX,
@@ -13,6 +14,9 @@ import {
     isChatParticipant,
 } from '@/contexts/chat/Chat.types';
 import { findOrganizationByUserId } from '@/contexts/organization/Organization.lib';
+
+const MAX_SCOPES = 32;
+const HEARTBEAT_MS = 25_000;
 
 async function canSubscribe(
     userId: string,
@@ -72,12 +76,12 @@ export async function GET(request: Request) {
 
     if (!session?.user) return new Response('Unauthorized', { status: 401 });
 
-    const requestedScopeIds = new URL(request.url).searchParams
-        .getAll('scope')
-        .filter(Boolean);
+    const requestedScopeIds = [
+        ...new Set(new URL(request.url).searchParams.getAll('scope')),
+    ].filter(Boolean);
 
-    if (requestedScopeIds.length === 0)
-        return new Response('Missing scope', { status: 400 });
+    if (requestedScopeIds.length === 0 || requestedScopeIds.length > MAX_SCOPES)
+        return new Response('Bad scope', { status: 400 });
 
     const scopeIds = await authorizeScopes(session.user.id, requestedScopeIds);
 
@@ -87,13 +91,38 @@ export async function GET(request: Request) {
     const encoder = new TextEncoder();
     const unsubscribers: Array<() => void> = [];
     let heartbeat: ReturnType<typeof setInterval> | undefined;
+    let stop: (() => void) | undefined;
+    let closed = false;
+
+    const cleanup = () => {
+        if (closed) return;
+
+        closed = true;
+        clearInterval(heartbeat);
+
+        for (const off of unsubscribers) off();
+
+        stop?.();
+    };
+
+    request.signal.addEventListener('abort', cleanup, { once: true });
 
     const stream = new ReadableStream({
         start(controller) {
+            stop = () => {
+                try {
+                    controller.close();
+                } catch {}
+            };
+
             const send = (chunk: string) => {
+                if (closed) return;
+
                 try {
                     controller.enqueue(encoder.encode(chunk));
-                } catch {}
+                } catch {
+                    cleanup();
+                }
             };
 
             send('retry: 3000\n\n');
@@ -106,13 +135,9 @@ export async function GET(request: Request) {
                 );
             }
 
-            heartbeat = setInterval(() => send(': ping\n\n'), 25_000);
+            heartbeat = setInterval(() => send(': ping\n\n'), HEARTBEAT_MS);
         },
-        cancel() {
-            if (heartbeat) clearInterval(heartbeat);
-
-            for (const off of unsubscribers) off();
-        },
+        cancel: cleanup,
     });
 
     return new Response(stream, {
@@ -130,6 +155,12 @@ export async function POST(request: Request) {
     const session = await getServerSession();
 
     if (!session?.user) return new Response('Unauthorized', { status: 401 });
+
+    try {
+        enforceRateLimit('realtime', session.user.id);
+    } catch {
+        return new Response('Too many requests', { status: 429 });
+    }
 
     let body: unknown;
 
