@@ -51,7 +51,11 @@ export const PasswordInput = <
                     type={show ? 'text' : 'password'}
                     autoComplete={autoComplete}
                     aria-invalid={invalid}
-                    placeholder="••••••••"
+                    placeholder={
+                        autoComplete === 'new-password'
+                            ? 'Минимум 8 символов, заглавная буква и цифра'
+                            : 'Ваш пароль'
+                    }
                 />
 
                 <InputGroupAddon align="inline-end">
