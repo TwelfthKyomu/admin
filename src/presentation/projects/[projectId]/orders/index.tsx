@@ -17,7 +17,7 @@ export const OrdersPage = () => {
             <div className="mb-3 flex flex-wrap items-center gap-2">
                 <Input
                     className="max-w-xs"
-                    placeholder="Поиск по клиенту или телефону…"
+                    placeholder="Поиск по №, клиенту или телефону…"
                     value={search}
                     onChange={(event) => setSearch(event.target.value)}
                 />

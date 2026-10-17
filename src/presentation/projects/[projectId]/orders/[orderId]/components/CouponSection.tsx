@@ -59,7 +59,7 @@ export const CouponSection = ({ order, couponCode, projectId }: CouponSectionPro
             <div className="flex items-center gap-2 px-4 py-3">
                 <Input
                     value={code}
-                    placeholder="SUMMER-10"
+                    placeholder="Код промокода"
                     onChange={(event) => setCode(event.target.value.toUpperCase())}
                     onKeyDown={(event) => {
                         if (event.key === 'Enter') {

@@ -3,6 +3,7 @@
 import { Fragment } from 'react';
 import { useStaticData } from '@/app/providers';
 import { HOME_LABEL, ORDER_LABEL, segmentLabel } from '@/shared/labels/navigation';
+import { orderNumber } from '@/contexts/order/Order.types';
 import {
     Breadcrumb,
     BreadcrumbItem,
@@ -26,7 +27,9 @@ export const Slug = () => {
         ...segments.map((segment, index) => ({
             label:
                 projectName(segment) ??
-                (segments[index - 1] === 'orders' ? ORDER_LABEL : segmentLabel(segment)),
+                (segments[index - 1] === 'orders'
+                    ? `${ORDER_LABEL} ${orderNumber({ id: segment })}`
+                    : segmentLabel(segment)),
             href: `/${segments.slice(0, index + 1).join('/')}`,
         })),
     ];

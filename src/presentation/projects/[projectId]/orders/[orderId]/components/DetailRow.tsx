@@ -11,6 +11,8 @@ interface DetailRowProps {
 }
 
 export const DetailRow = ({ label, value, dim, strong, mono, url }: DetailRowProps) => {
+    const isExternal = url?.startsWith('http') ?? false;
+
     const content = (
         <span
             className={cn(
@@ -30,12 +32,11 @@ export const DetailRow = ({ label, value, dim, strong, mono, url }: DetailRowPro
             {url ? (
                 <a
                     href={url}
-                    target="_blank"
-                    rel="noreferrer"
+                    {...(isExternal ? { target: '_blank', rel: 'noreferrer' } : {})}
                     className="flex items-center gap-1 hover:underline"
                 >
                     {content}
-                    <ExternalLink className="size-3.5" />
+                    {isExternal && <ExternalLink className="size-3.5" />}
                 </a>
             ) : (
                 content

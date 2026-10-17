@@ -85,6 +85,7 @@ export const ordersAction = projectReadAction(BOOKING_READ_PERMISSIONS)
 
         filters.push(
             ...searchFilters(options.search, [
+                orders.id,
                 orders.customerName,
                 orders.customerPhone,
                 orders.customerEmail,
