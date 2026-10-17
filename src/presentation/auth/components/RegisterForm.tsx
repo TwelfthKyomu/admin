@@ -31,7 +31,9 @@ export const RegisterForm = ({ redirectTo = '/', defaultEmail }: RegisterFormPro
     const handleSubmit: SubmitHandler<RegisterFormValues> = async (values) => {
         await signUp.email(
             {
-                ...values,
+                name: values.name,
+                email: values.email,
+                password: values.password,
                 callbackURL: redirectTo,
             },
             {

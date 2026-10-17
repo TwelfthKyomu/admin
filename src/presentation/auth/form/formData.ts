@@ -1,9 +1,4 @@
-import {
-    emailSchema,
-    nameSchema,
-    passwordSchema,
-    phoneSchema,
-} from '@/shared/validation';
+import { emailSchema, nameSchema, passwordSchema } from '@/shared/validation';
 import * as z from 'zod/v4';
 
 export const LoginFormSchema = z.object({
@@ -25,7 +20,6 @@ export const RegisterFormSchema = z
         name: nameSchema,
         email: emailSchema,
         password: passwordSchema,
-        phone: phoneSchema,
         confirmPassword: passwordSchema,
         agreedToTerms: z.boolean().refine((val) => val, {
             message: 'Вы должны согласиться с условиями',

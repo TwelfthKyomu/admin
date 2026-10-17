@@ -31,7 +31,9 @@ export const LoginForm = ({ redirectTo = '/', defaultEmail }: LoginFormProps = {
     const handleSubmit: SubmitHandler<LoginFormValues> = async (values) => {
         await signIn.email(
             {
-                ...values,
+                email: values.email,
+                password: values.password,
+                rememberMe: values.remember,
                 callbackURL: redirectTo,
             },
             {

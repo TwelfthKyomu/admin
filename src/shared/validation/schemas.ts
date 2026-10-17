@@ -28,9 +28,3 @@ export const nameSchema = z
         z.maxLength(NAME_MAX, 'Имя слишком длинное'),
         z.trim(),
     );
-
-export const phoneSchema = z.optional(
-    z
-        .string()
-        .check(z.regex(/^\+?[1-9]\d{1,14}$/, 'Некорректный номер телефона')),
-);
