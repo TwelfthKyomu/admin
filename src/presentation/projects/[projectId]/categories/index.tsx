@@ -16,7 +16,13 @@ export const CategoriesPage = () => {
             {(categories) => (
                 <Table
                     columns={COLUMNS({ onEdit, onDelete, isDeleting })}
-                    customActions={<CreateButton onClick={onCreate} />}
+                    showToolbar
+                    customActions={
+                        <CreateButton
+                            label="Категория"
+                            onClick={onCreate}
+                        />
+                    }
                     data={categories}
                     emptyMessage="Категорий пока нет. Добавьте первую."
                     getRowId={(category) => category.id}

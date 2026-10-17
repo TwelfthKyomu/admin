@@ -10,6 +10,7 @@ import {
     useMemo,
     useState,
 } from 'react';
+import { matchesSearch } from '@/shared/lib/search';
 import { cn } from '@/shared/lib/utils';
 import { TableBody, TableFooter, TableHeader, TablePagination, TableToolbar } from '@/ui/Base';
 import {
@@ -133,6 +134,14 @@ function useNotifiedState<T>(initial: T, notify?: (next: T) => void) {
     return [state, onChange, setState] as const;
 }
 
+function searchableValues(original: unknown): (string | number)[] {
+    if (!original || typeof original !== 'object') return [];
+
+    return Object.values(original).filter(
+        (value): value is string | number => typeof value === 'string' || typeof value === 'number',
+    );
+}
+
 export const Table = <TData,>({
     columns,
     data,
@@ -152,7 +161,7 @@ export const Table = <TData,>({
     manualPagination = false,
     pageCount,
     onPaginationChange,
-    initialPagination = { pageIndex: 0, pageSize: 10 },
+    initialPagination = { pageIndex: 0, pageSize: 25 },
     pageSizeOptions,
     enableRowSelection = false,
     enableMultiRowSelection = true,
@@ -283,6 +292,8 @@ export const Table = <TData,>({
         }),
         ...(enableFiltering && {
             getFilteredRowModel: getFilteredRowModel(),
+            globalFilterFn: (row: Row<TData>, _columnId: string, value: string) =>
+                matchesSearch(value, ...searchableValues(row.original)),
         }),
         ...(enablePagination &&
             !manualPagination && {
@@ -391,6 +402,9 @@ export const Table = <TData,>({
         );
     }
 
+    const hasManyRows =
+        manualPagination || table.getPrePaginationRowModel().rows.length > pagination.pageSize;
+
     const selectedRows: TData[] = bulkActions
         ? table.getSelectedRowModel().rows.map((row) => row.original)
         : [];
@@ -414,6 +428,7 @@ export const Table = <TData,>({
             <div className={cn('flex flex-col gap-1', className)}>
                 {(showToolbar || customActions) && (
                     <TableToolbar
+                        showSearch={showToolbar}
                         placeholder={toolbarPlaceholder}
                         actions={toolbarActions}
                         customAction={customActions}
@@ -440,13 +455,13 @@ export const Table = <TData,>({
                         {showFooter && <TableFooter />}
                     </BaseTable>
                 </div>
-                {enablePagination && (
+                {enablePagination && hasManyRows && (
                     <TablePagination
                         pageSizeOptions={pageSizeOptions}
                         selectionActions={selectionActions}
                     />
                 )}
-                {!enablePagination && selectionActions && (
+                {!(enablePagination && hasManyRows) && selectionActions && (
                     <div className="flex min-h-8 items-center gap-2 px-2 py-3 text-xs text-muted-foreground">
                         Выбрано: {selectedRows.length}
                         {selectionActions}

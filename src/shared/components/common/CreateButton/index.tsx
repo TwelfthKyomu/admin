@@ -1,18 +1,17 @@
-import { Button, ButtonGroup } from '@/ui/Base';
+import { Button } from '@/ui/Base';
 import { Plus } from 'lucide-react';
 
 interface CreateButtonProps {
+    label: string;
     onClick: () => void;
 }
 
-export const CreateButton = ({ onClick }: CreateButtonProps) => (
-    <ButtonGroup>
-        <Button
-            variant="outline"
-            aria-label="Создать"
-            onClick={onClick}
-        >
-            <Plus />
-        </Button>
-    </ButtonGroup>
+export const CreateButton = ({ label, onClick }: CreateButtonProps) => (
+    <Button
+        variant="outline"
+        onClick={onClick}
+    >
+        <Plus />
+        {label}
+    </Button>
 );

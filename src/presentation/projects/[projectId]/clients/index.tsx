@@ -16,8 +16,17 @@ export const ClientsPage = () => {
             {(clients) => (
                 <Table
                     columns={COLUMNS(currency)}
-                    customActions={canCreate ? <CreateButton onClick={onCreate} /> : undefined}
+                    customActions={
+                        canCreate ? (
+                            <CreateButton
+                                label="Клиент"
+                                onClick={onCreate}
+                            />
+                        ) : undefined
+                    }
                     data={clients}
+                    showToolbar
+                    toolbarPlaceholder="Поиск по имени, телефону или email…"
                     emptyMessage="Клиентов пока нет."
                     getRowId={(client) => client.id}
                     onRowClick={onEdit ? (row) => onEdit(row.original) : undefined}

@@ -8,12 +8,14 @@ import { useDataTable } from '@/ui/Base/Table/context';
 import { Search, X } from 'lucide-react';
 
 interface TableToolbarProps {
+    showSearch?: boolean;
     placeholder?: string;
     actions?: ReactNode;
     customAction?: ReactNode;
 }
 
 export const TableToolbar = ({
+    showSearch = true,
     placeholder = 'Поиск…',
     actions,
     customAction,
@@ -22,9 +24,8 @@ export const TableToolbar = ({
     const value = (table.getState().globalFilter as string | undefined) ?? '';
 
     return (
-        <div className="flex flex-col gap-2 py-3 sm:flex-row sm:items-center sm:justify-between">
-            {customAction && customAction}
-            {!customAction && (
+        <div className="flex flex-col gap-2 py-3 sm:flex-row sm:items-center">
+            {showSearch && (
                 <div className="relative w-full sm:max-w-sm">
                     <Search className="pointer-events-none absolute left-2.5 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
                     <Input
@@ -47,7 +48,12 @@ export const TableToolbar = ({
                     )}
                 </div>
             )}
-            {actions && <div className="flex items-center gap-2">{actions}</div>}
+            {(actions || customAction) && (
+                <div className="flex items-center gap-2 sm:ml-auto">
+                    {actions}
+                    {customAction}
+                </div>
+            )}
         </div>
     );
 };

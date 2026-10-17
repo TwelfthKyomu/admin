@@ -16,7 +16,13 @@ export const LooksPage = () => {
             {(looks) => (
                 <Table
                     columns={COLUMNS({ onEdit, onDelete, isDeleting })}
-                    customActions={<CreateButton onClick={onCreate} />}
+                    showToolbar
+                    customActions={
+                        <CreateButton
+                            label="Образ"
+                            onClick={onCreate}
+                        />
+                    }
                     data={looks}
                     emptyMessage="Образов пока нет. Загрузите фото, отметьте на нём товары — на сайте их можно будет купить одним нажатием."
                     getRowId={(look) => look.id}

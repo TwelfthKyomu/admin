@@ -16,7 +16,13 @@ export const CouponsPage = () => {
             {(coupons) => (
                 <Table
                     columns={COLUMNS({ currency, onEdit, onDelete, isDeleting })}
-                    customActions={<CreateButton onClick={onCreate} />}
+                    showToolbar
+                    customActions={
+                        <CreateButton
+                            label="Купон"
+                            onClick={onCreate}
+                        />
+                    }
                     data={coupons}
                     emptyMessage="Купонов пока нет. Создайте первый."
                     getRowId={(coupon) => coupon.id}
