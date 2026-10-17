@@ -11,12 +11,20 @@ export const ProductsPage = () => {
 
     return (
         <>
-            <Input
-                className="max-w-xs"
-                placeholder="Поиск по названию или артикулу…"
-                value={search}
-                onChange={(event) => setSearch(event.target.value)}
-            />
+            <div className="mb-3 flex flex-wrap items-center gap-2">
+                <Input
+                    className="max-w-xs"
+                    placeholder="Поиск по названию или артикулу…"
+                    value={search}
+                    onChange={(event) => setSearch(event.target.value)}
+                />
+                <div className="ml-auto">
+                    <CreateButton
+                        label="Товар"
+                        onClick={onCreate}
+                    />
+                </div>
+            </div>
             <QueryBoundary
                 query={query}
                 errorTitle="Не удалось загрузить товары"
@@ -24,9 +32,12 @@ export const ProductsPage = () => {
                 {(products) => (
                     <Table
                         columns={COLUMNS({ onEdit, onDelete, isDeleting })}
-                        customActions={<CreateButton onClick={onCreate} />}
                         data={products}
-                        emptyMessage="Товаров пока нет. Добавьте первый."
+                        emptyMessage={
+                            search
+                                ? 'По запросу ничего не нашлось.'
+                                : 'Товаров пока нет. Добавьте первый.'
+                        }
                         enableRowSelection
                         getRowId={(product) => product.id}
                         bulkActions={(rows) => (

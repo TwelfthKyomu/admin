@@ -16,7 +16,13 @@ export const BadgesPage = () => {
             {(badges) => (
                 <Table
                     columns={COLUMNS({ onEdit, onDelete, isDeleting })}
-                    customActions={<CreateButton onClick={onCreate} />}
+                    showToolbar
+                    customActions={
+                        <CreateButton
+                            label="Бейдж"
+                            onClick={onCreate}
+                        />
+                    }
                     data={badges}
                     emptyMessage="Бейджей пока нет. Добавьте «Sale», «Хит», «Лимит» — что нужно вашему магазину."
                     getRowId={(badge) => badge.id}

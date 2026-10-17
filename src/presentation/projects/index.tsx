@@ -16,7 +16,13 @@ export const ProjectsPage = () => {
             {(projects) => (
                 <Table
                     columns={COLUMNS({ onEdit, onDelete, isDeleting })}
-                    customActions={<CreateButton onClick={onCreate} />}
+                    showToolbar
+                    customActions={
+                        <CreateButton
+                            label="Проект"
+                            onClick={onCreate}
+                        />
+                    }
                     data={projects}
                     emptyMessage="Проектов пока нет. Создайте первый."
                     getRowId={(project) => project.id}
