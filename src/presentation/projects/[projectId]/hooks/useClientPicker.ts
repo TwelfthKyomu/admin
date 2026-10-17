@@ -2,7 +2,7 @@
 
 import { clientDisplayName, clientLabel } from '@/shared/format/name';
 import { NONE } from '@/shared/lib/none';
-import { useClientsList } from '@/contexts/client';
+import { CLIENTS_PICKER_LIMIT, useClientsList } from '@/contexts/client';
 
 type SetCustomerField = (
     name: 'customerName' | 'customerPhone',
@@ -11,7 +11,8 @@ type SetCustomerField = (
 ) => void;
 
 export function useClientPicker(projectId: string, setValue: SetCustomerField) {
-    const clients = useClientsList({ projectId }).data ?? [];
+    const clients =
+        useClientsList({ projectId, limit: CLIENTS_PICKER_LIMIT }).data ?? [];
 
     const clientOptions = [
         { value: NONE, label: 'Без аккаунта (ввести вручную)' },

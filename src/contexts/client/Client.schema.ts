@@ -2,9 +2,14 @@ import { LABEL_MAX, NAME_MAX, PHONE_MAX } from '@/shared/constants/default';
 import { idSchema } from '@/shared/validation/base';
 import * as z from 'zod/mini';
 
+export const CLIENTS_LIST_LIMIT = 500;
+
+export const CLIENTS_PICKER_LIMIT = 5000;
+
 export const ClientsActionInputSchema = z.object({
     projectId: idSchema,
     search: z.optional(z.string().check(z.trim(), z.maxLength(LABEL_MAX))),
+    limit: z.optional(z.int().check(z.gte(1), z.lte(CLIENTS_PICKER_LIMIT))),
 });
 
 const ClientEmailSchema = z.pipe(
