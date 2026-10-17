@@ -22,7 +22,7 @@ function createQueryClient() {
                 refetchOnReconnect: false,
             },
             mutations: {
-                retry: 1,
+                retry: false,
             },
         },
     });

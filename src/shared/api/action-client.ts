@@ -11,6 +11,7 @@ import {
     requireProjectPermission,
     requireUserOrganization,
 } from '@/shared/api/permission';
+import { AUTH_REQUIRED_MESSAGE } from '@/shared/constants/auth';
 import { getErrorMessage } from '@/shared/lib/errors';
 import {
     enforceRateLimit,
@@ -38,7 +39,7 @@ const actionClient = createSafeActionClient({
 export const authActionClient = actionClient.use(async ({ next }) => {
     const session = await getServerSession();
 
-    if (!session?.user) throw new ApplicationError('Требуется авторизация');
+    if (!session?.user) throw new ApplicationError(AUTH_REQUIRED_MESSAGE);
 
     return next({ ctx: { userId: session.user.id, user: session.user } });
 });
