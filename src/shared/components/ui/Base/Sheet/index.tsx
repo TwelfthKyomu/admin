@@ -14,6 +14,7 @@ import {
 
 interface FormSheetProps {
     onClose?: () => void;
+    canClose?: () => Promise<boolean>;
     className?: string;
     showCloseButton?: boolean;
     side?: 'top' | 'right' | 'bottom' | 'left';
@@ -25,6 +26,7 @@ interface FormSheetProps {
 
 const SheetBase = ({
     onClose,
+    canClose,
     className,
     showCloseButton = true,
     side = 'right',
@@ -43,8 +45,9 @@ const SheetBase = ({
     return (
         <BaseSheet
             open={open}
-            onOpenChange={(next) => {
-                if (!next && !busy) close();
+            onOpenChange={async (next) => {
+                if (next || busy) return;
+                if (!canClose || (await canClose())) close();
             }}
         >
             <SheetContent

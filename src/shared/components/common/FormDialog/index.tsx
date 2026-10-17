@@ -1,13 +1,13 @@
 'use client';
 
-import type { ComponentProps, ReactNode } from 'react';
+import { type ComponentProps, type ReactNode, useRef } from 'react';
 import {
     type FieldValues,
     type SubmitHandler,
     type UseFormReturn,
     useFormState,
 } from 'react-hook-form';
-import { useModalClose } from '@/shared/lib/modal';
+import { modal, useModalClose } from '@/shared/lib/modal';
 import { cn } from '@/shared/lib/utils';
 import { Button, Modal, Sheet } from '@/ui/Base';
 import { Form } from '@/ui/Controlled';
@@ -47,6 +47,29 @@ export const FormDialog = <T extends FieldValues>({
 }: FormDialogProps<T>) => {
     const close = useModalClose();
     const { isValid, isDirty } = useFormState({ control: form.control });
+    const discardPrompt = useRef<Promise<boolean> | null>(null);
+
+    const canClose = (): Promise<boolean> => {
+        if (!isDirty) return Promise.resolve(true);
+
+        discardPrompt.current ??= modal
+            .confirm({
+                title: 'Закрыть без сохранения?',
+                description: 'Введённые изменения пропадут.',
+                confirmLabel: 'Закрыть',
+                cancelLabel: 'Вернуться к форме',
+                tone: 'destructive',
+            })
+            .finally(() => {
+                discardPrompt.current = null;
+            });
+
+        return discardPrompt.current;
+    };
+
+    const cancel = async () => {
+        if (await canClose()) close();
+    };
 
     const footer = (
         <>
@@ -61,7 +84,7 @@ export const FormDialog = <T extends FieldValues>({
                 type="button"
                 variant="outline"
                 disabled={busy}
-                onClick={close}
+                onClick={cancel}
             >
                 Отмена
             </Button>
@@ -78,6 +101,7 @@ export const FormDialog = <T extends FieldValues>({
     return (
         <Surface
             onClose={close}
+            canClose={canClose}
             title={title}
             description={description}
             className={surfaceClassName}

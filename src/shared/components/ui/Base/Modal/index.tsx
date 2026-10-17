@@ -14,6 +14,7 @@ export * from './primitives';
 
 interface ModalProps extends Omit<ComponentProps<typeof Dialog>, 'children'> {
     onClose?: () => void;
+    canClose?: () => Promise<boolean>;
     className?: string;
     showCloseButton?: boolean;
     title?: ReactNode;
@@ -24,6 +25,7 @@ interface ModalProps extends Omit<ComponentProps<typeof Dialog>, 'children'> {
 
 const ModalBase = ({
     onClose,
+    canClose,
     className,
     showCloseButton = true,
     title,
@@ -41,8 +43,9 @@ const ModalBase = ({
     return (
         <Dialog
             open={open}
-            onOpenChange={(next) => {
-                if (!next && !busy) close();
+            onOpenChange={async (next) => {
+                if (next || busy) return;
+                if (!canClose || (await canClose())) close();
             }}
         >
             <DialogContent
