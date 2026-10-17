@@ -13,6 +13,7 @@ export const env = createEnv({
         ENCRYPTION_KEY: z.string().check(z.length(32)),
         BETTER_AUTH_URL: z.optional(z.url()),
         TRUSTED_PROXY_IPS: z.optional(z.string()),
+        CRON_SECRET: z.optional(z.string().check(z.minLength(32))),
         UPLOADS_DIR: z.optional(z.string()),
         AWS_ENDPOINT_URL_S3: z.optional(z.url()),
         AWS_REGION: z.optional(z.string()),

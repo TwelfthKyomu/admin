@@ -82,6 +82,25 @@ export function teamDetails(order: OrderRecord): string[] {
     ].filter((line) => line !== null);
 }
 
+const REMINDER_TIME_ZONE = 'Europe/Moscow';
+
+const reminderTime = new Intl.DateTimeFormat('ru-RU', {
+    day: 'numeric',
+    month: 'long',
+    hour: '2-digit',
+    minute: '2-digit',
+    timeZone: REMINDER_TIME_ZONE,
+});
+
+export function reminderContent(
+    order: OrderRecord & { scheduledAt: Date },
+): CustomerMailContent {
+    return {
+        heading: `Напоминаем о записи № ${orderNumber(order)}`,
+        intro: `Ждём вас ${reminderTime.format(order.scheduledAt)} (МСК). Если планы изменились, предупредите нас заранее.`,
+    };
+}
+
 export function placedContent(order: OrderRecord): CustomerMailContent {
     return {
         heading: `Заказ № ${orderNumber(order)} принят`,
