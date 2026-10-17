@@ -10,6 +10,7 @@ import { ApplicationError } from '@/shared/api/errors';
 import { insertOne, updateInProject } from '@/shared/api/repository';
 import { getErrorMessage } from '@/shared/lib/errors';
 import { encryptCredentials } from '@/shared/security/encryption';
+import { isPublicHttpUrl } from '@/shared/security/public-url';
 import { recordAudit } from '@/contexts/auditLog/AuditLog.lib';
 import {
     AuditAction,
@@ -70,6 +71,15 @@ export const createIntegrationAction = projectMutationAction(
 )
     .inputSchema(CreateIntegrationActionInputSchema)
     .action(async ({ parsedInput, ctx: { userId, organizationId } }) => {
+        if (
+            parsedInput.siteUrl &&
+            !(await isPublicHttpUrl(parsedInput.siteUrl))
+        ) {
+            throw new ApplicationError(
+                'Адрес сайта должен быть публичным: локальные и внутренние адреса не подходят',
+            );
+        }
+
         const secret = randomBytes(INTEGRATION_API_KEY_ENTROPY_BYTES).toString(
             'base64url',
         );
@@ -142,6 +152,12 @@ export const connectStorageAction = projectMutationAction(
         if (await findProjectBucket(projectId)) {
             throw new ApplicationError(
                 'У проекта уже подключено хранилище. Сначала отключите его.',
+            );
+        }
+
+        if (!(await isPublicHttpUrl(bucket.endpoint))) {
+            throw new ApplicationError(
+                'Адрес хранилища должен быть публичным: локальные и внутренние адреса не подходят',
             );
         }
 
