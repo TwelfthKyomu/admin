@@ -2,6 +2,7 @@
 
 import { Fragment } from 'react';
 import { useStaticData } from '@/app/providers';
+import { HOME_LABEL, ORDER_LABEL, segmentLabel } from '@/shared/labels/navigation';
 import {
     Breadcrumb,
     BreadcrumbItem,
@@ -12,10 +13,8 @@ import {
 } from '@/ui/Base';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { useTranslations } from 'next-intl';
 
 export const Slug = () => {
-    const t = useTranslations('menu');
     const { projects } = useStaticData();
     const projectName = (segment: string) => projects?.find((item) => item.id === segment)?.name;
 
@@ -23,11 +22,11 @@ export const Slug = () => {
     const segments = pathname.split('/').filter(Boolean);
 
     const items = [
-        { label: t('home'), href: '/' },
+        { label: HOME_LABEL, href: '/' },
         ...segments.map((segment, index) => ({
             label:
                 projectName(segment) ??
-                (segments[index - 1] === 'orders' ? t('order') : t(segment)),
+                (segments[index - 1] === 'orders' ? ORDER_LABEL : segmentLabel(segment)),
             href: `/${segments.slice(0, index + 1).join('/')}`,
         })),
     ];

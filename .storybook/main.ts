@@ -2,7 +2,6 @@ import { fileURLToPath } from 'node:url';
 import type { StorybookConfig } from '@storybook/nextjs-vite';
 
 const src = fileURLToPath(new URL('../src', import.meta.url));
-const i18n = fileURLToPath(new URL('../i18n', import.meta.url));
 
 const aliases = [
     { find: /^@\/ui\//, replacement: `${src}/shared/components/ui/` },
@@ -11,7 +10,6 @@ const aliases = [
         find: /^@\/feedback\//,
         replacement: `${src}/shared/components/feedback/`,
     },
-    { find: /^@\/i18n\//, replacement: `${i18n}/` },
     { find: /^@\//, replacement: `${src}/` },
 ];
 

@@ -5,7 +5,7 @@
         "src/**/*.stories.tsx",
         "src/**/*.{test,spec}.ts"
     ],
-    "project": ["src/**/*.{ts,tsx}", "i18n/**/*.ts"],
+    "project": ["src/**/*.{ts,tsx}"],
     "ignoreDependencies": ["tailwindcss", "tw-animate-css"],
     "rules": {
         "types": "off",

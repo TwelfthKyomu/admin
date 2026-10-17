@@ -5,7 +5,6 @@ import { useActiveUrl } from '@/shared/hooks/useActiveUrl';
 import { canInOrg } from '@/contexts/organizationMember/OrganizationMember.types';
 import { navMain } from '@/layout/Sidebar/constants';
 import Link from 'next/link';
-import { useTranslations } from 'next-intl';
 import {
     SidebarGroup,
     SidebarGroupLabel,
@@ -21,7 +20,6 @@ export const NavMain = () => {
         (item) => !item.permission || canInOrg(organization.role, item.permission),
     );
 
-    const t = useTranslations('menu');
     const isActive = useActiveUrl();
 
     return (
@@ -32,12 +30,12 @@ export const NavMain = () => {
                     <SidebarMenuItem key={href}>
                         <SidebarMenuButton
                             asChild
-                            tooltip={t(label)}
+                            tooltip={label}
                             isActive={isActive(href)}
                         >
                             <Link href={href}>
                                 {icon}
-                                <span>{t(label)}</span>
+                                <span>{label}</span>
                             </Link>
                         </SidebarMenuButton>
                     </SidebarMenuItem>

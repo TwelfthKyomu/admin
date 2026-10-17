@@ -1,8 +1,7 @@
 import { type PropsWithChildren, Suspense } from 'react';
-import { IntlProviders } from '@/app/providers/IntlProviders';
+import { Providers } from '@/app/providers/Providers';
 import { PageLoader } from '@/shared/components/common';
 import { Toaster } from '@/shared/components/ui/Base/Sonner';
-import { defaultLocale } from '@/i18n/config';
 import type { Metadata, Viewport } from 'next';
 import { Inter, JetBrains_Mono } from 'next/font/google';
 import '@/app/index.css';
@@ -42,14 +41,7 @@ export const metadata: Metadata = {
         locale: 'ru_RU',
         siteName: 'Flowsy',
     },
-    robots: {
-        index: process.env.NODE_ENV === 'production',
-        follow: process.env.NODE_ENV === 'production',
-        googleBot: {
-            index: process.env.NODE_ENV === 'production',
-            follow: process.env.NODE_ENV === 'production',
-        },
-    },
+    robots: { index: false, follow: false },
 };
 
 export const viewport: Viewport = {
@@ -71,16 +63,16 @@ export const viewport: Viewport = {
 
 const RootLayout = ({ children }: PropsWithChildren) => (
     <html
-        lang={defaultLocale}
+        lang="ru"
         suppressHydrationWarning
         className={`${inter.variable} ${mono.variable}`}
     >
         <body className="dark dark-theme">
             <Suspense fallback={<PageLoader />}>
-                <IntlProviders>
+                <Providers>
                     {children}
                     <Toaster />
-                </IntlProviders>
+                </Providers>
             </Suspense>
         </body>
     </html>

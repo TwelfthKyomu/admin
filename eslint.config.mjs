@@ -9,7 +9,7 @@ export default [
         ignores: ['.next/**', 'node_modules/**', 'storybook-static/**', 'src/infrastructure/database/migrations/**'],
     },
     {
-        files: ['src/**/*.{ts,tsx}', 'scripts/**/*.ts', 'i18n/**/*.ts'],
+        files: ['src/**/*.{ts,tsx}'],
         languageOptions: { parser: tseslint.parser },
         plugins: { '@stylistic': stylistic },
         rules: {

@@ -12,29 +12,29 @@ interface NavItem {
 
 export const navMain: NavItem[] = [
     {
-        label: 'main',
+        label: 'Главная панель',
         href: ROUTES.home,
         icon: <LayoutDashboard />,
     },
     {
-        label: 'chat',
+        label: 'Чат',
         href: ROUTES.chat,
         icon: <MessagesSquare />,
     },
     {
-        label: 'billing',
+        label: 'Тариф',
         href: ROUTES.billing,
         icon: <CreditCard />,
         permission: Permission.MANAGE_BILLING,
     },
     {
-        label: 'audit',
+        label: 'Журнал',
         href: ROUTES.audit,
         icon: <ScrollText />,
         permission: Permission.MANAGE_ORGANIZATION,
     },
     {
-        label: 'users',
+        label: 'Пользователи',
         href: ROUTES.users,
         icon: <Users />,
         permission: Permission.MANAGE_MEMBERS,

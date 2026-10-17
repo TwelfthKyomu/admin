@@ -23,16 +23,9 @@
         ],
         "paths": {
             "@/*": ["./src/*"],
-            "@/app/*": ["./src/app/*"],
-            "@/shared/*": ["./src/shared/*"],
             "@/ui/*": ["./src/shared/components/ui/*"],
-            "@/contexts/*": ["./src/contexts/*"],
             "@/layout/*": ["./src/shared/components/layout/*"],
-            "@/feedback/*": ["./src/shared/components/feedback/*"],
-            "@/infrastructure/*": ["./src/infrastructure/*"],
-            "@/types/*": ["./src/types/*"],
-            "@/i18n/*": ["./i18n/*"],
-            "@public/*": ["./public/*"]
+            "@/feedback/*": ["./src/shared/components/feedback/*"]
         }
     },
     "include": [
@@ -40,9 +33,8 @@
         "**/*.ts",
         "**/*.tsx",
         ".next/types/**/*.ts",
-        "src/shared/assets/**/*",
         ".next/dev/types/**/*.ts",
         "src/types/**/*.d.ts"
     ],
-    "exclude": ["node_modules", "backup-20260220-022208"]
+    "exclude": ["node_modules"]
 }
