@@ -234,6 +234,10 @@ export type OrderEventType =
 export const ORDER_EVENT_TYPE_VALUES = enumValues(OrderEventType);
 
 export const ORDER_ITEMS_MAX = 200;
+
+export const ORDERS_LIST_LIMIT = 500;
+
+export const ORDERS_RANGE_LIMIT = 5000;
 export const ORDER_ITEM_QUANTITY_MAX = 10_000;
 
 export interface ProjectRevenueView {

@@ -41,6 +41,8 @@ import {
 import {
     type EmployeeRevenueView,
     inferDurationMinutes,
+    ORDERS_LIST_LIMIT,
+    ORDERS_RANGE_LIMIT,
     OrderType,
     orderRequiresSchedule,
     sumOrderItems,
@@ -94,7 +96,12 @@ export const ordersAction = projectReadAction(BOOKING_READ_PERMISSIONS)
             .select()
             .from(orders)
             .where(and(...filters))
-            .orderBy(desc(orders.createdAt));
+            .orderBy(desc(orders.createdAt))
+            .limit(
+                options.from && options.to
+                    ? ORDERS_RANGE_LIMIT
+                    : ORDERS_LIST_LIMIT,
+            );
     });
 
 export const orderDetailAction = projectReadAction(BOOKING_READ_PERMISSIONS)

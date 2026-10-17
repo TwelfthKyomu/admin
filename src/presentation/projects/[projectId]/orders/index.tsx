@@ -1,6 +1,7 @@
 'use client';
 
 import { QueryBoundary } from '@/shared/components/common';
+import { ORDERS_LIST_LIMIT } from '@/contexts/order';
 import { Button, Input, Table } from '@/ui/Base';
 import { Plus } from 'lucide-react';
 import { COLUMNS } from './components/Column';
@@ -40,14 +41,26 @@ export const OrdersPage = () => {
                 errorTitle="Не удалось загрузить заказы"
             >
                 {(orders) => (
-                    <Table
-                        columns={COLUMNS}
-                        data={orders}
-                        emptyMessage="Заказов пока нет."
-                        getRowId={(order) => order.id}
-                        onRowClick={(row) => onOpen(row.original.id)}
-                        rowClassName="cursor-pointer"
-                    />
+                    <>
+                        <Table
+                            columns={COLUMNS}
+                            data={orders}
+                            emptyMessage={
+                                search || status !== 'all'
+                                    ? 'Под фильтр не подошёл ни один заказ.'
+                                    : 'Заказов пока нет.'
+                            }
+                            getRowId={(order) => order.id}
+                            onRowClick={(row) => onOpen(row.original.id)}
+                            rowClassName="cursor-pointer"
+                        />
+                        {orders.length >= ORDERS_LIST_LIMIT && (
+                            <p className="mt-2 text-muted-foreground text-xs">
+                                Показаны последние {ORDERS_LIST_LIMIT} заказов — уточните поиск или
+                                фильтр, чтобы найти более ранние.
+                            </p>
+                        )}
+                    </>
                 )}
             </QueryBoundary>
         </>
