@@ -60,6 +60,7 @@ export const orders = pgTable(
         scheduledAt: timestamp('scheduled_at'),
         durationMinutes: integer('duration_minutes'),
         completedAt: timestamp('completed_at'),
+        reminderSentAt: timestamp('reminder_sent_at'),
         currency: currencyEnum('currency').notNull().default('RUB'),
         subtotalAmount: bigint('subtotal_amount', { mode: 'number' })
             .notNull()

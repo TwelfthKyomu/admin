@@ -147,7 +147,7 @@ export const changeOrderScheduleAction = projectMutationAction(
             return writeOrderUpdate(
                 tx,
                 assigned,
-                { scheduledAt, durationMinutes },
+                { scheduledAt, durationMinutes, reminderSentAt: null },
                 {
                     type: OrderEventType.SCHEDULED_AT_CHANGED,
                     byUserId: userId,
