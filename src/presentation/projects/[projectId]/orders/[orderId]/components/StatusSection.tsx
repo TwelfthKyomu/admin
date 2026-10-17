@@ -37,7 +37,7 @@ export const StatusSection = ({ order, projectId, canEdit }: StatusSectionProps)
         if (isCancel || status === OrderStatus.NO_SHOW) {
             return confirmDestructive({
                 title: isCancel ? 'Отменить заказ?' : 'Отметить «не пришёл»?',
-                description: 'Действие нельзя отменить — заказ перейдёт в терминальное состояние.',
+                description: 'Вернуть прежний статус будет нельзя.',
                 confirmLabel: isCancel ? 'Отменить' : 'Не пришёл',
                 success,
                 onConfirm: () => mutateAsync(input),
@@ -65,7 +65,7 @@ export const StatusSection = ({ order, projectId, canEdit }: StatusSectionProps)
                 <div className="flex flex-wrap gap-2 px-4 py-3">
                     {next.length === 0 && (
                         <p className="text-[12px] text-muted-foreground">
-                            Заказ в терминальном состоянии.
+                            Заказ закрыт — статус больше не меняется.
                         </p>
                     )}
                     {next.map((status) => (

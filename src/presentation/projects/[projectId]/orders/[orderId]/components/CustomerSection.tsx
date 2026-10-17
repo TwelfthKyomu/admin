@@ -13,11 +13,17 @@ export const CustomerSection = ({ order }: { order: OrderView }) => (
             <DetailRow
                 label="Телефон"
                 value={order.customerPhone ?? '—'}
+                url={
+                    order.customerPhone
+                        ? `tel:${order.customerPhone.replace(/[^\d+]/g, '')}`
+                        : undefined
+                }
                 mono
             />
             <DetailRow
                 label="Email"
                 value={order.customerEmail ?? '—'}
+                url={order.customerEmail ? `mailto:${order.customerEmail}` : undefined}
             />
             {order.scheduledAt && (
                 <DetailRow

@@ -7,13 +7,20 @@ import {
     PAYMENT_STATUS_LABEL,
     PAYMENT_STATUS_VARIANT,
 } from '@/shared/labels/order';
-import type { OrderView } from '@/contexts/order';
+import { type OrderView, orderNumber } from '@/contexts/order';
 import { Badge } from '@/ui/Base';
 import { createColumnHelper } from '@tanstack/react-table';
 
 const { display, accessor } = createColumnHelper<OrderView>();
 
 export const COLUMNS = [
+    display({
+        id: 'number',
+        header: '№',
+        cell: ({ row: { original } }) => (
+            <span className="font-mono text-muted-foreground text-xs">{orderNumber(original)}</span>
+        ),
+    }),
     display({
         id: 'date',
         header: 'Дата',
