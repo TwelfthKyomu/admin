@@ -1,11 +1,11 @@
 'use client';
 
-import { useState } from 'react';
 import { useProject } from '@/app/providers';
 import { useDebouncedValue } from '@/shared/hooks/useDebouncedValue';
 import { confirmDestructive, modal } from '@/shared/lib/modal';
 import { type ProductView, useDeleteProduct, useProductsList } from '@/contexts/product';
 import dynamic from 'next/dynamic';
+import { parseAsString, useQueryState } from 'nuqs';
 
 const ProductCreateModal = dynamic(() =>
     import('../modal/ProductCreateModal').then((m) => m.ProductCreateModal),
@@ -17,7 +17,7 @@ const ProductEditSheet = dynamic(() =>
 
 export function useProductsPage() {
     const { projectId } = useProject();
-    const [search, setSearch] = useState('');
+    const [search, setSearch] = useQueryState('q', parseAsString.withDefault(''));
     const debouncedSearch = useDebouncedValue(search);
     const query = useProductsList({ projectId, search: debouncedSearch });
     const { mutateAsync, isPending } = useDeleteProduct(projectId);
