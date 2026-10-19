@@ -161,13 +161,13 @@ async function ownScope(
     return employeeId;
 }
 
-const OWN_BOOKINGS_ONLY =
-    'Ваша роль даёт доступ только к своим записям, но вы не числитесь сотрудником организации';
+const OWN_SHIFTS_ONLY =
+    'Ваша роль даёт доступ только к своим сменам, но вы не числитесь сотрудником организации';
 
 const OWN_DELIVERIES_ONLY =
     'Ваша роль даёт доступ только к своим доставкам, но вы не числитесь сотрудником организации';
 
-export function ownBookingsEmployeeId(
+export function ownShiftsEmployeeId(
     userId: string,
     projectId: string,
 ): Promise<string | null> {
@@ -175,11 +175,11 @@ export function ownBookingsEmployeeId(
         userId,
         projectId,
         [Permission.MANAGE_ORDERS],
-        OWN_BOOKINGS_ONLY,
+        OWN_SHIFTS_ONLY,
     );
 }
 
-export function visibleBookingsEmployeeId(
+export function visibleShiftsEmployeeId(
     userId: string,
     projectId: string,
 ): Promise<string | null> {
@@ -187,7 +187,7 @@ export function visibleBookingsEmployeeId(
         userId,
         projectId,
         [Permission.MANAGE_ORDERS, Permission.VIEW_ORDERS],
-        OWN_BOOKINGS_ONLY,
+        OWN_SHIFTS_ONLY,
     );
 }
 
@@ -215,7 +215,7 @@ export function visibleDeliveriesCourierId(
     );
 }
 
-export async function assertFullBookingsAccess(
+export async function assertFullShiftsAccess(
     userId: string,
     projectId: string,
 ): Promise<void> {

@@ -2,7 +2,6 @@ import 'server-only';
 
 import { db, type Reader, type Tx } from '@/infrastructure/database/client';
 import { ApplicationError } from '@/shared/api/errors';
-import { ownBookingsEmployeeId } from '@/shared/api/permission';
 import {
     findInProject,
     insertOne,
@@ -96,22 +95,6 @@ export async function findClientOrders(
         order,
         items: itemsByOrder.get(order.id) ?? [],
     }));
-}
-
-export async function lockOwnOrder(
-    tx: Tx,
-    userId: string,
-    id: string,
-    projectId: string,
-): Promise<OrderRecord> {
-    const order = await lockOrder(tx, id, projectId);
-    const ownEmployeeId = await ownBookingsEmployeeId(userId, projectId);
-
-    if (ownEmployeeId && order.assignedEmployeeId !== ownEmployeeId) {
-        throw new ApplicationError('Заказ закреплён за другим сотрудником');
-    }
-
-    return order;
 }
 
 export async function resolveOrderItems(

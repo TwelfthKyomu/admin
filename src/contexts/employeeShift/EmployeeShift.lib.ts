@@ -2,7 +2,7 @@ import 'server-only';
 
 import { db, type Reader, type Tx } from '@/infrastructure/database/client';
 import { ApplicationError } from '@/shared/api/errors';
-import { ownBookingsEmployeeId } from '@/shared/api/permission';
+import { ownShiftsEmployeeId } from '@/shared/api/permission';
 import { findInProject, insertOne, updateOne } from '@/shared/api/repository';
 import {
     courierLoadInWindow,
@@ -218,7 +218,7 @@ export async function assertShiftAccess(
     userId: string,
     shift: EmployeeShiftRecord,
 ): Promise<{ fullAccess: boolean }> {
-    const ownEmployeeId = await ownBookingsEmployeeId(userId, shift.projectId);
+    const ownEmployeeId = await ownShiftsEmployeeId(userId, shift.projectId);
 
     if (ownEmployeeId && shift.employeeId !== ownEmployeeId) {
         throw new ApplicationError('Смена принадлежит другому сотруднику');

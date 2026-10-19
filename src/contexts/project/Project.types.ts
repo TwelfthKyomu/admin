@@ -14,7 +14,6 @@ export const ProjectRole = {
     MANAGER: 'manager',
     EDITOR: 'editor',
     VIEWER: 'viewer',
-    MASTER: 'master',
     COURIER: 'courier',
     ACCOUNTANT: 'accountant',
 } as const;
@@ -32,7 +31,6 @@ const PROJECT_ROLE_PERMISSIONS: Record<ProjectRole, ReadonlySet<Permission>> = {
         Permission.MANAGE_CATALOG,
         Permission.VIEW_CATALOG,
         Permission.MANAGE_ORDERS,
-        Permission.MANAGE_OWN_BOOKINGS,
         Permission.VIEW_ORDERS,
         Permission.MANAGE_DELIVERIES,
         Permission.VIEW_DELIVERIES,
@@ -45,7 +43,6 @@ const PROJECT_ROLE_PERMISSIONS: Record<ProjectRole, ReadonlySet<Permission>> = {
         Permission.MANAGE_CATALOG,
         Permission.VIEW_CATALOG,
         Permission.MANAGE_ORDERS,
-        Permission.MANAGE_OWN_BOOKINGS,
         Permission.VIEW_ORDERS,
         Permission.MANAGE_DELIVERIES,
         Permission.VIEW_DELIVERIES,
@@ -56,11 +53,6 @@ const PROJECT_ROLE_PERMISSIONS: Record<ProjectRole, ReadonlySet<Permission>> = {
         Permission.VIEW_CATALOG,
         Permission.VIEW_ORDERS,
         Permission.VIEW_DELIVERIES,
-    ]),
-
-    [ProjectRole.MASTER]: new Set<Permission>([
-        Permission.VIEW_CATALOG,
-        Permission.MANAGE_OWN_BOOKINGS,
     ]),
 
     [ProjectRole.COURIER]: new Set<Permission>([

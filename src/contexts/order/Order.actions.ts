@@ -6,10 +6,6 @@ import {
     projectReadAction,
 } from '@/shared/api/action-client';
 import { ApplicationError } from '@/shared/api/errors';
-import {
-    ownBookingsEmployeeId,
-    visibleBookingsEmployeeId,
-} from '@/shared/api/permission';
 import { searchFilters } from '@/shared/api/repository';
 import { DURATION_MINUTES_MAX } from '@/shared/constants/default';
 import { findClientInProject } from '@/contexts/client/Client.lib';
@@ -20,11 +16,7 @@ import {
     memberNamesByIds,
 } from '@/contexts/organizationMember/OrganizationMember.lib';
 import { projectDefaultCurrency } from '@/contexts/project/Project.lib';
-import {
-    ORDER_PERMISSIONS,
-    ORDER_READ_PERMISSIONS,
-    Permission,
-} from '@/contexts/user/User.types';
+import { ORDER_READ_PERMISSIONS, Permission } from '@/contexts/user/User.types';
 import { and, asc, desc, eq, gte, inArray, lt } from 'drizzle-orm';
 import {
     createOrderWithItems,
@@ -53,19 +45,11 @@ import { orderEvents, orders } from './Orders.table';
 
 export const ordersAction = projectReadAction(ORDER_READ_PERMISSIONS)
     .inputSchema(OrdersActionInputSchema)
-    .action(async ({ parsedInput, ctx: { userId } }) => {
+    .action(async ({ parsedInput }) => {
         const { projectId, ...options } = parsedInput;
-
-        const ownEmployeeId = await visibleBookingsEmployeeId(
-            userId,
-            projectId,
-        );
 
         const filters = [eq(orders.projectId, projectId)];
 
-        if (ownEmployeeId) {
-            filters.push(eq(orders.assignedEmployeeId, ownEmployeeId));
-        }
         if (options.types && options.types.length > 0) {
             filters.push(inArray(orders.type, options.types));
         }
@@ -107,23 +91,17 @@ export const ordersAction = projectReadAction(ORDER_READ_PERMISSIONS)
 
 export const orderDetailAction = projectReadAction(ORDER_READ_PERMISSIONS)
     .inputSchema(OrderDetailActionInputSchema)
-    .action(async ({ parsedInput: { id, projectId }, ctx: { userId } }) => {
-        const [order, ownEmployeeId, items, events, couponCode] =
-            await Promise.all([
-                findOrderInProject(id, projectId),
-                visibleBookingsEmployeeId(userId, projectId),
-                loadOrderItems(id),
-                db
-                    .select()
-                    .from(orderEvents)
-                    .where(eq(orderEvents.orderId, id))
-                    .orderBy(asc(orderEvents.createdAt)),
-                findOrderCouponCode(id),
-            ]);
-
-        if (ownEmployeeId && order.assignedEmployeeId !== ownEmployeeId) {
-            throw new ApplicationError('Заказ закреплён за другим сотрудником');
-        }
+    .action(async ({ parsedInput: { id, projectId } }) => {
+        const [order, items, events, couponCode] = await Promise.all([
+            findOrderInProject(id, projectId),
+            loadOrderItems(id),
+            db
+                .select()
+                .from(orderEvents)
+                .where(eq(orderEvents.orderId, id))
+                .orderBy(asc(orderEvents.createdAt)),
+            findOrderCouponCode(id),
+        ]);
 
         return { order, items, events, couponCode };
     });
@@ -145,7 +123,7 @@ export const employeeRevenueAction = projectReadAction(Permission.VIEW_FINANCES)
         }));
     });
 
-export const createOrderAction = projectMutationAction(ORDER_PERMISSIONS)
+export const createOrderAction = projectMutationAction(Permission.MANAGE_ORDERS)
     .inputSchema(CreateOrderActionInputSchema)
     .action(async ({ parsedInput, ctx: { userId, organizationId } }) => {
         const { projectId } = parsedInput;
@@ -168,19 +146,12 @@ export const createOrderAction = projectMutationAction(ORDER_PERMISSIONS)
             throw new ApplicationError('Для записи нужен исполнитель');
         }
 
-        const [ownEmployeeId, currency] = await Promise.all([
-            ownBookingsEmployeeId(userId, projectId),
+        const [currency] = await Promise.all([
             parsedInput.currency ?? projectDefaultCurrency(projectId),
             parsedInput.clientId
                 ? findClientInProject(parsedInput.clientId, projectId)
                 : null,
         ]);
-
-        if (ownEmployeeId && assignedEmployeeId !== ownEmployeeId) {
-            throw new ApplicationError(
-                'Роль позволяет создавать записи только на себя',
-            );
-        }
 
         const [items] = await Promise.all([
             resolveOrderItems(projectId, inputItems, currency),

@@ -10,7 +10,6 @@ export const Permission = {
     VIEW_CATALOG: 'view_catalog',
 
     MANAGE_ORDERS: 'manage_orders',
-    MANAGE_OWN_BOOKINGS: 'manage_own_bookings',
     VIEW_ORDERS: 'view_orders',
 
     MANAGE_DELIVERIES: 'manage_deliveries',
@@ -25,13 +24,8 @@ export type Permission = (typeof Permission)[keyof typeof Permission];
 
 export const ALL_PERMISSIONS: Permission[] = Object.values(Permission);
 
-export const ORDER_PERMISSIONS: Permission[] = [
-    Permission.MANAGE_ORDERS,
-    Permission.MANAGE_OWN_BOOKINGS,
-];
-
 export const ORDER_READ_PERMISSIONS: Permission[] = [
-    ...ORDER_PERMISSIONS,
+    Permission.MANAGE_ORDERS,
     Permission.VIEW_ORDERS,
 ];
 
@@ -46,7 +40,7 @@ export const DELIVERY_READ_PERMISSIONS: Permission[] = [
 ];
 
 export const SHIFT_WRITE_PERMISSIONS: Permission[] = [
-    ...ORDER_PERMISSIONS,
+    Permission.MANAGE_ORDERS,
     Permission.MANAGE_OWN_DELIVERIES,
 ];
 

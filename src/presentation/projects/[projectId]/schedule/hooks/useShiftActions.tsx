@@ -10,7 +10,7 @@ import {
     ShiftStatus,
     useChangeShiftStatus,
 } from '@/contexts/employeeShift';
-import { ORDER_PERMISSIONS, Permission } from '@/contexts/user';
+import { Permission } from '@/contexts/user';
 import dynamic from 'next/dynamic';
 
 const ShiftCancelModal = dynamic(() =>
@@ -79,7 +79,7 @@ export function useShiftActions({
         );
 
     return {
-        isVisible: can(ORDER_PERMISSIONS) && isActive,
+        isVisible: can(Permission.MANAGE_ORDERS) && isActive,
         canManage: can(Permission.MANAGE_ORDERS),
         isScheduled,
         isPending,
