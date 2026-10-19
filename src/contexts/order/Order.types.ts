@@ -1,5 +1,6 @@
 import { ApplicationError } from '@/shared/api/errors';
 import type { Currency } from '@/shared/constants/currency';
+import { fmtMoney } from '@/shared/format/money';
 import { enumValues } from '@/shared/lib/enum';
 import type { MyDeliveryView } from '@/contexts/delivery/Delivery.types';
 import type { MyShiftView } from '@/contexts/employeeShift/EmployeeShift.types';
@@ -23,6 +24,7 @@ export const OrderStatus = {
     PENDING: 'pending',
     CONFIRMED: 'confirmed',
     IN_PROGRESS: 'in_progress',
+    READY: 'ready',
     COMPLETED: 'completed',
     CANCELLED: 'cancelled',
 } as const;
@@ -56,16 +58,47 @@ const ORDER_STATUS_TRANSITIONS: Record<OrderStatus, OrderStatus[]> = {
     [OrderStatus.PENDING]: [OrderStatus.CONFIRMED, OrderStatus.CANCELLED],
     [OrderStatus.CONFIRMED]: [
         OrderStatus.IN_PROGRESS,
+        OrderStatus.READY,
         OrderStatus.COMPLETED,
         OrderStatus.CANCELLED,
     ],
-    [OrderStatus.IN_PROGRESS]: [OrderStatus.COMPLETED, OrderStatus.CANCELLED],
+    [OrderStatus.IN_PROGRESS]: [
+        OrderStatus.READY,
+        OrderStatus.COMPLETED,
+        OrderStatus.CANCELLED,
+    ],
+    [OrderStatus.READY]: [OrderStatus.COMPLETED, OrderStatus.CANCELLED],
     [OrderStatus.COMPLETED]: [],
     [OrderStatus.CANCELLED]: [],
 };
 
-export function getNextOrderStatuses(current: OrderStatus): OrderStatus[] {
-    return ORDER_STATUS_TRANSITIONS[current];
+export function getNextOrderStatuses(
+    current: OrderStatus,
+    options: { hasDelivery: boolean },
+): OrderStatus[] {
+    const next = ORDER_STATUS_TRANSITIONS[current];
+
+    if (!options.hasDelivery) return next;
+
+    return next.filter((status) => status !== OrderStatus.READY);
+}
+
+const READY_PENDING_STATUSES: readonly OrderStatus[] = [
+    OrderStatus.PENDING,
+    OrderStatus.CONFIRMED,
+    OrderStatus.IN_PROGRESS,
+];
+
+export function isReadyOverdue(
+    order: { readyBy?: Date | null; status: OrderStatus },
+    now: Date,
+): boolean {
+    if (!order.readyBy) return false;
+
+    return (
+        new Date(order.readyBy) < now &&
+        READY_PENDING_STATUSES.includes(order.status)
+    );
 }
 
 export const PaymentStatus = {
@@ -93,6 +126,16 @@ export function recomputePaymentStatus(money: OrderMoney): PaymentStatus {
     if (net < money.totalAmount) return PaymentStatus.PARTIAL;
 
     return PaymentStatus.PAID;
+}
+
+export function readyPaymentDetails(
+    order: OrderMoney & Pick<OrderRecord, 'currency'>,
+): string[] {
+    const due = orderAmountDue(order);
+
+    if (due === 0) return [];
+
+    return [`К оплате при получении: ${fmtMoney(due, order.currency)}`];
 }
 
 export function orderAmountDue(money: OrderMoney): number {

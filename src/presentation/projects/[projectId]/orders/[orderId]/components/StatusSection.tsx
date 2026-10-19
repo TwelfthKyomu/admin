@@ -17,17 +17,19 @@ import {
     useChangeOrderStatus,
 } from '@/contexts/order';
 import { Badge, Button } from '@/ui/Base';
+import { ReadyBy } from '../../components/ReadyBy';
 import { Section } from './Section';
 
 interface StatusSectionProps {
     order: OrderView;
     projectId: string;
     canEdit: boolean;
+    hasDelivery: boolean;
 }
 
-export const StatusSection = ({ order, projectId, canEdit }: StatusSectionProps) => {
+export const StatusSection = ({ order, projectId, canEdit, hasDelivery }: StatusSectionProps) => {
     const { mutateAsync, isPending } = useChangeOrderStatus(projectId);
-    const next = getNextOrderStatuses(order.status);
+    const next = getNextOrderStatuses(order.status, { hasDelivery });
 
     const onTransition = (status: OrderStatus) => {
         const input = { id: order.id, projectId, nextStatus: status };
@@ -61,6 +63,12 @@ export const StatusSection = ({ order, projectId, canEdit }: StatusSectionProps)
                 </div>
             }
         >
+            {order.readyBy && (
+                <div className="flex items-center gap-2 border-b border-border px-4 py-2 text-[13px]">
+                    <span className="text-muted-foreground">Будет готово к</span>
+                    <ReadyBy order={order} />
+                </div>
+            )}
             {canEdit && (
                 <div className="flex flex-wrap gap-2 px-4 py-3">
                     {next.length === 0 && (

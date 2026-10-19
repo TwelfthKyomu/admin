@@ -9,6 +9,7 @@ import {
 } from '@/shared/api/repository';
 import type { Currency } from '@/shared/constants/currency';
 import { addClientSpending } from '@/contexts/client/Client.lib';
+import { hasOpenDelivery } from '@/contexts/delivery/Delivery.lib';
 import { ProductType } from '@/contexts/product/Product.types';
 import { products, productVariants } from '@/contexts/product/Products.table';
 import {
@@ -278,7 +279,10 @@ export async function changeOrderStatus(
     status: OrderStatus,
     event: { byUserId: string | null; reason: string | null },
 ): Promise<OrderRecord> {
-    if (!getNextOrderStatuses(order.status).includes(status)) {
+    const hasDelivery =
+        status === OrderStatus.READY && (await hasOpenDelivery(tx, order.id));
+
+    if (!getNextOrderStatuses(order.status, { hasDelivery }).includes(status)) {
         throw new ApplicationError(
             `Недопустимый переход статуса: ${order.status} → ${status}`,
         );

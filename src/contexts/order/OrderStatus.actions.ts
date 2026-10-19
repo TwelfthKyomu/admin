@@ -8,6 +8,7 @@ import { cancelActiveDelivery } from '@/contexts/delivery/Delivery.lib';
 import { findMemberIdByUserId } from '@/contexts/organizationMember/OrganizationMember.lib';
 import { applyStockReturn } from '@/contexts/stockMovement/StockMovement.lib';
 import { Permission } from '@/contexts/user/User.types';
+import { after } from 'next/server';
 import { changeOrderStatus, lockOrder, setOrderSeller } from './Order.lib';
 import { ChangeOrderStatusActionInputSchema } from './Order.schema';
 import {
@@ -16,13 +17,14 @@ import {
     isOrderTerminal,
     OrderStatus,
 } from './Order.types';
+import { mailOrderReady } from './OrderMail.lib';
 
 export const changeOrderStatusAction = projectMutationAction(
     Permission.MANAGE_ORDERS,
 )
     .inputSchema(ChangeOrderStatusActionInputSchema)
-    .action(({ parsedInput, ctx: { userId, organizationId } }) =>
-        db.transaction(async (tx) => {
+    .action(async ({ parsedInput, ctx: { userId, organizationId } }) => {
+        const updated = await db.transaction(async (tx) => {
             const order = await lockOrder(
                 tx,
                 parsedInput.id,
@@ -66,5 +68,11 @@ export const changeOrderStatusAction = projectMutationAction(
             }
 
             return row;
-        }),
-    );
+        });
+
+        if (updated.status === OrderStatus.READY) {
+            after(() => mailOrderReady(updated.id));
+        }
+
+        return updated;
+    });

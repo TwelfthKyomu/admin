@@ -7,7 +7,7 @@ import { DELIVERY_CARRIER_LABEL } from '@/shared/labels/delivery';
 import { PAYMENT_STATUS_LABEL } from '@/shared/labels/order';
 import type { DeliveryRecord } from '@/contexts/delivery/Deliveries.table';
 import { deliveryTrackUrl } from '@/contexts/delivery/Delivery.types';
-import { orderNumber } from './Order.types';
+import { orderNumber, readyPaymentDetails } from './Order.types';
 import type { OrderItemRecord, OrderRecord } from './Orders.table';
 
 export interface MailOrder {
@@ -80,6 +80,16 @@ export function teamDetails(order: OrderRecord): string[] {
         `Оплата: ${PAYMENT_STATUS_LABEL[order.paymentStatus]}`,
         order.notes && `Комментарий: ${order.notes}`,
     ].filter((line) => line !== null);
+}
+
+export function readyContent(order: OrderRecord): CustomerMailContent {
+    const details = readyPaymentDetails(order);
+
+    return {
+        heading: `Заказ № ${orderNumber(order)} готов`,
+        intro: 'Можно забирать.',
+        details: details.length > 0 ? details : undefined,
+    };
 }
 
 export function placedContent(order: OrderRecord): CustomerMailContent {

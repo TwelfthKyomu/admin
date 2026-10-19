@@ -1,3 +1,5 @@
+import { DEFAULT_CURRENCY } from '@/shared/constants/currency';
+import { fmtMoney } from '@/shared/format/money';
 import { ProductType } from '@/contexts/product/Product.types';
 import { describe, expect, it } from 'vitest';
 import type { OrderItemInput } from './Order.schema';
@@ -5,6 +7,7 @@ import {
     confirmationSeller,
     getNextOrderStatuses,
     isOrderCancelled,
+    isReadyOverdue,
     isScheduledSale,
     maskSeller,
     ORDER_STATUS_VALUES,
@@ -15,6 +18,7 @@ import {
     orderRevenueShare,
     PaymentStatus,
     type ProjectRevenueView,
+    readyPaymentDetails,
     recomputePaymentStatus,
     rollUpRevenueByCurrency,
     salesTotal,
@@ -104,10 +108,12 @@ describe('orderAmountDue', () => {
     });
 });
 
+const NO_DELIVERY = { hasDelivery: false };
+
 describe('переходы статусов заказа', () => {
     it('из конечных статусов перейти никуда нельзя', () => {
         for (const status of ORDER_TERMINAL_STATUSES) {
-            expect(getNextOrderStatuses(status)).toEqual([]);
+            expect(getNextOrderStatuses(status, NO_DELIVERY)).toEqual([]);
         }
     });
 
@@ -115,7 +121,7 @@ describe('переходы статусов заказа', () => {
         for (const status of ORDER_STATUS_VALUES) {
             if (ORDER_TERMINAL_STATUSES.includes(status)) continue;
 
-            expect(getNextOrderStatuses(status)).toContain(
+            expect(getNextOrderStatuses(status, NO_DELIVERY)).toContain(
                 OrderStatus.CANCELLED,
             );
         }
@@ -123,20 +129,25 @@ describe('переходы статусов заказа', () => {
 
     it('статус не переходит сам в себя', () => {
         for (const status of ORDER_STATUS_VALUES) {
-            expect(getNextOrderStatuses(status)).not.toContain(status);
+            expect(getNextOrderStatuses(status, NO_DELIVERY)).not.toContain(
+                status,
+            );
         }
     });
 
     it('из «Новый» можно подтвердить или отменить', () => {
-        expect(getNextOrderStatuses(OrderStatus.PENDING)).toEqual([
+        expect(getNextOrderStatuses(OrderStatus.PENDING, NO_DELIVERY)).toEqual([
             OrderStatus.CONFIRMED,
             OrderStatus.CANCELLED,
         ]);
     });
 
     it('подтверждённый можно взять в работу, выполнить или отменить', () => {
-        expect(getNextOrderStatuses(OrderStatus.CONFIRMED)).toEqual([
+        expect(
+            getNextOrderStatuses(OrderStatus.CONFIRMED, NO_DELIVERY),
+        ).toEqual([
             OrderStatus.IN_PROGRESS,
+            OrderStatus.READY,
             OrderStatus.COMPLETED,
             OrderStatus.CANCELLED,
         ]);
@@ -368,5 +379,74 @@ describe('продажи в расписании', () => {
         expect(
             salesTotal([{ totalAmount: 1_500 }, { totalAmount: 2_500 }]),
         ).toBe(4_000);
+    });
+});
+
+describe('статус «Готово»', () => {
+    it('доступен из «Подтверждён» и «В работе», если нет доставки', () => {
+        expect(
+            getNextOrderStatuses(OrderStatus.CONFIRMED, NO_DELIVERY),
+        ).toContain(OrderStatus.READY);
+
+        expect(
+            getNextOrderStatuses(OrderStatus.IN_PROGRESS, NO_DELIVERY),
+        ).toContain(OrderStatus.READY);
+
+        expect(getNextOrderStatuses(OrderStatus.READY, NO_DELIVERY)).toEqual([
+            OrderStatus.COMPLETED,
+            OrderStatus.CANCELLED,
+        ]);
+    });
+
+    it('заказу с доставкой не предлагается', () => {
+        expect(
+            getNextOrderStatuses(OrderStatus.CONFIRMED, { hasDelivery: true }),
+        ).not.toContain(OrderStatus.READY);
+    });
+
+    it('просрочка — срок прошёл, а заказ ещё не готов', () => {
+        const now = new Date('2026-10-20T12:00');
+        const readyBy = new Date('2026-10-20T10:00');
+
+        expect(
+            isReadyOverdue({ readyBy, status: OrderStatus.IN_PROGRESS }, now),
+        ).toBe(true);
+
+        expect(
+            isReadyOverdue({ readyBy, status: OrderStatus.READY }, now),
+        ).toBe(false);
+
+        expect(
+            isReadyOverdue(
+                { readyBy: null, status: OrderStatus.IN_PROGRESS },
+                now,
+            ),
+        ).toBe(false);
+    });
+});
+
+describe('письмо «Готово»', () => {
+    it('оплаченный заказ — без строки о доплате', () => {
+        expect(
+            readyPaymentDetails({
+                totalAmount: 1_500,
+                paidAmount: 1_500,
+                refundedAmount: 0,
+                currency: DEFAULT_CURRENCY,
+            }),
+        ).toEqual([]);
+    });
+
+    it('неоплаченный остаток — к оплате при получении', () => {
+        expect(
+            readyPaymentDetails({
+                totalAmount: 1_500,
+                paidAmount: 500,
+                refundedAmount: 0,
+                currency: DEFAULT_CURRENCY,
+            }),
+        ).toEqual([
+            `К оплате при получении: ${fmtMoney(1_000, DEFAULT_CURRENCY)}`,
+        ]);
     });
 });

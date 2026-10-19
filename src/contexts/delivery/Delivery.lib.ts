@@ -1,6 +1,6 @@
 import 'server-only';
 
-import { db, type Tx } from '@/infrastructure/database/client';
+import { db, type Reader, type Tx } from '@/infrastructure/database/client';
 import { ApplicationError } from '@/shared/api/errors';
 import { insertOne, lockInProject } from '@/shared/api/repository';
 import { PAGE_SIZE_HUGE } from '@/shared/constants/default';
@@ -205,6 +205,24 @@ export async function assignCourier(
             },
         },
     );
+}
+
+export async function hasOpenDelivery(
+    executor: Reader,
+    orderId: string,
+): Promise<boolean> {
+    const [delivery] = await executor
+        .select({ id: deliveries.id })
+        .from(deliveries)
+        .where(
+            and(
+                eq(deliveries.orderId, orderId),
+                inArray(deliveries.status, OPEN_DELIVERY_STATUSES),
+            ),
+        )
+        .limit(1);
+
+    return delivery !== undefined;
 }
 
 export async function cancelActiveDelivery(

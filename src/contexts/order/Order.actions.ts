@@ -202,6 +202,7 @@ export const createOrderAction = projectMutationAction(Permission.MANAGE_ORDERS)
                     discountAmount,
                     totalAmount: subtotalAmount - discountAmount,
                     notes: parsedInput.notes ?? null,
+                    readyBy: parsedInput.readyBy ?? null,
                 },
                 items,
                 { byUserId: userId },

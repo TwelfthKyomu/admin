@@ -21,6 +21,7 @@ import {
     CreateSaleFormSchema,
     type CreateSaleFormValues,
 } from '../form/formData';
+import { READY_TIME_DEFAULT, readyByOf } from '../lib/readyBy';
 
 interface Sellable {
     key: string;
@@ -75,6 +76,8 @@ export function useCreateSale(projectId: string) {
             customerPhone: '',
             items: [{ itemKey: '', quantity: 1, unitPriceAmount: 0 }],
             notes: '',
+            readyDate: undefined,
+            readyTime: READY_TIME_DEFAULT,
         },
         resolver: zodResolver(CreateSaleFormSchema),
         mode: 'onChange',
@@ -89,11 +92,7 @@ export function useCreateSale(projectId: string) {
     const items = useWatch({ control: form.control, name: 'items' }) ?? [];
 
     const sellables = (productsQuery.data ?? [])
-        .filter(
-            (product) =>
-                product.type !== ProductType.SERVICE &&
-                SELLABLE_PRODUCT_STATUSES.includes(product.status),
-        )
+        .filter((product) => SELLABLE_PRODUCT_STATUSES.includes(product.status))
         .flatMap(sellablesOf);
 
     const sellableByKey = new Map(sellables.map((item) => [item.key, item]));
@@ -103,6 +102,11 @@ export function useCreateSale(projectId: string) {
         label: `${item.name} · ${fmtMoney(item.price, item.currency)}`,
         keywords: item.sku ? [item.sku] : undefined,
     }));
+
+    const hasService = items.some(
+        (line) =>
+            sellableByKey.get(line.itemKey ?? '')?.type === ProductType.SERVICE,
+    );
 
     const totalAmount = items.reduce(
         (sum, item) => sum + (item.unitPriceAmount ?? 0) * (item.quantity ?? 0),
@@ -130,6 +134,9 @@ export function useCreateSale(projectId: string) {
                 customerName: values.customerName?.trim() || undefined,
                 customerPhone: values.customerPhone?.trim() || undefined,
                 notes: values.notes?.trim() || undefined,
+                readyBy: hasService
+                    ? readyByOf(values.readyDate, values.readyTime)
+                    : undefined,
                 items: values.items.flatMap((line) => {
                     const item = sellableByKey.get(line.itemKey);
 
@@ -165,6 +172,7 @@ export function useCreateSale(projectId: string) {
         removeItem: itemsArray.remove,
         addItem,
         totalAmount,
+        hasService,
         onClientChange,
         onItemChange,
         submit,
