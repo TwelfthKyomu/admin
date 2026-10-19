@@ -69,6 +69,7 @@ export const ORDER_EVENT_LABEL: Record<OrderEventType, string> = {
     [OrderEventType.ASSIGNED_EMPLOYEE_CHANGED]: 'Изменён сотрудник',
     [OrderEventType.SCHEDULED_AT_CHANGED]: 'Изменено время',
     [OrderEventType.SHIPMENT_UPDATED]: 'Обновлена доставка',
+    [OrderEventType.SELLER_CHANGED]: 'Изменён продавец',
 };
 
 export const PAYMENT_STATUS_LABEL: Record<PaymentStatus, string> = {

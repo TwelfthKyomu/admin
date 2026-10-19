@@ -334,6 +334,24 @@ export async function completeOrder(
     return changeOrderStatus(tx, confirmed, OrderStatus.COMPLETED, event);
 }
 
+export function setOrderSeller(
+    tx: Tx,
+    order: OrderRecord,
+    sellerId: string | null,
+    byUserId: string | null,
+): Promise<OrderRecord> {
+    return writeOrderUpdate(
+        tx,
+        order,
+        { sellerId, soldAt: order.soldAt ?? new Date() },
+        {
+            type: OrderEventType.SELLER_CHANGED,
+            byUserId,
+            payload: { from: order.sellerId, to: sellerId },
+        },
+    );
+}
+
 export async function setOrderAssignedEmployee(
     tx: Tx,
     order: OrderRecord,

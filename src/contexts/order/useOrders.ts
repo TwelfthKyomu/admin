@@ -14,6 +14,7 @@ import {
     recordOrderPaymentAction,
     recordOrderRefundAction,
 } from './OrderPayment.actions';
+import { changeOrderSellerAction } from './OrderSeller.actions';
 import { dashboardAction, myDayAction } from './OrderStats.actions';
 import {
     changeOrderScheduleAction,
@@ -28,6 +29,7 @@ interface ListOptions {
     to?: Date;
     clientId?: string;
     assignedEmployeeId?: string;
+    sellerId?: string;
     search?: string;
     enabled?: boolean;
 }
@@ -47,6 +49,7 @@ const orderQueries = {
         to,
         clientId,
         assignedEmployeeId,
+        sellerId,
         search,
         enabled = true,
     }: ListOptions) =>
@@ -61,6 +64,7 @@ const orderQueries = {
                 to?.toISOString() ?? '',
                 clientId ?? '',
                 assignedEmployeeId ?? '',
+                sellerId ?? '',
                 search ?? '',
             ],
             () =>
@@ -72,6 +76,7 @@ const orderQueries = {
                     to,
                     clientId,
                     assignedEmployeeId,
+                    sellerId,
                     search,
                 }),
             { enabled: enabled && projectId.length > 0, staleTime: 15_000 },
@@ -97,6 +102,7 @@ export const useChangeOrderSchedule = makeScopedMutation(
     changeOrderScheduleAction,
 );
 export const useChangeOrderStatus = makeScopedMutation(changeOrderStatusAction);
+export const useChangeOrderSeller = makeScopedMutation(changeOrderSellerAction);
 export const useRecordOrderPayment = makeScopedMutation(
     recordOrderPaymentAction,
 );

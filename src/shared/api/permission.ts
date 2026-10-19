@@ -164,6 +164,9 @@ async function ownScope(
 const OWN_SHIFTS_ONLY =
     'Ваша роль даёт доступ только к своим сменам, но вы не числитесь сотрудником организации';
 
+const OWN_SALES_ONLY =
+    'Ваша роль даёт доступ только к своим продажам, но вы не числитесь сотрудником организации';
+
 const OWN_DELIVERIES_ONLY =
     'Ваша роль даёт доступ только к своим доставкам, но вы не числитесь сотрудником организации';
 
@@ -188,6 +191,18 @@ export function visibleShiftsEmployeeId(
         projectId,
         [Permission.MANAGE_ORDERS, Permission.VIEW_ORDERS],
         OWN_SHIFTS_ONLY,
+    );
+}
+
+export function visibleSalesEmployeeId(
+    userId: string,
+    projectId: string,
+): Promise<string | null> {
+    return ownScope(
+        userId,
+        projectId,
+        [Permission.VIEW_FINANCES],
+        OWN_SALES_ONLY,
     );
 }
 

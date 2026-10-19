@@ -1,4 +1,5 @@
 import type { EmployeeKind } from '@/contexts/employeeAssignment/EmployeeAssignment.types';
+import type { PayoutRecord } from './Payouts.table';
 
 export interface PayoutInputs {
     shiftsCount: number;
@@ -43,4 +44,11 @@ export interface PayrollRowView extends PayoutInputs, PayoutAmounts {
     paidAt: Date | null;
     paidAmount: number;
     recalculatedTotal: number | null;
+}
+
+export function payoutCovers(
+    payout: Pick<PayoutRecord, 'periodStart' | 'periodEnd'>,
+    at: Date,
+): boolean {
+    return at >= payout.periodStart && at < payout.periodEnd;
 }

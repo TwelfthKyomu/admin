@@ -6,7 +6,10 @@ import { ApplicationError } from '@/shared/api/errors';
 import { reverseCouponRedemptionsForOrder } from '@/contexts/coupon/Coupon.lib';
 import { cancelActiveDelivery } from '@/contexts/delivery/Delivery.lib';
 import { assertActiveAssignments } from '@/contexts/employeeAssignment/EmployeeAssignment.lib';
-import { lockEmployees } from '@/contexts/organizationMember/OrganizationMember.lib';
+import {
+    findMemberIdByUserId,
+    lockEmployees,
+} from '@/contexts/organizationMember/OrganizationMember.lib';
 import { applyStockReturn } from '@/contexts/stockMovement/StockMovement.lib';
 import { Permission } from '@/contexts/user/User.types';
 import {
@@ -14,6 +17,7 @@ import {
     loadOrderItems,
     lockOrder,
     setOrderAssignedEmployee,
+    setOrderSeller,
     writeOrderUpdate,
 } from './Order.lib';
 import {
@@ -21,9 +25,11 @@ import {
     ChangeOrderStatusActionInputSchema,
 } from './Order.schema';
 import {
+    confirmationSeller,
     isOrderCancelled,
     isOrderTerminal,
     OrderEventType,
+    OrderStatus,
     OrderType,
     orderRequiresSchedule,
 } from './Order.types';
@@ -33,7 +39,7 @@ export const changeOrderStatusAction = projectMutationAction(
     Permission.MANAGE_ORDERS,
 )
     .inputSchema(ChangeOrderStatusActionInputSchema)
-    .action(({ parsedInput, ctx: { userId } }) =>
+    .action(({ parsedInput, ctx: { userId, organizationId } }) =>
         db.transaction(async (tx) => {
             const order = await lockOrder(
                 tx,
@@ -47,10 +53,23 @@ export const changeOrderStatusAction = projectMutationAction(
 
             const next = parsedInput.nextStatus;
 
-            const row = await changeOrderStatus(tx, order, next, {
+            const changed = await changeOrderStatus(tx, order, next, {
                 byUserId: userId,
                 reason: parsedInput.reason?.trim() || null,
             });
+
+            const sellerId =
+                next === OrderStatus.CONFIRMED
+                    ? confirmationSeller(
+                          changed,
+                          await findMemberIdByUserId(organizationId, userId),
+                      )
+                    : changed.sellerId;
+
+            const row =
+                sellerId === changed.sellerId
+                    ? changed
+                    : await setOrderSeller(tx, changed, sellerId, userId);
 
             if (isOrderCancelled(next)) {
                 await reverseCouponRedemptionsForOrder(tx, order.id);

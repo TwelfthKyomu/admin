@@ -10,13 +10,13 @@ export function useRevenuePage() {
     const { projectId, currency } = useProject();
     const period = usePeriodParam();
     const { from, to } = period.range;
-    const mastersQuery = useEmployeeRevenue({ projectId, from, to });
+    const sellersQuery = useEmployeeRevenue({ projectId, from, to });
     const couriersQuery = useCourierStats({ projectId, from, to });
 
-    const masters = mastersQuery.data ?? [];
+    const sellers = sellersQuery.data ?? [];
     const couriers = couriersQuery.data ?? [];
 
-    const mastersTotal = masters.reduce(
+    const sellersTotal = sellers.reduce(
         (sum, row) => sum + row.revenueAmount,
         0,
     );
@@ -28,9 +28,9 @@ export function useRevenuePage() {
 
     const stats: StatItem[] = [
         {
-            label: 'Выручка мастеров',
-            value: fmtMoney(mastersTotal, currency),
-            hint: `${masters.length} в списке`,
+            label: 'Выручка продавцов',
+            value: fmtMoney(sellersTotal, currency),
+            hint: `${sellers.length} в списке`,
         },
         {
             label: 'Доставлено',
@@ -48,9 +48,9 @@ export function useRevenuePage() {
     return {
         period,
         currency,
-        mastersQuery,
+        sellersQuery,
         couriersQuery,
-        mastersTotal,
+        sellersTotal,
         delivered,
         stats,
     };

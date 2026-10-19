@@ -13,6 +13,7 @@ import {
 } from '@/contexts/order/Order.lib';
 import type { OrderItemInput } from '@/contexts/order/Order.schema';
 import {
+    OrderSource,
     OrderType,
     orderAmountDue,
     orderItemTotal,
@@ -169,6 +170,7 @@ export async function createStorefrontOrder(
                 projectId: access.projectId,
                 organizationId: access.organizationId,
                 type: OrderType.SALE,
+                source: OrderSource.STOREFRONT,
                 clientId,
                 customerName: input.customerName,
                 customerPhone: input.customerPhone ?? null,

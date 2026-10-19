@@ -2,13 +2,17 @@ import { ProductType } from '@/contexts/product/Product.types';
 import { describe, expect, it } from 'vitest';
 import type { OrderItemInput } from './Order.schema';
 import {
+    confirmationSeller,
     getNextOrderStatuses,
     inferDurationMinutes,
     isOrderCancelled,
+    maskSeller,
     ORDER_STATUS_VALUES,
     ORDER_TERMINAL_STATUSES,
+    OrderSource,
     OrderStatus,
     orderAmountDue,
+    orderRevenueShare,
     PaymentStatus,
     type ProjectRevenueView,
     recomputePaymentStatus,
@@ -278,5 +282,64 @@ describe('stockLinesFromOrderItems', () => {
             { productId: 'mug', variantId: null, quantity: 2 },
             { productId: 'tee', variantId: 'tee-red-m', quantity: 1 },
         ]);
+    });
+});
+
+describe('продавец заказа', () => {
+    it('заказ с сайта получает продавцом того, кто его подтвердил', () => {
+        expect(
+            confirmationSeller(
+                { source: OrderSource.STOREFRONT, sellerId: null },
+                'm1',
+            ),
+        ).toBe('m1');
+    });
+
+    it('продавца, который уже есть, подтверждение не меняет', () => {
+        expect(
+            confirmationSeller(
+                { source: OrderSource.STOREFRONT, sellerId: 'm2' },
+                'm1',
+            ),
+        ).toBe('m2');
+
+        expect(
+            confirmationSeller(
+                { source: OrderSource.STORE, sellerId: null },
+                'm1',
+            ),
+        ).toBeNull();
+    });
+
+    it('продавец без доступа к финансам видит только своего продавца', () => {
+        expect(maskSeller({ sellerId: 'm2' }, 'm1').sellerId).toBeNull();
+        expect(maskSeller({ sellerId: 'm1' }, 'm1').sellerId).toBe('m1');
+        expect(maskSeller({ sellerId: 'm2' }, null).sellerId).toBe('m2');
+    });
+
+    it('выручка продавца — оплаченное за вычетом возвратов, не больше суммы заказа', () => {
+        expect(
+            orderRevenueShare({
+                totalAmount: 10_000,
+                paidAmount: 10_000,
+                refundedAmount: 3_000,
+            }),
+        ).toBe(7_000);
+
+        expect(
+            orderRevenueShare({
+                totalAmount: 10_000,
+                paidAmount: 12_000,
+                refundedAmount: 0,
+            }),
+        ).toBe(10_000);
+
+        expect(
+            orderRevenueShare({
+                totalAmount: 10_000,
+                paidAmount: 2_000,
+                refundedAmount: 5_000,
+            }),
+        ).toBe(0);
     });
 });

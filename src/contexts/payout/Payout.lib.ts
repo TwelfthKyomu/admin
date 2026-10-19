@@ -8,8 +8,8 @@ import {
     employeeAssignments,
 } from '@/contexts/employeeAssignment/EmployeeAssignments.table';
 import { aggregateWorkedShiftsByEmployee } from '@/contexts/employeeShift/EmployeeShift.lib';
-import { aggregateOrderRevenueByEmployee } from '@/contexts/order/OrderStats.lib';
-import { and, desc, eq, gt, isNull, lt, or } from 'drizzle-orm';
+import { aggregateSellerRevenue } from '@/contexts/order/OrderStats.lib';
+import { and, desc, eq, gt, inArray, isNull, lt, lte, or } from 'drizzle-orm';
 import type { PayoutInputs } from './Payout.types';
 import { type PayoutRecord, payouts } from './Payouts.table';
 
@@ -77,24 +77,48 @@ export function findOverlappingPayouts(
         );
 }
 
+export function findPayoutsCovering(
+    executor: Reader,
+    input: { projectId: string; employeeIds: string[]; at: Date },
+): Promise<PayoutRecord[]> {
+    return executor
+        .select()
+        .from(payouts)
+        .where(
+            and(
+                eq(payouts.projectId, input.projectId),
+                inArray(payouts.employeeId, input.employeeIds),
+                lte(payouts.periodStart, input.at),
+                gt(payouts.periodEnd, input.at),
+            ),
+        );
+}
+
 export async function loadPayrollActivity(
     projectId: string,
     from: Date,
     to: Date,
 ): Promise<PayrollActivity> {
-    const [shifts, revenue, delivered] = await Promise.all([
+    const [shifts, sales, delivered] = await Promise.all([
         aggregateWorkedShiftsByEmployee(projectId, from, to),
-        aggregateOrderRevenueByEmployee(projectId, from, to),
+        aggregateSellerRevenue(projectId, from, to),
         aggregateDeliveredByCourier(projectId, from, to),
     ]);
 
+    const revenue = new Map<string, number>();
+
+    for (const row of sales) {
+        if (!row.sellerId) continue;
+
+        revenue.set(
+            row.sellerId,
+            (revenue.get(row.sellerId) ?? 0) + row.revenueAmount,
+        );
+    }
+
     return {
         shifts: new Map(shifts.map((row) => [row.employeeId, row.count])),
-        revenue: new Map(
-            revenue.flatMap((row) =>
-                row.employeeId ? [[row.employeeId, row.revenueAmount]] : [],
-            ),
-        ),
+        revenue,
         delivered: new Map(delivered.map((row) => [row.courierId, row.count])),
     };
 }

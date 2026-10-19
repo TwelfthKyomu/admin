@@ -6,12 +6,13 @@ import type { ProjectRecord } from '@/contexts/project/Projects.table';
 import { and, count, desc, eq, gt, gte, inArray, lt, sum } from 'drizzle-orm';
 import {
     type DashboardStatsView,
-    type EmployeeRevenueView,
     OrderStatus,
+    orderRevenueShare,
     type ProjectRevenueView,
     paidShareOf,
     type RecentOrderView,
     rollUpRevenueByCurrency,
+    type SellerRevenueRow,
     type TopOrderItemView,
 } from './Order.types';
 import { orderItems, orders } from './Orders.table';
@@ -25,22 +26,23 @@ const paidOrderColumns = {
     refundedAmount: orders.refundedAmount,
 };
 
-export async function aggregateOrderRevenueByEmployee(
+export async function aggregateSellerRevenue(
     projectId: string,
     from: Date,
     to: Date,
-): Promise<Omit<EmployeeRevenueView, 'employeeName'>[]> {
+    sellerId?: string,
+): Promise<SellerRevenueRow[]> {
     const rows = await db
         .select({
-            employeeId: orderItems.performerEmployeeId,
-            item: { totalAmount: orderItems.totalAmount },
-            order: paidOrderColumns,
+            sellerId: orders.sellerId,
+            source: orders.source,
+            ...paidOrderColumns,
         })
-        .from(orderItems)
-        .innerJoin(orders, eq(orderItems.orderId, orders.id))
+        .from(orders)
         .where(
             and(
                 eq(orders.projectId, projectId),
+                sellerId ? eq(orders.sellerId, sellerId) : undefined,
                 eq(orders.status, OrderStatus.COMPLETED),
                 gt(orders.paidAmount, 0),
                 gte(orders.completedAt, from),
@@ -48,29 +50,26 @@ export async function aggregateOrderRevenueByEmployee(
             ),
         );
 
-    const byEmployee = new Map<
-        string | null,
-        Omit<EmployeeRevenueView, 'employeeName'>
-    >();
+    const bySeller = new Map<string, SellerRevenueRow>();
 
     for (const row of rows) {
-        const current = byEmployee.get(row.employeeId) ?? {
-            employeeId: row.employeeId,
-            itemsCount: 0,
+        const key = `${row.sellerId ?? ''}:${row.source}`;
+
+        const current = bySeller.get(key) ?? {
+            sellerId: row.sellerId,
+            source: row.source,
+            ordersCount: 0,
             revenueAmount: 0,
         };
 
-        current.itemsCount += 1;
-        current.revenueAmount += paidShareOf(row.item, row.order);
-        byEmployee.set(row.employeeId, current);
+        current.ordersCount += 1;
+        current.revenueAmount += orderRevenueShare(row);
+        bySeller.set(key, current);
     }
 
-    return [...byEmployee.values()]
-        .map((row) => ({
-            ...row,
-            revenueAmount: Math.round(row.revenueAmount),
-        }))
-        .sort((a, b) => b.revenueAmount - a.revenueAmount);
+    return [...bySeller.values()].sort(
+        (a, b) => b.revenueAmount - a.revenueAmount,
+    );
 }
 
 async function aggregateRevenueByProject(

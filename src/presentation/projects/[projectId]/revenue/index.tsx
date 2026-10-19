@@ -4,18 +4,18 @@ import { PageHeader, PeriodPicker, QueryBoundary, StatsRow } from '@/shared/comp
 import { fmtMoney } from '@/shared/format/money';
 import { Table } from '@/ui/Base';
 import { KindBadge } from '../components/KindBadge';
-import { COURIER_COLUMNS, MASTER_COLUMNS } from './components/Column';
+import { COURIER_COLUMNS, SELLER_COLUMNS } from './components/Column';
 import { useRevenuePage } from './hooks/useRevenuePage';
 
 export const RevenuePage = () => {
-    const { period, currency, mastersQuery, couriersQuery, mastersTotal, delivered, stats } =
+    const { period, currency, sellersQuery, couriersQuery, sellersTotal, delivered, stats } =
         useRevenuePage();
 
     return (
         <>
             <PageHeader
                 title="Выручка по сотрудникам"
-                description="Мастера — по оплаченным позициям завершённых заказов. Курьеры — по доставкам и деньгам у двери."
+                description="Продавцы — по оплаченным выполненным заказам. Курьеры — по доставкам и деньгам у двери."
                 actions={<PeriodPicker state={period} />}
             />
             <StatsRow items={stats} />
@@ -24,18 +24,18 @@ export const RevenuePage = () => {
                 <header className="flex items-center gap-2 border-b border-border px-4 py-3 text-[13px]">
                     <KindBadge kind="specialist" />
                     <span className="text-muted-foreground">
-                        {fmtMoney(mastersTotal, currency)} за период
+                        {fmtMoney(sellersTotal, currency)} за период
                     </span>
                 </header>
                 <QueryBoundary
-                    query={mastersQuery}
-                    errorTitle="Не удалось загрузить выручку мастеров"
+                    query={sellersQuery}
+                    errorTitle="Не удалось загрузить выручку продавцов"
                 >
-                    {(masters) => (
+                    {(sellers) => (
                         <Table
-                            columns={MASTER_COLUMNS(currency, mastersTotal)}
-                            data={masters}
-                            emptyMessage="За период нет оплаченных позиций с исполнителем."
+                            columns={SELLER_COLUMNS(currency, sellersTotal)}
+                            data={sellers}
+                            emptyMessage="За период нет оплаченных выполненных заказов."
                             getRowId={(row) => row.employeeId ?? 'none'}
                         />
                     )}

@@ -5,13 +5,28 @@ import { ORDERS_LIST_LIMIT } from '@/contexts/order';
 import { Button, Input, Table } from '@/ui/Base';
 import { Download, Plus } from 'lucide-react';
 import { COLUMNS } from './components/Column';
+import { SellerFilter } from './components/SellerFilter';
 import { StatusFilter } from './components/StatusFilter';
 import { useOrdersPage } from './hooks/useOrdersPage';
 import { exportOrders } from './lib/exportOrders';
+import { ALL_SELLERS } from './lib/sellers';
 
 export const OrdersPage = () => {
-    const { query, search, setSearch, status, setStatus, onOpen, canCreateSale, onCreateSale } =
-        useOrdersPage();
+    const {
+        query,
+        search,
+        setSearch,
+        status,
+        setStatus,
+        showSeller,
+        seller,
+        setSeller,
+        sellerOptions,
+        sellerNames,
+        onOpen,
+        canCreateSale,
+        onCreateSale,
+    } = useOrdersPage();
 
     return (
         <>
@@ -26,6 +41,13 @@ export const OrdersPage = () => {
                     value={status}
                     onChange={setStatus}
                 />
+                {showSeller && (
+                    <SellerFilter
+                        value={seller}
+                        options={sellerOptions}
+                        onChange={setSeller}
+                    />
+                )}
                 <div className="ml-auto flex items-center gap-2">
                     <Button
                         variant="ghost"
@@ -53,10 +75,10 @@ export const OrdersPage = () => {
                 {(orders) => (
                     <>
                         <Table
-                            columns={COLUMNS}
+                            columns={COLUMNS({ sellerNames })}
                             data={orders}
                             emptyMessage={
-                                search || status !== 'all'
+                                search || status !== 'all' || seller !== ALL_SELLERS
                                     ? 'Под фильтр не подошёл ни один заказ.'
                                     : 'Заказов пока нет.'
                             }

@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { calcPayout } from './Payout.types';
+import { calcPayout, payoutCovers } from './Payout.types';
 
 describe('calcPayout', () => {
     it('складывает смены, процент с услуг и доставки', () => {
@@ -31,5 +31,22 @@ describe('calcPayout', () => {
         });
 
         expect(commissionPay).toBe(500);
+    });
+});
+
+describe('payoutCovers', () => {
+    const payout = {
+        periodStart: new Date('2026-10-01'),
+        periodEnd: new Date('2026-11-01'),
+    };
+
+    it('начало периода входит, конец — нет', () => {
+        expect(payoutCovers(payout, new Date('2026-10-01'))).toBe(true);
+
+        expect(payoutCovers(payout, new Date('2026-10-31T23:59:59'))).toBe(
+            true,
+        );
+
+        expect(payoutCovers(payout, new Date('2026-11-01'))).toBe(false);
     });
 });
