@@ -15,7 +15,11 @@ import {
     recordOrderRefundAction,
 } from './OrderPayment.actions';
 import { changeOrderSellerAction } from './OrderSeller.actions';
-import { dashboardAction, myDayAction } from './OrderStats.actions';
+import {
+    dashboardAction,
+    myDayAction,
+    mySalesAction,
+} from './OrderStats.actions';
 import { changeOrderStatusAction } from './OrderStatus.actions';
 
 interface ListOptions {
@@ -145,4 +149,22 @@ const myDayQueries = {
 
 export function useMyDay(opts: MyDayOptions) {
     return useQuery(myDayQueries.range(opts));
+}
+
+interface MySalesOptions {
+    dayFrom: Date;
+    monthFrom: Date;
+    to: Date;
+}
+
+const mySalesQueries = {
+    all: [...dashboardQueries.all, 'my-sales'] as const,
+    range: ({ dayFrom, monthFrom, to }: MySalesOptions) =>
+        itemQuery([...mySalesQueries.all, dayFrom.toISOString()], () =>
+            mySalesAction({ dayFrom, monthFrom, to }),
+        ),
+};
+
+export function useMySales(opts: MySalesOptions) {
+    return useQuery(mySalesQueries.range(opts));
 }

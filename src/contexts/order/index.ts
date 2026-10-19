@@ -4,9 +4,11 @@ import type {
     DashboardStatsView as ServerDashboardStatsView,
     EmployeeRevenueView as ServerEmployeeRevenueView,
     MyDayView as ServerMyDayView,
+    MySalesView as ServerMySalesView,
     OrderListView as ServerOrderListView,
     ProjectRevenueView as ServerProjectRevenueView,
     RecentOrderView as ServerRecentOrderView,
+    SalesSummaryView as ServerSalesSummaryView,
     TopOrderItemView as ServerTopOrderItemView,
 } from './Order.types';
 import type {
@@ -28,6 +30,8 @@ export type CurrencyTotalsView = NullToOptional<ServerCurrencyTotalsView>;
 export type DashboardStatsView = NullToOptional<ServerDashboardStatsView>;
 export type EmployeeRevenueView = NullToOptional<ServerEmployeeRevenueView>;
 export type MyDayView = NullToOptional<ServerMyDayView>;
+export type MySalesView = NullToOptional<ServerMySalesView>;
+export type SalesSummaryView = NullToOptional<ServerSalesSummaryView>;
 export type ProjectRevenueView = NullToOptional<ServerProjectRevenueView>;
 export type RecentOrderView = NullToOptional<ServerRecentOrderView>;
 export type TopOrderItemView = NullToOptional<ServerTopOrderItemView>;

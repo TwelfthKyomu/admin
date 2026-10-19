@@ -94,6 +94,12 @@ export const EmployeeRevenueActionInputSchema = z.object({
     to: z.coerce.date(),
 });
 
+export const MySalesActionInputSchema = z.object({
+    dayFrom: z.coerce.date(),
+    monthFrom: z.coerce.date(),
+    to: z.coerce.date(),
+});
+
 export const MyDayActionInputSchema = z.object({
     from: z.coerce.date(),
     to: z.coerce.date(),
