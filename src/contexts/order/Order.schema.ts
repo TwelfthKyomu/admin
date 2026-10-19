@@ -45,6 +45,7 @@ export const CreateOrderActionInputSchema = z.object({
     ),
     discountAmount: z.optional(moneyAmountSchema),
     notes: z.optional(z.string().check(z.maxLength(DESCRIPTION_LONG_MAX))),
+    readyBy: z.nullish(z.coerce.date()),
 });
 
 export const ChangeOrderStatusActionInputSchema = z.object({

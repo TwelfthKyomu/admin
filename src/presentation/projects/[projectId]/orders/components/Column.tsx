@@ -10,6 +10,7 @@ import { type OrderView, orderNumber } from '@/contexts/order';
 import { Badge } from '@/ui/Base';
 import { createColumnHelper } from '@tanstack/react-table';
 import { sellerLabel } from '../lib/sellers';
+import { ReadyBy } from './ReadyBy';
 
 const { display, accessor } = createColumnHelper<OrderView>();
 
@@ -55,6 +56,11 @@ export const COLUMNS = ({ sellerNames }: ColumnsProps) => [
                 {ORDER_STATUS_LABEL[getValue()]}
             </Badge>
         ),
+    }),
+    display({
+        id: 'readyBy',
+        header: 'Срок',
+        cell: ({ row: { original } }) => <ReadyBy order={original} />,
     }),
     accessor('paymentStatus', {
         header: 'Оплата',

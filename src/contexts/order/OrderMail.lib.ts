@@ -31,6 +31,7 @@ import {
     orderLines,
     paidContent,
     placedContent,
+    readyContent,
     shippedContent,
     teamDetails,
 } from './OrderMail.types';
@@ -235,5 +236,15 @@ export function mailOrderShipped(deliveryId: string): Promise<void> {
         if (!mail) return;
 
         await notifyCustomer(mail, shippedContent(mail.order, delivery));
+    });
+}
+
+export function mailOrderReady(orderId: string): Promise<void> {
+    return safely(async () => {
+        const mail = await loadMailOrder(orderId);
+
+        if (!mail) return;
+
+        await notifyCustomer(mail, readyContent(mail.order));
     });
 }

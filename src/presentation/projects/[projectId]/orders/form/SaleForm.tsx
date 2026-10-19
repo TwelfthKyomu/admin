@@ -7,11 +7,13 @@ import type { Option } from '@/shared/types';
 import { Button, FieldGroup, FieldLabel } from '@/ui/Base';
 import {
     Combobox,
+    DatePicker,
     Input,
     InputGroup,
     Money,
     requiredIntTransform,
     Textarea,
+    TimePicker,
 } from '@/ui/Controlled';
 import { Plus, Trash2 } from 'lucide-react';
 import type { CreateSaleFormValues } from './formData';
@@ -22,6 +24,7 @@ interface SaleFormProps {
     productOptions: Option[];
     itemFields: FieldArrayWithId<CreateSaleFormValues, 'items'>[];
     totalAmount: number;
+    hasService: boolean;
     addItem: () => void;
     removeItem: (index: number) => void;
     onClientChange: (clientId: string) => void;
@@ -34,6 +37,7 @@ export const SaleForm = ({
     productOptions,
     itemFields,
     totalAmount,
+    hasService,
     addItem,
     removeItem,
     onClientChange,
@@ -116,10 +120,23 @@ export const SaleForm = ({
             </div>
         </div>
 
+        {hasService && (
+            <div className="grid grid-cols-[minmax(0,1fr)_7rem] gap-3">
+                <DatePicker<CreateSaleFormValues>
+                    name="readyDate"
+                    label="Будет готово к"
+                />
+                <TimePicker<CreateSaleFormValues>
+                    name="readyTime"
+                    label="Время"
+                />
+            </div>
+        )}
+
         <Textarea
             name="notes"
             label="Заметка"
-            placeholder="Необязательно"
+            placeholder={hasService ? 'Что сломано, что сделать' : 'Необязательно'}
         />
     </FieldGroup>
 );

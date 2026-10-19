@@ -16,7 +16,7 @@ export const SaleCreateModal = ({ projectId, currency }: SaleCreateModalProps) =
     return (
         <FormDialog
             title="Новая продажа"
-            description="Заказ на товары без записи. Оплату и купон можно внести в карточке заказа."
+            description="Товары и услуги. Оплату и купон можно внести в карточке заказа."
             className="max-w-xl"
             form={form}
             onSubmit={submit}

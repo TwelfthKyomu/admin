@@ -50,6 +50,7 @@ export const orders = pgTable(
             onDelete: 'set null',
         }),
         soldAt: timestamp('sold_at'),
+        readyBy: timestamp('ready_by'),
         source: orderSourceEnum('source').notNull().default('store'),
         completedAt: timestamp('completed_at'),
         currency: currencyEnum('currency').notNull().default('RUB'),

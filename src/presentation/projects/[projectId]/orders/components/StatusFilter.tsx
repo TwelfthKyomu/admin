@@ -10,6 +10,7 @@ const VISIBLE_STATUSES: OrderStatus[] = [
     OrderStatus.PENDING,
     OrderStatus.CONFIRMED,
     OrderStatus.IN_PROGRESS,
+    OrderStatus.READY,
     OrderStatus.COMPLETED,
     OrderStatus.CANCELLED,
 ];

@@ -2,6 +2,7 @@
 
 import { useProject } from '@/app/providers';
 import { modal } from '@/shared/lib/modal';
+import { isOpenDelivery, useOrderDelivery } from '@/contexts/delivery';
 import { useProjectEmployees } from '@/contexts/employeeAssignment';
 import { type OrderView, useOrderDetail } from '@/contexts/order';
 import { Permission } from '@/contexts/user';
@@ -17,6 +18,7 @@ export function useOrderDetailPage() {
     const { projectId, can } = useProject();
     const { orderId } = useParams<{ orderId: string }>();
     const query = useOrderDetail({ id: orderId, projectId });
+    const delivery = useOrderDelivery(projectId, orderId).data;
     const canSeeSeller = can(Permission.VIEW_FINANCES);
     const employeesQuery = useProjectEmployees({ projectId, enabled: canSeeSeller });
 
@@ -40,6 +42,7 @@ export function useOrderDetailPage() {
         canFinance: can(Permission.VIEW_FINANCES),
         canManageFinance: can(Permission.MANAGE_FINANCES),
         canSeeSeller,
+        hasOpenDelivery: delivery ? isOpenDelivery(delivery.status) : false,
         sellerName: (order: OrderView) => sellerLabel(order.sellerId, sellerNames),
         onChangeSeller: canChangeSeller ? onChangeSeller : undefined,
     };
