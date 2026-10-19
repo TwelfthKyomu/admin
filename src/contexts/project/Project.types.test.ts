@@ -42,3 +42,19 @@ describe('права на деньги', () => {
         ).toBe(false);
     });
 });
+
+describe('права на заказы', () => {
+    it('продавец управляет заказами, наблюдатель только смотрит', () => {
+        expect(canInProject(ProjectRole.EDITOR, Permission.MANAGE_ORDERS)).toBe(
+            true,
+        );
+
+        expect(canInProject(ProjectRole.VIEWER, Permission.VIEW_ORDERS)).toBe(
+            true,
+        );
+
+        expect(canInProject(ProjectRole.VIEWER, Permission.MANAGE_ORDERS)).toBe(
+            false,
+        );
+    });
+});

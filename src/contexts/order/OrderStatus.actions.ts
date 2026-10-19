@@ -9,7 +9,7 @@ import { cancelActiveDelivery } from '@/contexts/delivery/Delivery.lib';
 import { assertActiveAssignments } from '@/contexts/employeeAssignment/EmployeeAssignment.lib';
 import { lockEmployees } from '@/contexts/organizationMember/OrganizationMember.lib';
 import { applyStockReturn } from '@/contexts/stockMovement/StockMovement.lib';
-import { BOOKING_PERMISSIONS } from '@/contexts/user/User.types';
+import { ORDER_PERMISSIONS } from '@/contexts/user/User.types';
 import {
     changeOrderStatus,
     loadOrderItems,
@@ -30,9 +30,7 @@ import {
 } from './Order.types';
 import { assertBookingFeasible } from './OrderBooking.lib';
 
-export const changeOrderStatusAction = projectMutationAction(
-    BOOKING_PERMISSIONS,
-)
+export const changeOrderStatusAction = projectMutationAction(ORDER_PERMISSIONS)
     .inputSchema(ChangeOrderStatusActionInputSchema)
     .action(({ parsedInput, ctx: { userId } }) =>
         db.transaction(async (tx) => {
@@ -71,7 +69,7 @@ export const changeOrderStatusAction = projectMutationAction(
     );
 
 export const changeOrderScheduleAction = projectMutationAction(
-    BOOKING_PERMISSIONS,
+    ORDER_PERMISSIONS,
 )
     .inputSchema(ChangeOrderScheduleActionInputSchema)
     .action(async ({ parsedInput, ctx: { userId } }) => {

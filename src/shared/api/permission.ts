@@ -174,7 +174,7 @@ export function ownBookingsEmployeeId(
     return ownScope(
         userId,
         projectId,
-        [Permission.MANAGE_BOOKINGS],
+        [Permission.MANAGE_ORDERS],
         OWN_BOOKINGS_ONLY,
     );
 }
@@ -186,7 +186,7 @@ export function visibleBookingsEmployeeId(
     return ownScope(
         userId,
         projectId,
-        [Permission.MANAGE_BOOKINGS, Permission.VIEW_BOOKINGS],
+        [Permission.MANAGE_ORDERS, Permission.VIEW_ORDERS],
         OWN_BOOKINGS_ONLY,
     );
 }
@@ -219,11 +219,7 @@ export async function assertFullBookingsAccess(
     userId: string,
     projectId: string,
 ): Promise<void> {
-    await requireProjectPermission(
-        userId,
-        projectId,
-        Permission.MANAGE_BOOKINGS,
-    );
+    await requireProjectPermission(userId, projectId, Permission.MANAGE_ORDERS);
 }
 
 export async function listProjectPermissions(

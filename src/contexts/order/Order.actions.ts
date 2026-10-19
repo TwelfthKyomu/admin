@@ -21,8 +21,8 @@ import {
 } from '@/contexts/organizationMember/OrganizationMember.lib';
 import { projectDefaultCurrency } from '@/contexts/project/Project.lib';
 import {
-    BOOKING_PERMISSIONS,
-    BOOKING_READ_PERMISSIONS,
+    ORDER_PERMISSIONS,
+    ORDER_READ_PERMISSIONS,
     Permission,
 } from '@/contexts/user/User.types';
 import { and, asc, desc, eq, gte, inArray, lt } from 'drizzle-orm';
@@ -51,7 +51,7 @@ import { assertBookingFeasible } from './OrderBooking.lib';
 import { aggregateOrderRevenueByEmployee } from './OrderStats.lib';
 import { orderEvents, orders } from './Orders.table';
 
-export const ordersAction = projectReadAction(BOOKING_READ_PERMISSIONS)
+export const ordersAction = projectReadAction(ORDER_READ_PERMISSIONS)
     .inputSchema(OrdersActionInputSchema)
     .action(async ({ parsedInput, ctx: { userId } }) => {
         const { projectId, ...options } = parsedInput;
@@ -105,7 +105,7 @@ export const ordersAction = projectReadAction(BOOKING_READ_PERMISSIONS)
             );
     });
 
-export const orderDetailAction = projectReadAction(BOOKING_READ_PERMISSIONS)
+export const orderDetailAction = projectReadAction(ORDER_READ_PERMISSIONS)
     .inputSchema(OrderDetailActionInputSchema)
     .action(async ({ parsedInput: { id, projectId }, ctx: { userId } }) => {
         const [order, ownEmployeeId, items, events, couponCode] =
@@ -145,7 +145,7 @@ export const employeeRevenueAction = projectReadAction(Permission.VIEW_FINANCES)
         }));
     });
 
-export const createOrderAction = projectMutationAction(BOOKING_PERMISSIONS)
+export const createOrderAction = projectMutationAction(ORDER_PERMISSIONS)
     .inputSchema(CreateOrderActionInputSchema)
     .action(async ({ parsedInput, ctx: { userId, organizationId } }) => {
         const { projectId } = parsedInput;

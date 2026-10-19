@@ -14,8 +14,8 @@ import {
 } from '@/shared/api/repository';
 import { orders } from '@/contexts/order/Orders.table';
 import {
-    BOOKING_PERMISSIONS,
     CLIENT_READ_PERMISSIONS,
+    ORDER_PERMISSIONS,
     Permission,
 } from '@/contexts/user/User.types';
 import { and, desc, eq, inArray } from 'drizzle-orm';
@@ -127,7 +127,7 @@ async function assertEmailFree(
     });
 }
 
-export const createClientAction = projectMutationAction(BOOKING_PERMISSIONS)
+export const createClientAction = projectMutationAction(ORDER_PERMISSIONS)
     .inputSchema(CreateClientActionInputSchema)
     .action(async ({ parsedInput }) => {
         const values = clientValues(parsedInput);
@@ -144,7 +144,7 @@ export const createClientAction = projectMutationAction(BOOKING_PERMISSIONS)
     });
 
 export const updateClientAction = projectMutationAction(
-    Permission.MANAGE_BOOKINGS,
+    Permission.MANAGE_ORDERS,
 )
     .inputSchema(UpdateClientActionInputSchema)
     .action(async ({ parsedInput }) => {

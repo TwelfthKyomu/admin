@@ -29,7 +29,7 @@ export interface OwnShiftRow extends EmployeeShiftView {
 
 export function useReplacementsPage() {
     const { projectId, currency, can } = useProject();
-    const canAssign = can(Permission.MANAGE_BOOKINGS);
+    const canAssign = can(Permission.MANAGE_ORDERS);
     const { kind, setKind, matches } = useKindParam();
 
     const query = useReplacementShifts(projectId);

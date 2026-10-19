@@ -59,7 +59,7 @@ export const projectEmployeesAction = projectReadAction(
     );
 
 export const updateAssignmentAction = projectMutationAction(
-    Permission.MANAGE_BOOKINGS,
+    Permission.MANAGE_ORDERS,
 )
     .inputSchema(UpdateAssignmentActionInputSchema)
     .action(async ({ parsedInput }) => {
