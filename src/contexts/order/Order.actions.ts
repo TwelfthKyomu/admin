@@ -6,12 +6,14 @@ import {
     projectReadAction,
 } from '@/shared/api/action-client';
 import { ApplicationError } from '@/shared/api/errors';
+import { visibleSalesEmployeeId } from '@/shared/api/permission';
 import { searchFilters } from '@/shared/api/repository';
 import { DURATION_MINUTES_MAX } from '@/shared/constants/default';
 import { findClientInProject } from '@/contexts/client/Client.lib';
 import { findOrderCouponCode } from '@/contexts/coupon/Coupon.lib';
 import { assertActiveAssignments } from '@/contexts/employeeAssignment/EmployeeAssignment.lib';
 import {
+    findMemberIdByUserId,
     lockEmployees,
     memberNamesByIds,
 } from '@/contexts/organizationMember/OrganizationMember.lib';
@@ -33,6 +35,7 @@ import {
 import {
     type EmployeeRevenueView,
     inferDurationMinutes,
+    maskSeller,
     ORDERS_LIST_LIMIT,
     ORDERS_RANGE_LIMIT,
     OrderType,
@@ -40,14 +43,14 @@ import {
     sumOrderItems,
 } from './Order.types';
 import { assertBookingFeasible } from './OrderBooking.lib';
-import { aggregateOrderRevenueByEmployee } from './OrderStats.lib';
+import { aggregateSellerRevenue } from './OrderStats.lib';
 import { orderEvents, orders } from './Orders.table';
 
 export const ordersAction = projectReadAction(ORDER_READ_PERMISSIONS)
     .inputSchema(OrdersActionInputSchema)
-    .action(async ({ parsedInput }) => {
+    .action(async ({ parsedInput, ctx: { userId } }) => {
         const { projectId, ...options } = parsedInput;
-
+        const ownEmployeeId = await visibleSalesEmployeeId(userId, projectId);
         const filters = [eq(orders.projectId, projectId)];
 
         if (options.types && options.types.length > 0) {
@@ -66,6 +69,9 @@ export const ordersAction = projectReadAction(ORDER_READ_PERMISSIONS)
                 eq(orders.assignedEmployeeId, options.assignedEmployeeId),
             );
         }
+        if (options.sellerId && !ownEmployeeId) {
+            filters.push(eq(orders.sellerId, options.sellerId));
+        }
 
         filters.push(
             ...searchFilters(options.search, [
@@ -77,7 +83,7 @@ export const ordersAction = projectReadAction(ORDER_READ_PERMISSIONS)
             ]),
         );
 
-        return db
+        const rows = await db
             .select()
             .from(orders)
             .where(and(...filters))
@@ -87,40 +93,62 @@ export const ordersAction = projectReadAction(ORDER_READ_PERMISSIONS)
                     ? ORDERS_RANGE_LIMIT
                     : ORDERS_LIST_LIMIT,
             );
+
+        return rows.map((order) => maskSeller(order, ownEmployeeId));
     });
 
 export const orderDetailAction = projectReadAction(ORDER_READ_PERMISSIONS)
     .inputSchema(OrderDetailActionInputSchema)
-    .action(async ({ parsedInput: { id, projectId } }) => {
-        const [order, items, events, couponCode] = await Promise.all([
-            findOrderInProject(id, projectId),
-            loadOrderItems(id),
-            db
-                .select()
-                .from(orderEvents)
-                .where(eq(orderEvents.orderId, id))
-                .orderBy(asc(orderEvents.createdAt)),
-            findOrderCouponCode(id),
-        ]);
+    .action(async ({ parsedInput: { id, projectId }, ctx: { userId } }) => {
+        const [order, ownEmployeeId, items, events, couponCode] =
+            await Promise.all([
+                findOrderInProject(id, projectId),
+                visibleSalesEmployeeId(userId, projectId),
+                loadOrderItems(id),
+                db
+                    .select()
+                    .from(orderEvents)
+                    .where(eq(orderEvents.orderId, id))
+                    .orderBy(asc(orderEvents.createdAt)),
+                findOrderCouponCode(id),
+            ]);
 
-        return { order, items, events, couponCode };
+        return {
+            order: maskSeller(order, ownEmployeeId),
+            items,
+            events,
+            couponCode,
+        };
     });
 
 export const employeeRevenueAction = projectReadAction(Permission.VIEW_FINANCES)
     .inputSchema(EmployeeRevenueActionInputSchema)
     .action(async ({ parsedInput: { projectId, from, to } }) => {
-        const rows = await aggregateOrderRevenueByEmployee(projectId, from, to);
+        const rows = await aggregateSellerRevenue(projectId, from, to);
+        const bySeller = new Map<string | null, EmployeeRevenueView>();
 
         const nameById = await memberNamesByIds(
-            rows.map((row) => row.employeeId).filter((id) => id !== null),
+            rows.map((row) => row.sellerId).filter((id) => id !== null),
         );
 
-        return rows.map<EmployeeRevenueView>((row) => ({
-            ...row,
-            employeeName: row.employeeId
-                ? (nameById.get(row.employeeId) ?? 'Удалённый сотрудник')
-                : 'Без исполнителя',
-        }));
+        for (const row of rows) {
+            const current = bySeller.get(row.sellerId) ?? {
+                employeeId: row.sellerId,
+                employeeName: row.sellerId
+                    ? (nameById.get(row.sellerId) ?? 'Удалённый сотрудник')
+                    : 'Без продавца',
+                ordersCount: 0,
+                revenueAmount: 0,
+            };
+
+            current.ordersCount += row.ordersCount;
+            current.revenueAmount += row.revenueAmount;
+            bySeller.set(row.sellerId, current);
+        }
+
+        return [...bySeller.values()].sort(
+            (a, b) => b.revenueAmount - a.revenueAmount,
+        );
     });
 
 export const createOrderAction = projectMutationAction(Permission.MANAGE_ORDERS)
@@ -146,8 +174,9 @@ export const createOrderAction = projectMutationAction(Permission.MANAGE_ORDERS)
             throw new ApplicationError('Для записи нужен исполнитель');
         }
 
-        const [currency] = await Promise.all([
+        const [currency, sellerId] = await Promise.all([
             parsedInput.currency ?? projectDefaultCurrency(projectId),
+            findMemberIdByUserId(organizationId, userId),
             parsedInput.clientId
                 ? findClientInProject(parsedInput.clientId, projectId)
                 : null,
@@ -215,6 +244,8 @@ export const createOrderAction = projectMutationAction(Permission.MANAGE_ORDERS)
                     assignedEmployeeId,
                     scheduledAt,
                     durationMinutes,
+                    sellerId,
+                    soldAt: new Date(),
                     currency,
                     subtotalAmount,
                     discountAmount,

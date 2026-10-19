@@ -48,3 +48,11 @@ export const OnlinePaymentFormSchema = z.object({
 });
 
 export type OnlinePaymentFormValues = z.input<typeof OnlinePaymentFormSchema>;
+
+export const NO_SELLER = '__none__';
+
+export const OrderSellerFormSchema = z.object({
+    sellerId: z.string(),
+});
+
+export type OrderSellerFormValues = z.input<typeof OrderSellerFormSchema>;

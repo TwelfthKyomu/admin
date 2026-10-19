@@ -5,15 +5,15 @@ import type { CourierStatsView } from '@/contexts/delivery';
 import type { EmployeeRevenueView } from '@/contexts/order';
 import { createColumnHelper } from '@tanstack/react-table';
 
-const masters = createColumnHelper<EmployeeRevenueView>();
+const sellers = createColumnHelper<EmployeeRevenueView>();
 
-export const MASTER_COLUMNS = (currency: Currency, total: number) => [
-    masters.display({
+export const SELLER_COLUMNS = (currency: Currency, total: number) => [
+    sellers.display({
         id: 'employee',
-        header: 'Сотрудник',
+        header: 'Продавец',
         cell: ({ row: { original } }) => <PersonCell name={original.employeeName} />,
     }),
-    masters.display({
+    sellers.display({
         id: 'share',
         header: 'Доля выручки',
         cell: ({ row: { original } }) => {
@@ -34,19 +34,19 @@ export const MASTER_COLUMNS = (currency: Currency, total: number) => [
             );
         },
     }),
-    masters.accessor('itemsCount', {
-        header: 'Позиций',
+    sellers.accessor('ordersCount', {
+        header: 'Заказов',
     }),
-    masters.accessor('revenueAmount', {
+    sellers.accessor('revenueAmount', {
         header: 'Выручка',
         cell: ({ getValue }) => fmtMoney(getValue(), currency),
     }),
-    masters.display({
+    sellers.display({
         id: 'average',
-        header: 'В среднем за позицию',
+        header: 'Средний чек',
         cell: ({ row: { original } }) =>
-            original.itemsCount > 0
-                ? fmtMoney(Math.round(original.revenueAmount / original.itemsCount), currency)
+            original.ordersCount > 0
+                ? fmtMoney(Math.round(original.revenueAmount / original.ordersCount), currency)
                 : '—',
     }),
 ];

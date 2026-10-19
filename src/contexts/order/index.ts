@@ -19,6 +19,7 @@ export * from './Order.actions';
 export * from './Order.schema';
 export * from './Order.types';
 export * from './OrderPayment.actions';
+export * from './OrderSeller.actions';
 export * from './OrderStats.actions';
 export * from './OrderStatus.actions';
 export * from './useOrders';

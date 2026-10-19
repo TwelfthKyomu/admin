@@ -7,6 +7,7 @@ import { createdAt, id } from '@/infrastructure/database/columns';
 import {
     currencyEnum,
     orderEventTypeEnum,
+    orderSourceEnum,
     orderStatusEnum,
     orderTypeEnum,
     paymentStatusEnum,
@@ -57,6 +58,11 @@ export const orders = pgTable(
                 onDelete: 'set null',
             },
         ),
+        sellerId: text('seller_id').references(() => organizationMembers.id, {
+            onDelete: 'set null',
+        }),
+        soldAt: timestamp('sold_at'),
+        source: orderSourceEnum('source').notNull().default('store'),
         scheduledAt: timestamp('scheduled_at'),
         durationMinutes: integer('duration_minutes'),
         completedAt: timestamp('completed_at'),
@@ -119,6 +125,15 @@ export const orders = pgTable(
             name: 'orders_employee_org_fk',
         }),
 
+        foreignKey({
+            columns: [t.sellerId, t.organizationId],
+            foreignColumns: [
+                organizationMembers.id,
+                organizationMembers.organizationId,
+            ],
+            name: 'orders_seller_org_fk',
+        }),
+
         index('orders_project_status_idx').on(t.projectId, t.status),
         index('orders_project_scheduled_idx').on(t.projectId, t.scheduledAt),
         index('orders_project_created_idx').on(t.projectId, t.createdAt),
@@ -127,6 +142,8 @@ export const orders = pgTable(
             t.scheduledAt,
         ),
         index('orders_client_idx').on(t.clientId),
+        index('orders_seller_sold_idx').on(t.sellerId, t.soldAt),
+        index('orders_project_sold_idx').on(t.projectId, t.soldAt),
     ],
 );
 

@@ -17,6 +17,7 @@ import {
 import { INTEGRATION_TYPE_VALUES } from '@/contexts/integration/Integration.types';
 import {
     ORDER_EVENT_TYPE_VALUES,
+    ORDER_SOURCE_VALUES,
     ORDER_STATUS_VALUES,
     ORDER_TYPE_VALUES,
     PAYMENT_STATUS_VALUES,
@@ -115,6 +116,8 @@ export const shiftCancelReasonEnum = pgEnum(
 );
 
 export const orderTypeEnum = pgEnum('order_type', ORDER_TYPE_VALUES);
+
+export const orderSourceEnum = pgEnum('order_source', ORDER_SOURCE_VALUES);
 
 export const orderStatusEnum = pgEnum('order_status', ORDER_STATUS_VALUES);
 

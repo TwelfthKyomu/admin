@@ -21,6 +21,15 @@ export type OrderType = (typeof OrderType)[keyof typeof OrderType];
 
 export const ORDER_TYPE_VALUES = enumValues(OrderType);
 
+export const OrderSource = {
+    STORE: 'store',
+    STOREFRONT: 'storefront',
+} as const;
+
+export type OrderSource = (typeof OrderSource)[keyof typeof OrderSource];
+
+export const ORDER_SOURCE_VALUES = enumValues(OrderSource);
+
 export const OrderStatus = {
     PENDING: 'pending',
     CONFIRMED: 'confirmed',
@@ -158,6 +167,30 @@ function orderNetPaid(money: OrderMoney): number {
     return Math.max(money.paidAmount - money.refundedAmount, 0);
 }
 
+export function orderRevenueShare(money: OrderMoney): number {
+    return Math.min(orderNetPaid(money), money.totalAmount);
+}
+
+export function confirmationSeller(
+    order: Pick<OrderRecord, 'source' | 'sellerId'>,
+    confirmerId: string | null,
+): string | null {
+    if (order.sellerId || order.source !== OrderSource.STOREFRONT) {
+        return order.sellerId;
+    }
+
+    return confirmerId;
+}
+
+export function maskSeller<T extends Pick<OrderRecord, 'sellerId'>>(
+    order: T,
+    ownEmployeeId: string | null,
+): T {
+    if (!ownEmployeeId || order.sellerId === ownEmployeeId) return order;
+
+    return { ...order, sellerId: null };
+}
+
 export function paidShareOf(
     item: Pick<OrderItemRecord, 'totalAmount'>,
     order: OrderMoney & Pick<OrderRecord, 'subtotalAmount'>,
@@ -226,6 +259,7 @@ export const OrderEventType = {
     ASSIGNED_EMPLOYEE_CHANGED: 'assigned_employee_changed',
     SCHEDULED_AT_CHANGED: 'scheduled_at_changed',
     SHIPMENT_UPDATED: 'shipment_updated',
+    SELLER_CHANGED: 'seller_changed',
 } as const;
 
 export type OrderEventType =
@@ -320,7 +354,14 @@ export function rollUpRevenueByCurrency(
 export interface EmployeeRevenueView {
     employeeId: string | null;
     employeeName: string;
-    itemsCount: number;
+    ordersCount: number;
+    revenueAmount: number;
+}
+
+export interface SellerRevenueRow {
+    sellerId: string | null;
+    source: OrderSource;
+    ordersCount: number;
     revenueAmount: number;
 }
 

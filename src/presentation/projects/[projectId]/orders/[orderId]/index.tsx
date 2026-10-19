@@ -14,11 +14,21 @@ import { DeliverySection } from './components/Delivery';
 import { HistorySection } from './components/HistorySection';
 import { ItemsSection } from './components/ItemsSection';
 import { PaymentsSection } from './components/Payments';
+import { SellerSection } from './components/SellerSection';
 import { StatusSection } from './components/StatusSection';
 import { useOrderDetailPage } from './hooks/useOrderDetailPage';
 
 export const OrderDetailPage = () => {
-    const { query, projectId, canEdit, canFinance, canManageFinance } = useOrderDetailPage();
+    const {
+        query,
+        projectId,
+        canEdit,
+        canFinance,
+        canManageFinance,
+        canSeeSeller,
+        sellerName,
+        onChangeSeller,
+    } = useOrderDetailPage();
 
     return (
         <QueryBoundary
@@ -72,6 +82,12 @@ export const OrderDetailPage = () => {
                                 order={order}
                                 projectId={projectId}
                             />
+                            {canSeeSeller && (
+                                <SellerSection
+                                    name={sellerName(order)}
+                                    onChange={onChangeSeller && (() => onChangeSeller(order))}
+                                />
+                            )}
                             <CustomerSection order={order} />
                         </div>
                         <HistorySection

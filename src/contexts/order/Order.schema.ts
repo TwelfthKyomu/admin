@@ -74,6 +74,12 @@ export const ChangeOrderStatusActionInputSchema = z.object({
     reason: z.optional(z.string().check(z.maxLength(REASON_MAX))),
 });
 
+export const ChangeOrderSellerActionInputSchema = z.object({
+    id: idSchema,
+    projectId: idSchema,
+    sellerId: z.nullable(idSchema),
+});
+
 export const RecordOrderPaymentActionInputSchema = z.object({
     id: idSchema,
     projectId: idSchema,
@@ -98,6 +104,7 @@ export const OrdersActionInputSchema = z.object({
     to: z.optional(z.coerce.date()),
     clientId: z.optional(idSchema),
     assignedEmployeeId: z.optional(idSchema),
+    sellerId: z.optional(idSchema),
 });
 
 export const OrderDetailActionInputSchema = entityInProjectSchema;

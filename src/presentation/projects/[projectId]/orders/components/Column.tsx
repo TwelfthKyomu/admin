@@ -10,10 +10,15 @@ import {
 import { type OrderView, orderNumber } from '@/contexts/order';
 import { Badge } from '@/ui/Base';
 import { createColumnHelper } from '@tanstack/react-table';
+import { sellerLabel } from '../lib/sellers';
 
 const { display, accessor } = createColumnHelper<OrderView>();
 
-export const COLUMNS = [
+interface ColumnsProps {
+    sellerNames?: Map<string, string>;
+}
+
+export const COLUMNS = ({ sellerNames }: ColumnsProps) => [
     display({
         id: 'number',
         header: '№',
@@ -39,6 +44,15 @@ export const COLUMNS = [
         header: 'Тип',
         cell: ({ getValue }) => ORDER_TYPE_LABEL[getValue()],
     }),
+    ...(sellerNames
+        ? [
+              display({
+                  id: 'seller',
+                  header: 'Продавец',
+                  cell: ({ row: { original } }) => sellerLabel(original.sellerId, sellerNames),
+              }),
+          ]
+        : []),
     accessor('status', {
         header: 'Статус',
         cell: ({ getValue }) => (
