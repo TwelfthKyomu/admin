@@ -5,6 +5,7 @@ import { fmtDateRu } from '@/shared/format/date';
 import { Sun } from 'lucide-react';
 import { Agenda } from './components/Agenda';
 import { MyDeliveries } from './components/MyDeliveries';
+import { MySales } from './components/MySales';
 import { MyTasks } from './components/MyTasks';
 import { RecentOrders } from './components/RecentOrders';
 import { Summary } from './components/Summary';
@@ -13,7 +14,7 @@ import { useDashboardPage } from './hooks/useDashboardPage';
 import { agendaItems } from './lib/myDay';
 
 export const DashboardPage = () => {
-    const { today, projectById, myDay, finance } = useDashboardPage();
+    const { today, projectById, myDay, mySales, finance } = useDashboardPage();
 
     return (
         <QueryBoundary
@@ -39,6 +40,12 @@ export const DashboardPage = () => {
                             tasks={day.tasks}
                             today={today}
                         />
+                        {mySales.length > 0 && (
+                            <MySales
+                                sales={mySales}
+                                projectById={projectById}
+                            />
+                        )}
                         {day.deliveries.length > 0 && (
                             <MyDeliveries
                                 deliveries={day.deliveries}

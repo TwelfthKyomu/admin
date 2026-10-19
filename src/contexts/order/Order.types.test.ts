@@ -23,6 +23,7 @@ import {
     rollUpRevenueByCurrency,
     salesTotal,
     stockLinesFromOrderItems,
+    summarizeSales,
     sumOrderItems,
 } from './Order.types';
 
@@ -448,5 +449,35 @@ describe('письмо «Готово»', () => {
         ).toEqual([
             `К оплате при получении: ${fmtMoney(1_000, DEFAULT_CURRENCY)}`,
         ]);
+    });
+});
+
+describe('summarizeSales', () => {
+    it('складывает продажи и считает заработок по ставкам, как зарплата', () => {
+        expect(
+            summarizeSales(
+                [
+                    {
+                        sellerId: 'm1',
+                        source: OrderSource.STORE,
+                        ordersCount: 3,
+                        revenueAmount: 10_000,
+                    },
+                    {
+                        sellerId: 'm1',
+                        source: OrderSource.STOREFRONT,
+                        ordersCount: 1,
+                        revenueAmount: 1_001,
+                    },
+                ],
+                { commissionRate: 10, siteCommissionRate: 50 },
+            ),
+        ).toEqual({
+            ordersCount: 4,
+            storeRevenue: 10_000,
+            siteRevenue: 1_001,
+            storeEarned: 1_000,
+            siteEarned: 500,
+        });
     });
 });

@@ -111,6 +111,20 @@ export async function findActiveAssignment(
     return assignment ?? null;
 }
 
+export function findActiveAssignmentsOfEmployee(
+    employeeId: string,
+): Promise<EmployeeAssignmentRecord[]> {
+    return db
+        .select()
+        .from(employeeAssignments)
+        .where(
+            and(
+                eq(employeeAssignments.employeeId, employeeId),
+                isNull(employeeAssignments.endedAt),
+            ),
+        );
+}
+
 export async function assertActiveAssignments(
     projectId: string,
     employeeIds: (string | null | undefined)[],

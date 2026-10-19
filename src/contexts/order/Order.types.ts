@@ -4,6 +4,7 @@ import { fmtMoney } from '@/shared/format/money';
 import { enumValues } from '@/shared/lib/enum';
 import type { MyDeliveryView } from '@/contexts/delivery/Delivery.types';
 import type { MyShiftView } from '@/contexts/employeeShift/EmployeeShift.types';
+import { commissionOf } from '@/contexts/payout/Payout.types';
 import { ProductType } from '@/contexts/product/Product.types';
 import type { ProjectRecord } from '@/contexts/project/Projects.table';
 import type { StockLine } from '@/contexts/stockMovement/StockMovement.types';
@@ -353,6 +354,21 @@ export interface EmployeeRevenueView {
 
 export type OrderListView = OrderRecord & { itemsCount: number };
 
+export interface SalesSummaryView {
+    ordersCount: number;
+    storeRevenue: number;
+    siteRevenue: number;
+    storeEarned: number;
+    siteEarned: number;
+}
+
+export interface MySalesView {
+    projectId: string;
+    currency: Currency;
+    today: SalesSummaryView;
+    month: SalesSummaryView;
+}
+
 export interface SellerRevenueRow {
     sellerId: string | null;
     source: OrderSource;
@@ -389,4 +405,25 @@ export function isScheduledSale(order: {
 
 export function salesTotal(orders: Pick<OrderRecord, 'totalAmount'>[]): number {
     return orders.reduce((sum, order) => sum + order.totalAmount, 0);
+}
+
+export function summarizeSales(
+    rows: SellerRevenueRow[],
+    rates: { commissionRate: number; siteCommissionRate: number },
+): SalesSummaryView {
+    const revenueOf = (source: OrderSource) =>
+        rows
+            .filter((row) => row.source === source)
+            .reduce((sum, row) => sum + row.revenueAmount, 0);
+
+    const storeRevenue = revenueOf(OrderSource.STORE);
+    const siteRevenue = revenueOf(OrderSource.STOREFRONT);
+
+    return {
+        ordersCount: rows.reduce((sum, row) => sum + row.ordersCount, 0),
+        storeRevenue,
+        siteRevenue,
+        storeEarned: commissionOf(storeRevenue, rates.commissionRate),
+        siteEarned: commissionOf(siteRevenue, rates.siteCommissionRate),
+    };
 }

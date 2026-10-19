@@ -2,8 +2,8 @@
 
 import { useState } from 'react';
 import { useStaticData } from '@/app/providers';
-import { useDashboard, useMyDay } from '@/contexts/order';
-import { addDays, startOfDay } from 'date-fns';
+import { useDashboard, useMyDay, useMySales } from '@/contexts/order';
+import { addDays, startOfDay, startOfMonth } from 'date-fns';
 
 export function useDashboardPage() {
     const { projects = [] } = useStaticData();
@@ -15,6 +15,13 @@ export function useDashboardPage() {
     });
 
     const myDay = useMyDay(range);
+
+    const mySales = useMySales({
+        dayFrom: range.from,
+        monthFrom: startOfMonth(range.from),
+        to: range.to,
+    });
+
     const dashboard = useDashboard();
 
     const finance =
@@ -26,6 +33,7 @@ export function useDashboardPage() {
         today: range.from,
         projectById: new Map(projects.map((project) => [project.id, project])),
         myDay,
+        mySales: mySales.data ?? [],
         finance,
     };
 }
