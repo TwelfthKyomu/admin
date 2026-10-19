@@ -12,7 +12,6 @@ const VISIBLE_STATUSES: OrderStatus[] = [
     OrderStatus.IN_PROGRESS,
     OrderStatus.COMPLETED,
     OrderStatus.CANCELLED,
-    OrderStatus.NO_SHOW,
 ];
 
 const STATUS_TABS: TabItem<StatusFilterValue>[] = [

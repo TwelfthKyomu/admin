@@ -17,22 +17,20 @@ export const Agenda = ({ items, projectById }: AgendaProps) => {
             padding="md"
             className="gap-3"
         >
-            <WidgetHeader icon={<CalendarClock className="size-4" />}>
-                Сегодня — смены и записи
-            </WidgetHeader>
+            <WidgetHeader icon={<CalendarClock className="size-4" />}>Сегодня — смены</WidgetHeader>
             <WidgetBody>
                 {items.length === 0 ? (
                     <EmptyState
                         icon={CalendarClock}
                         title="На сегодня ничего не назначено"
-                        description="Смены и записи клиентов к вам появятся здесь, как только их поставят в расписание."
+                        description="Ваши смены появятся здесь, как только их поставят в расписание."
                         className="py-6"
                     />
                 ) : (
                     <ol className="flex flex-col">
                         {items.map((item) => (
                             <AgendaRow
-                                key={`${item.kind}:${item.id}`}
+                                key={item.id}
                                 item={item}
                                 project={projectById.get(item.projectId)}
                                 now={now}

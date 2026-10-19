@@ -3,7 +3,6 @@ import { fmtMoney } from '@/shared/format/money';
 import {
     ORDER_STATUS_LABEL,
     ORDER_STATUS_VARIANT,
-    ORDER_TYPE_LABEL,
     PAYMENT_STATUS_LABEL,
     PAYMENT_STATUS_VARIANT,
 } from '@/shared/labels/order';
@@ -29,7 +28,7 @@ export const COLUMNS = ({ sellerNames }: ColumnsProps) => [
     display({
         id: 'date',
         header: 'Дата',
-        cell: ({ row: { original } }) => fmtDateTime(original.scheduledAt ?? original.createdAt),
+        cell: ({ row: { original } }) => fmtDateTime(original.createdAt),
     }),
     accessor('customerName', {
         header: 'Клиент',
@@ -39,10 +38,6 @@ export const COLUMNS = ({ sellerNames }: ColumnsProps) => [
                 {original.customerPhone && <div>{original.customerPhone}</div>}
             </div>
         ),
-    }),
-    accessor('type', {
-        header: 'Тип',
-        cell: ({ getValue }) => ORDER_TYPE_LABEL[getValue()],
     }),
     ...(sellerNames
         ? [

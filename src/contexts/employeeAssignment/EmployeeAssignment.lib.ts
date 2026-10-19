@@ -15,12 +15,9 @@ import {
     WORKING_SHIFT_STATUSES,
 } from '@/contexts/employeeShift/EmployeeShift.types';
 import { employeeShifts } from '@/contexts/employeeShift/EmployeeShifts.table';
-import { ORDER_ACTIVE_STATUSES } from '@/contexts/order/Order.types';
-import { orders } from '@/contexts/order/Orders.table';
 import { findMemberIdByUserId } from '@/contexts/organizationMember/OrganizationMember.lib';
 import { OrganizationRole } from '@/contexts/organizationMember/OrganizationMember.types';
 import { organizationMembers } from '@/contexts/organizationMember/OrganizationMembers.table';
-import { productPerformers } from '@/contexts/product/Products.table';
 import { ProjectRole } from '@/contexts/project/Project.types';
 import { findActiveProjectMember } from '@/contexts/projectMember/ProjectMember.lib';
 import { projectMembers } from '@/contexts/projectMember/ProjectMembers.table';
@@ -43,7 +40,6 @@ import {
     EmployeeKind,
     type ProjectEmployeeTodayView,
     type ProjectEmployeeView,
-    UNBOOKABLE_PROJECT_ROLES,
 } from './EmployeeAssignment.types';
 import {
     type EmployeeAssignmentRecord,
@@ -56,15 +52,11 @@ function kindForRole(role: ProjectRole | null): EmployeeKind {
         : EmployeeKind.SPECIALIST;
 }
 
-function bookableForRole(role: ProjectRole | null): boolean {
-    return !role || !UNBOOKABLE_PROJECT_ROLES.has(role);
-}
-
 async function resolvePosition(input: {
     organizationId: string;
     projectId: string;
     userId: string;
-}): Promise<{ position: string; kind: EmployeeKind; isBookable: boolean }> {
+}): Promise<{ position: string; kind: EmployeeKind }> {
     const projectMember = await findActiveProjectMember(
         input.projectId,
         input.userId,
@@ -74,7 +66,6 @@ async function resolvePosition(input: {
         return {
             position: PROJECT_ROLE_LABEL[projectMember.role],
             kind: kindForRole(projectMember.role),
-            isBookable: bookableForRole(projectMember.role),
         };
     }
 
@@ -94,7 +85,6 @@ async function resolvePosition(input: {
         position:
             ORGANIZATION_ROLE_LABEL[member?.role ?? OrganizationRole.MEMBER],
         kind: EmployeeKind.SPECIALIST,
-        isBookable: true,
     };
 }
 
@@ -102,15 +92,11 @@ export async function findActiveAssignment(
     employeeId: string,
     projectId: string,
     executor: Reader = db,
-): Promise<Pick<
-    EmployeeAssignmentRecord,
-    'id' | 'kind' | 'isBookable'
-> | null> {
+): Promise<Pick<EmployeeAssignmentRecord, 'id' | 'kind'> | null> {
     const [assignment] = await executor
         .select({
             id: employeeAssignments.id,
             kind: employeeAssignments.kind,
-            isBookable: employeeAssignments.isBookable,
         })
         .from(employeeAssignments)
         .where(
@@ -166,7 +152,7 @@ export async function ensureEmployeeAssigned(input: {
     if (!employeeId) return;
     if (await findActiveAssignment(employeeId, input.projectId)) return;
 
-    const { position, kind, isBookable } = await resolvePosition(input);
+    const { position, kind } = await resolvePosition(input);
 
     await db.insert(employeeAssignments).values({
         employeeId,
@@ -174,7 +160,6 @@ export async function ensureEmployeeAssigned(input: {
         organizationId: input.organizationId,
         position,
         kind,
-        isBookable,
     });
 }
 
@@ -190,12 +175,7 @@ export async function syncAssignmentKindWithRole(
 ): Promise<void> {
     const after = kindForRole(input.to);
 
-    if (
-        kindForRole(input.from) === after &&
-        bookableForRole(input.from) === bookableForRole(input.to)
-    ) {
-        return;
-    }
+    if (kindForRole(input.from) === after) return;
 
     const employeeId = await findMemberIdByUserId(
         input.organizationId,
@@ -208,7 +188,6 @@ export async function syncAssignmentKindWithRole(
         .update(employeeAssignments)
         .set({
             kind: after,
-            isBookable: bookableForRole(input.to),
             position: PROJECT_ROLE_LABEL[input.to],
         })
         .where(
@@ -332,7 +311,6 @@ export async function listProjectEmployees(
         image: row.image,
         position: assignment.position,
         kind: assignment.kind,
-        isBookable: assignment.isBookable,
         endedAt: assignment.endedAt,
         metadata: assignment.metadata,
         projectRole: row.projectRole,
@@ -355,7 +333,7 @@ export async function assertNoOpenWork(
 ): Promise<void> {
     const { employeeId, projectId } = input;
 
-    const [[shifts], [bookings], [deliveryRows]] = await Promise.all([
+    const [[shifts], [deliveryRows]] = await Promise.all([
         executor
             .select({ value: count() })
             .from(employeeShifts)
@@ -367,16 +345,6 @@ export async function assertNoOpenWork(
                         : undefined,
                     inArray(employeeShifts.status, OPEN_SHIFT_STATUSES),
                     gt(employeeShifts.endsAt, new Date()),
-                ),
-            ),
-        executor
-            .select({ value: count() })
-            .from(orders)
-            .where(
-                and(
-                    eq(orders.assignedEmployeeId, employeeId),
-                    projectId ? eq(orders.projectId, projectId) : undefined,
-                    inArray(orders.status, ORDER_ACTIVE_STATUSES),
                 ),
             ),
         executor
@@ -396,7 +364,6 @@ export async function assertNoOpenWork(
 
     const parts = [
         counted(shifts?.value ?? 0, ['смену', 'смены', 'смен']),
-        counted(bookings?.value ?? 0, ['заказ', 'заказа', 'заказов']),
         counted(deliveryRows?.value ?? 0, ['доставку', 'доставки', 'доставок']),
     ].filter((part) => part !== null);
 
@@ -429,17 +396,6 @@ export async function endEmployeeAssignment(
     if (!member) return;
 
     const employeeId = member.id;
-
-    await executor
-        .delete(productPerformers)
-        .where(
-            and(
-                eq(productPerformers.employeeId, employeeId),
-                input.projectId
-                    ? eq(productPerformers.projectId, input.projectId)
-                    : undefined,
-            ),
-        );
 
     await executor
         .update(employeeAssignments)

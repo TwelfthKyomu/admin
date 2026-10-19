@@ -43,6 +43,13 @@
       "when": 1792419004789,
       "tag": "0005_sales_commission",
       "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "7",
+      "when": 1792419835848,
+      "tag": "0006_remove_booking",
+      "breakpoints": true
     }
   ]
 }

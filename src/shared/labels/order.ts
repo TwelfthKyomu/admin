@@ -1,16 +1,5 @@
 import type { BadgeVariant } from '@/shared/types';
-import {
-    OrderEventType,
-    OrderStatus,
-    OrderType,
-    PaymentStatus,
-} from '@/contexts/order';
-
-export const ORDER_TYPE_LABEL: Record<OrderType, string> = {
-    [OrderType.BOOKING]: 'Бронь',
-    [OrderType.SALE]: 'Продажа',
-    [OrderType.MIXED]: 'Смешан.',
-};
+import { OrderEventType, OrderStatus, PaymentStatus } from '@/contexts/order';
 
 export const ORDER_STATUS_LABEL: Record<OrderStatus, string> = {
     [OrderStatus.PENDING]: 'Ожидает',
@@ -18,7 +7,6 @@ export const ORDER_STATUS_LABEL: Record<OrderStatus, string> = {
     [OrderStatus.IN_PROGRESS]: 'В работе',
     [OrderStatus.COMPLETED]: 'Завершён',
     [OrderStatus.CANCELLED]: 'Отменён',
-    [OrderStatus.NO_SHOW]: 'Не пришёл',
 };
 
 export const ORDER_STATUS_LABEL_SHORT: Record<OrderStatus, string> = {
@@ -27,7 +15,6 @@ export const ORDER_STATUS_LABEL_SHORT: Record<OrderStatus, string> = {
     [OrderStatus.IN_PROGRESS]: 'В работе',
     [OrderStatus.COMPLETED]: 'Завершены',
     [OrderStatus.CANCELLED]: 'Отменены',
-    [OrderStatus.NO_SHOW]: 'Не пришли',
 };
 
 export const ORDER_STATUS_VARIANT: Record<OrderStatus, BadgeVariant> = {
@@ -36,7 +23,6 @@ export const ORDER_STATUS_VARIANT: Record<OrderStatus, BadgeVariant> = {
     [OrderStatus.IN_PROGRESS]: 'default',
     [OrderStatus.COMPLETED]: 'default',
     [OrderStatus.CANCELLED]: 'destructive',
-    [OrderStatus.NO_SHOW]: 'destructive',
 };
 
 export const ORDER_STATUS_ACTION_LABEL: Record<OrderStatus, string> = {
@@ -45,7 +31,6 @@ export const ORDER_STATUS_ACTION_LABEL: Record<OrderStatus, string> = {
     [OrderStatus.IN_PROGRESS]: 'Начать работу',
     [OrderStatus.COMPLETED]: 'Завершить',
     [OrderStatus.CANCELLED]: 'Отменить',
-    [OrderStatus.NO_SHOW]: 'Не пришёл',
 };
 
 export const ORDER_STATUS_ACTION_TONE: Record<
@@ -57,7 +42,6 @@ export const ORDER_STATUS_ACTION_TONE: Record<
     [OrderStatus.IN_PROGRESS]: 'default',
     [OrderStatus.COMPLETED]: 'default',
     [OrderStatus.CANCELLED]: 'destructive',
-    [OrderStatus.NO_SHOW]: 'destructive',
 };
 
 export const ORDER_EVENT_LABEL: Record<OrderEventType, string> = {
@@ -66,8 +50,6 @@ export const ORDER_EVENT_LABEL: Record<OrderEventType, string> = {
     [OrderEventType.DISCOUNT_APPLIED]: 'Применена скидка',
     [OrderEventType.PAYMENT_RECORDED]: 'Записан платёж',
     [OrderEventType.REFUND_RECORDED]: 'Оформлен возврат',
-    [OrderEventType.ASSIGNED_EMPLOYEE_CHANGED]: 'Изменён сотрудник',
-    [OrderEventType.SCHEDULED_AT_CHANGED]: 'Изменено время',
     [OrderEventType.SHIPMENT_UPDATED]: 'Обновлена доставка',
     [OrderEventType.SELLER_CHANGED]: 'Изменён продавец',
 };

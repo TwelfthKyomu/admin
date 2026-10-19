@@ -17,7 +17,6 @@ import { SLUG_MAX } from '@/shared/constants/default';
 import { slugify } from '@/shared/format/url';
 import { mapDefined } from '@/shared/lib/utils';
 import { SLUG_PATTERN } from '@/shared/validation';
-import { assertActiveAssignments } from '@/contexts/employeeAssignment/EmployeeAssignment.lib';
 import { projectDefaultCurrency } from '@/contexts/project/Project.lib';
 import { cleanupProjectFiles } from '@/contexts/projectFile/ProjectFile.lib';
 import { recordManualStockChanges } from '@/contexts/stockMovement/StockMovement.lib';
@@ -33,7 +32,6 @@ import {
     loadProductRelations,
     loadVariants,
     replaceProductBadges,
-    replaceProductPerformers,
     resolveBadgeIds,
     saveProductVariants,
     withRelations,
@@ -110,11 +108,6 @@ export const createProductAction = projectMutationAction(
 
         const categoryId = parsedInput.categoryId ?? null;
 
-        const performerIds =
-            type === ProductType.SERVICE
-                ? (parsedInput.performerIds ?? [])
-                : [];
-
         const attributes = parseProductAttributes(type, parsedInput.attributes);
         const options = normalizeProductOptions(parsedInput.options ?? []);
 
@@ -126,7 +119,6 @@ export const createProductAction = projectMutationAction(
             parsedInput.currency ?? projectDefaultCurrency(projectId),
             assertProductLimit(organizationId, projectId),
             assertCategoryCompatible(projectId, categoryId, type),
-            assertActiveAssignments(projectId, performerIds),
             assertProductCodesFree(projectId, { slug, sku: parsedInput.sku }),
         ]);
 
@@ -157,13 +149,6 @@ export const createProductAction = projectMutationAction(
             );
 
             await replaceProductBadges(tx, product, badgeIds);
-
-            await replaceProductPerformers(
-                tx,
-                product,
-                organizationId,
-                performerIds,
-            );
 
             const variantRecords = buildVariantRecords(
                 product,
@@ -216,9 +201,6 @@ export const updateProductAction = projectMutationAction(
                 ? parsedInput.categoryId
                 : product.categoryId;
 
-        const performerIds =
-            nextType !== ProductType.SERVICE ? [] : parsedInput.performerIds;
-
         const attributes =
             parsedInput.attributes !== undefined ||
             parsedInput.type !== undefined
@@ -254,9 +236,6 @@ export const updateProductAction = projectMutationAction(
                 nextCategoryId,
                 nextType,
             ),
-            performerIds !== undefined
-                ? assertActiveAssignments(product.projectId, performerIds)
-                : undefined,
             assertProductCodesFree(
                 product.projectId,
                 {
@@ -315,14 +294,6 @@ export const updateProductAction = projectMutationAction(
 
             if (badgeIds !== undefined) {
                 await replaceProductBadges(tx, product, badgeIds);
-            }
-            if (performerIds !== undefined) {
-                await replaceProductPerformers(
-                    tx,
-                    product,
-                    organizationId,
-                    performerIds,
-                );
             }
 
             const variantChanges = variantRecords

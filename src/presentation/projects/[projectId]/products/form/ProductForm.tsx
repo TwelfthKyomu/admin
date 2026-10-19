@@ -15,8 +15,7 @@ interface ProductFormProps {
 }
 
 export const ProductForm = ({ projectId, mode }: ProductFormProps) => {
-    const { type, isService, categoryOptions, badgeOptions, performerOptions, onTypeChange } =
-        useProductForm(projectId);
+    const { isService, categoryOptions, badgeOptions, onTypeChange } = useProductForm(projectId);
 
     return (
         <FieldGroup>
@@ -94,13 +93,12 @@ export const ProductForm = ({ projectId, mode }: ProductFormProps) => {
                 )}
             </FieldSet>
 
-            <FieldSet className="grid gap-4">
-                <FieldLegend>{isService ? 'Запись на услугу' : 'Характеристики'}</FieldLegend>
-                <AttributesFields
-                    type={type}
-                    performerOptions={performerOptions}
-                />
-            </FieldSet>
+            {!isService && (
+                <FieldSet className="grid gap-4">
+                    <FieldLegend>Характеристики</FieldLegend>
+                    <AttributesFields />
+                </FieldSet>
+            )}
 
             {!isService && (
                 <FieldSet className="grid gap-4">

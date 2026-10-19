@@ -93,11 +93,7 @@ export function defaultAttributesFor(
 ): Record<string, unknown> {
     switch (type) {
         case ProductType.SERVICE:
-            return {
-                durationMinutes: 60,
-                bookable: true,
-                bufferMinutes: 0,
-            };
+            return {};
         default:
             return { weightGrams: null };
     }

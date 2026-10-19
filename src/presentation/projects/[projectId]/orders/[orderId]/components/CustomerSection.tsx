@@ -1,4 +1,3 @@
-import { fmtDateFull } from '@/shared/format/date';
 import type { OrderView } from '@/contexts/order';
 import { DetailRow } from './DetailRow';
 import { Section } from './Section';
@@ -25,13 +24,6 @@ export const CustomerSection = ({ order }: { order: OrderView }) => (
                 value={order.customerEmail ?? '—'}
                 url={order.customerEmail ? `mailto:${order.customerEmail}` : undefined}
             />
-            {order.scheduledAt && (
-                <DetailRow
-                    label="Время"
-                    value={fmtDateFull(order.scheduledAt)}
-                    mono
-                />
-            )}
             {order.notes && (
                 <div className="mt-1 whitespace-pre-line border-t border-border pt-2 text-[12px] text-muted-foreground">
                     {order.notes}

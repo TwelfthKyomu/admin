@@ -8,10 +8,10 @@ import { listCourierBalances } from '@/contexts/cashShift/CashShift.lib';
 import { courierHandovers } from '@/contexts/cashShift/CashShifts.table';
 import { findActiveAssignment } from '@/contexts/employeeAssignment/EmployeeAssignment.lib';
 import { EmployeeKind } from '@/contexts/employeeAssignment/EmployeeAssignment.types';
+import { isCoveredByShift } from '@/contexts/employeeShift/EmployeeShift.lib';
 import type { EmployeeWindow } from '@/contexts/employeeShift/EmployeeShift.types';
 import { recordOrderEvents } from '@/contexts/order/Order.lib';
 import { OrderEventType, orderAmountDue } from '@/contexts/order/Order.types';
-import { isCoveredByShift } from '@/contexts/order/OrderBooking.lib';
 import { orders } from '@/contexts/order/Orders.table';
 import {
     lockEmployees,

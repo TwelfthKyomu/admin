@@ -34,11 +34,11 @@ export const StatusSection = ({ order, projectId, canEdit }: StatusSectionProps)
         const success = `Статус: ${ORDER_STATUS_LABEL[status]}`;
         const isCancel = status === OrderStatus.CANCELLED;
 
-        if (isCancel || status === OrderStatus.NO_SHOW) {
+        if (isCancel) {
             return confirmDestructive({
-                title: isCancel ? 'Отменить заказ?' : 'Отметить «не пришёл»?',
+                title: 'Отменить заказ?',
                 description: 'Вернуть прежний статус будет нельзя.',
-                confirmLabel: isCancel ? 'Отменить' : 'Не пришёл',
+                confirmLabel: 'Отменить',
                 success,
                 onConfirm: () => mutateAsync(input),
             });

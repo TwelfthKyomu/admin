@@ -21,8 +21,6 @@ export const IMAGES_PER_ENTITY_MAX = 20;
 
 export const PERCENT_MAX = 100;
 
-export const DURATION_MINUTES_MAX = 60 * 24;
-
 export const SEARCH_QUERY_MIN = 2;
 
 export const PAGE_SIZE_SMALL = 20;

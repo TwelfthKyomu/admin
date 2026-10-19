@@ -19,7 +19,6 @@ import {
     ORDER_EVENT_TYPE_VALUES,
     ORDER_SOURCE_VALUES,
     ORDER_STATUS_VALUES,
-    ORDER_TYPE_VALUES,
     PAYMENT_STATUS_VALUES,
 } from '@/contexts/order/Order.types';
 import { ORGANIZATION_ROLE_VALUES } from '@/contexts/organizationMember/OrganizationMember.types';
@@ -114,8 +113,6 @@ export const shiftCancelReasonEnum = pgEnum(
     'shift_cancel_reason',
     SHIFT_CANCEL_REASON_VALUES,
 );
-
-export const orderTypeEnum = pgEnum('order_type', ORDER_TYPE_VALUES);
 
 export const orderSourceEnum = pgEnum('order_source', ORDER_SOURCE_VALUES);
 

@@ -3,7 +3,7 @@ import { fmtTime, fmtTimeRange } from '@/shared/format/date';
 import { cn } from '@/shared/lib/utils';
 import type { ProjectView } from '@/contexts/project';
 import Link from 'next/link';
-import { type AgendaItem, agendaHref, agendaNote, agendaPhase, agendaTitle } from '../lib/myDay';
+import { type AgendaItem, agendaHref, agendaNote, agendaPhase } from '../lib/myDay';
 
 interface AgendaRowProps {
     item: AgendaItem;
@@ -33,7 +33,7 @@ export const AgendaRow = ({ item, project, now }: AgendaRowProps) => {
                     {fmtTime(item.startsAt)}
                 </span>
                 <span className="flex min-w-0 flex-col gap-0.5">
-                    <span className="truncate font-medium">{agendaTitle(item)}</span>
+                    <span className="truncate font-medium">Смена</span>
                     <span className="flex min-w-0 items-center gap-1.5 text-[11px] text-muted-foreground">
                         <ColorDot
                             color={project?.color}
@@ -52,7 +52,7 @@ export const AgendaRow = ({ item, project, now }: AgendaRowProps) => {
                         phase === 'now' && 'font-medium text-violet-300',
                     )}
                 >
-                    {agendaNote(item, phase)}
+                    {agendaNote(phase)}
                 </span>
             </Link>
         </li>

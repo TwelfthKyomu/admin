@@ -221,13 +221,11 @@ export async function createOrderWithItems(
                           orderId: order.id,
                           productId: item.productId ?? null,
                           variantId: item.variantId ?? null,
-                          performerEmployeeId: item.performerEmployeeId ?? null,
                           name: item.name.trim(),
                           type: item.type,
                           unitPriceAmount: item.unitPriceAmount,
                           quantity: item.quantity,
                           totalAmount: orderItemTotal(item),
-                          durationMinutes: item.durationMinutes ?? null,
                       })),
                   )
                   .returning()
@@ -246,7 +244,6 @@ export async function createOrderWithItems(
             type: OrderEventType.CREATED,
             byUserId: event.byUserId,
             payload: {
-                type: order.type,
                 itemCount: items.length,
                 ...event.payload,
             },
@@ -350,46 +347,6 @@ export function setOrderSeller(
             payload: { from: order.sellerId, to: sellerId },
         },
     );
-}
-
-export async function setOrderAssignedEmployee(
-    tx: Tx,
-    order: OrderRecord,
-    employeeId: string | null,
-    byUserId: string | null,
-): Promise<OrderRecord> {
-    if (isOrderTerminal(order.status)) {
-        throw new ApplicationError('Нельзя переназначить завершённый заказ');
-    }
-    if (order.assignedEmployeeId === employeeId) return order;
-
-    const updated = await writeOrderUpdate(
-        tx,
-        order,
-        { assignedEmployeeId: employeeId },
-        {
-            type: OrderEventType.ASSIGNED_EMPLOYEE_CHANGED,
-            byUserId,
-            payload: { from: order.assignedEmployeeId, to: employeeId },
-        },
-    );
-
-    await tx
-        .update(orderItems)
-        .set({ performerEmployeeId: employeeId })
-        .where(
-            and(
-                eq(orderItems.orderId, order.id),
-                order.assignedEmployeeId
-                    ? eq(
-                          orderItems.performerEmployeeId,
-                          order.assignedEmployeeId,
-                      )
-                    : isNull(orderItems.performerEmployeeId),
-            ),
-        );
-
-    return updated;
 }
 
 export async function addOrderDiscount(

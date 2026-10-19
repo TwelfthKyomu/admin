@@ -3,7 +3,6 @@
 import { PageHeader, QueryBoundary } from '@/shared/components/common';
 import { ROUTES } from '@/shared/constants';
 import { fmtDateTime } from '@/shared/format/date';
-import { ORDER_TYPE_LABEL } from '@/shared/labels/order';
 import { orderNumber } from '@/contexts/order';
 import { Button } from '@/ui/Base';
 import { ArrowLeft } from 'lucide-react';
@@ -40,7 +39,7 @@ export const OrderDetailPage = () => {
                     <PageHeader
                         className="mb-0"
                         title={`Заказ ${orderNumber(order)}`}
-                        description={`${ORDER_TYPE_LABEL[order.type]} · создан ${fmtDateTime(order.createdAt)}`}
+                        description={`Создан ${fmtDateTime(order.createdAt)}`}
                         actions={
                             <Button
                                 variant="outline"

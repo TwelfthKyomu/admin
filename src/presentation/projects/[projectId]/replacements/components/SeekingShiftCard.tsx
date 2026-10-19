@@ -49,7 +49,9 @@ export const SeekingShiftCard = ({
                     )}
                 </div>
                 <div className="flex flex-wrap gap-1.5">
-                    <Badge variant="secondary">{shiftLoadLabel(shift)}</Badge>
+                    {shiftLoadLabel(shift) && (
+                        <Badge variant="secondary">{shiftLoadLabel(shift)}</Badge>
+                    )}
                     {shift.cashDue > 0 && (
                         <Badge className="bg-amber-100 text-amber-900 dark:bg-amber-950 dark:text-amber-200">
                             {fmtMoney(shift.cashDue, currency)} к получению у двери

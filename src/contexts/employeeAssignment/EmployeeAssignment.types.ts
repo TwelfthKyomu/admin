@@ -9,12 +9,6 @@ export const EmployeeKind = {
 
 export type EmployeeKind = (typeof EmployeeKind)[keyof typeof EmployeeKind];
 
-export const UNBOOKABLE_PROJECT_ROLES: ReadonlySet<ProjectRole> = new Set([
-    ProjectRole.VIEWER,
-    ProjectRole.COURIER,
-    ProjectRole.ACCOUNTANT,
-]);
-
 export const EMPLOYEE_KIND_VALUES = enumValues(EmployeeKind);
 
 const SHIFTLESS_PROJECT_ROLES: ReadonlySet<ProjectRole> = new Set([
@@ -49,7 +43,6 @@ export interface ProjectEmployeeView {
     image: string | null;
     position: string;
     kind: EmployeeKind;
-    isBookable: boolean;
     endedAt: Date | null;
     metadata: Record<string, unknown>;
     projectRole: ProjectRole | null;

@@ -3,7 +3,6 @@ import type {
     CurrencyTotalsView as ServerCurrencyTotalsView,
     DashboardStatsView as ServerDashboardStatsView,
     EmployeeRevenueView as ServerEmployeeRevenueView,
-    MyBookingView as ServerMyBookingView,
     MyDayView as ServerMyDayView,
     OrderListView as ServerOrderListView,
     ProjectRevenueView as ServerProjectRevenueView,
@@ -28,7 +27,6 @@ export * from './useOrders';
 export type CurrencyTotalsView = NullToOptional<ServerCurrencyTotalsView>;
 export type DashboardStatsView = NullToOptional<ServerDashboardStatsView>;
 export type EmployeeRevenueView = NullToOptional<ServerEmployeeRevenueView>;
-export type MyBookingView = NullToOptional<ServerMyBookingView>;
 export type MyDayView = NullToOptional<ServerMyDayView>;
 export type ProjectRevenueView = NullToOptional<ServerProjectRevenueView>;
 export type RecentOrderView = NullToOptional<ServerRecentOrderView>;

@@ -5,24 +5,20 @@ import type {
     ReplacementShiftView,
 } from '@/contexts/employeeShift';
 
-const BOOKINGS: [string, string, string] = ['запись', 'записи', 'записей'];
-
 const DELIVERIES: [string, string, string] = [
     'доставка',
     'доставки',
     'доставок',
 ];
 
-export function shiftLoadLabel(shift: ReplacementShiftView): string {
-    if (shift.kind === EmployeeKind.COURIER) {
-        return shift.deliveriesCount > 0
-            ? `${shift.deliveriesCount} ${pluralRu(shift.deliveriesCount, DELIVERIES)} в окне`
-            : 'доставок пока нет';
-    }
+export function shiftLoadLabel(
+    shift: ReplacementShiftView,
+): string | undefined {
+    if (shift.kind !== EmployeeKind.COURIER) return undefined;
 
-    return shift.bookingsCount > 0
-        ? `${shift.bookingsCount} ${pluralRu(shift.bookingsCount, BOOKINGS)}`
-        : 'записей пока нет';
+    return shift.deliveriesCount > 0
+        ? `${shift.deliveriesCount} ${pluralRu(shift.deliveriesCount, DELIVERIES)} в окне`
+        : 'доставок пока нет';
 }
 
 export function overlaps(

@@ -15,7 +15,6 @@ export const UpdateAssignmentActionInputSchema = z.object({
             .string()
             .check(z.trim(), z.minLength(1), z.maxLength(DISPLAY_NAME_MAX)),
     ),
-    isBookable: z.optional(z.boolean()),
     metadata: z.optional(z.record(z.string(), z.unknown())),
 });
 

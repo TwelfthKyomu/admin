@@ -2,10 +2,8 @@ import { ApplicationError } from '@/shared/api/errors';
 import { CURRENCY_VALUES } from '@/shared/constants/currency';
 import {
     CODE_MAX,
-    DURATION_MINUTES_MAX,
     IMAGES_PER_ENTITY_MAX,
     LABEL_MAX,
-    PAGE_SIZE_DEFAULT,
     SKU_MAX,
     SKU_MIN,
     SLUG_MAX,
@@ -39,11 +37,7 @@ const PhysicalAttributesSchema = z.object({
     editionSize: z.nullish(z.int().check(z.positive())),
 });
 
-const ServiceAttributesSchema = z.object({
-    durationMinutes: z.int().check(z.positive(), z.lte(DURATION_MINUTES_MAX)),
-    bookable: z._default(z.boolean(), true),
-    bufferMinutes: z._default(z.int().check(z.nonnegative(), z.lte(180)), 0),
-});
+const ServiceAttributesSchema = z.object({});
 
 function attributesSchemaFor(type: ProductType) {
     switch (type) {
@@ -85,9 +79,6 @@ const CommonProductFields = {
             .check(z.maxLength(PRODUCT_BADGE_MAX)),
     ),
     attributes: z.optional(z.record(z.string(), z.unknown())),
-    performerIds: z.optional(
-        z.array(idSchema).check(z.maxLength(PAGE_SIZE_DEFAULT)),
-    ),
     isFeatured: z.optional(z.boolean()),
     stock: z.nullish(z.int().check(z.gte(0))),
     options: z.optional(
