@@ -18,7 +18,6 @@ import {
     UpdateAssignmentActionInputSchema,
     UpdateAssignmentRatesActionInputSchema,
 } from './EmployeeAssignment.schema';
-import { EmployeeKind } from './EmployeeAssignment.types';
 import {
     type EmployeeAssignmentRecord,
     employeeAssignments,
@@ -73,10 +72,6 @@ export const updateAssignmentAction = projectMutationAction(
             eq(employeeAssignments.id, assignment.id),
             {
                 position: parsedInput.position?.trim(),
-                isBookable:
-                    assignment.kind === EmployeeKind.COURIER
-                        ? false
-                        : parsedInput.isBookable,
                 metadata: parsedInput.metadata,
             },
             'Назначение не найдено',

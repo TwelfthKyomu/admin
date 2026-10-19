@@ -29,10 +29,8 @@ export const MembersPage = () => {
         currentUserId,
         currency,
         canManageRoles,
-        canManageStaff,
         onInvite,
         onChangeRole,
-        onToggleBookable,
         onAddToSchedule,
         onDetach,
     } = useMembersPage();
@@ -81,9 +79,7 @@ export const MembersPage = () => {
                                 currentUserId,
                                 currency,
                                 canManageRoles,
-                                canManageStaff,
                                 onChangeRole,
-                                onToggleBookable,
                                 onAddToSchedule,
                                 onDetach,
                             })}

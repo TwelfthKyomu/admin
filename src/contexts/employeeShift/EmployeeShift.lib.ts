@@ -11,10 +11,6 @@ import {
 import { findActiveAssignment } from '@/contexts/employeeAssignment/EmployeeAssignment.lib';
 import { EmployeeKind } from '@/contexts/employeeAssignment/EmployeeAssignment.types';
 import { employeeAssignments } from '@/contexts/employeeAssignment/EmployeeAssignments.table';
-import {
-    findBookingsLosingShiftCoverage,
-    findEmployeeBookings,
-} from '@/contexts/order/OrderBooking.lib';
 import { lockEmployees } from '@/contexts/organizationMember/OrganizationMember.lib';
 import { organizationMembers } from '@/contexts/organizationMember/OrganizationMembers.table';
 import { users } from '@/contexts/user/Users.table';
@@ -197,21 +193,38 @@ export async function listReplacementShifts(
 
     return Promise.all(
         rows.map(async ({ shift, employeeName, kind }) => {
-            const [bookings, load] = await Promise.all([
-                findEmployeeBookings(db, shift),
-                courierLoadInWindow(shift),
-            ]);
+            const load = await courierLoadInWindow(shift);
 
             return {
                 ...shift,
                 employeeName,
                 kind: kind ?? EmployeeKind.SPECIALIST,
-                bookingsCount: bookings.length,
                 deliveriesCount: load.count,
                 cashDue: load.cashDue,
             };
         }),
     );
+}
+
+export async function isCoveredByShift(
+    executor: Reader,
+    window: EmployeeWindow,
+): Promise<boolean> {
+    const [shift] = await executor
+        .select({ id: employeeShifts.id })
+        .from(employeeShifts)
+        .where(
+            and(
+                eq(employeeShifts.employeeId, window.employeeId),
+                eq(employeeShifts.projectId, window.projectId),
+                inArray(employeeShifts.status, WORKING_SHIFT_STATUSES),
+                lte(employeeShifts.startsAt, window.startsAt),
+                gte(employeeShifts.endsAt, window.endsAt),
+            ),
+        )
+        .limit(1);
+
+    return shift !== undefined;
 }
 
 export async function assertShiftAccess(
@@ -225,16 +238,6 @@ export async function assertShiftAccess(
     }
 
     return { fullAccess: ownEmployeeId === null };
-}
-
-async function assertShiftDroppable(shift: EmployeeShiftRecord): Promise<void> {
-    const orphaned = await findBookingsLosingShiftCoverage(shift);
-
-    if (orphaned.length > 0) {
-        throw new ApplicationError(
-            `На это время назначены активные записи (${orphaned.length} шт.), которые больше ничем не покрыты. Перенесите их или передайте смену другому сотруднику.`,
-        );
-    }
 }
 
 async function assertShiftWindowFree(
@@ -327,8 +330,6 @@ async function planShiftCancel(
         );
     }
 
-    await assertShiftDroppable(shift);
-
     return {
         status: ShiftStatus.CANCELLED,
         cancelReason: cancelReason ?? null,
@@ -356,8 +357,6 @@ async function planShiftNoShow(
             'Неявку можно отметить только после начала смены',
         );
     }
-
-    await assertShiftDroppable(shift);
 
     return { status: ShiftStatus.NO_SHOW, seekingReplacement: false };
 }

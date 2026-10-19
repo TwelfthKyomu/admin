@@ -9,7 +9,6 @@ import {
     EmployeeKind,
     type ProjectEmployeeView,
     useProjectEmployees,
-    useUpdateAssignment,
 } from '@/contexts/employeeAssignment';
 import { ShiftStatus } from '@/contexts/employeeShift';
 import type { ProjectRole } from '@/contexts/project';
@@ -66,7 +65,6 @@ export function useMembersPage() {
     const ensureSchedule = useEnsureMemberSchedule();
     const detach = useDetachProjectMember();
     const changeRole = useChangeProjectMemberRole();
-    const updateAssignment = useUpdateAssignment(projectId);
 
     const employees = employeesQuery.data ?? [];
     const activeEmployees = employees.filter((employee) => !employee.endedAt);
@@ -147,16 +145,6 @@ export function useMembersPage() {
         });
     };
 
-    const onToggleBookable = async (assignmentId: string, isBookable: boolean) => {
-        await runAction(
-            updateAssignment.mutateAsync({
-                projectId,
-                id: assignmentId,
-                isBookable,
-            }),
-        );
-    };
-
     return {
         membersQuery,
         employeesQuery,
@@ -173,10 +161,8 @@ export function useMembersPage() {
         currentUserId: user.id,
         currency,
         canManageRoles: can(Permission.MANAGE_ROLES),
-        canManageStaff: can(Permission.MANAGE_ORDERS),
         onInvite,
         onChangeRole,
-        onToggleBookable,
         onAddToSchedule,
         onDetach,
     };

@@ -6,7 +6,7 @@ import { fmtMoney } from '@/shared/format/money';
 import { runAction } from '@/shared/lib/action-result';
 import { useModalClose } from '@/shared/lib/modal';
 import { fromNone, NONE } from '@/shared/lib/none';
-import { OrderType, useCreateOrder } from '@/contexts/order';
+import { useCreateOrder } from '@/contexts/order';
 import {
     ProductType,
     type ProductView,
@@ -126,7 +126,6 @@ export function useCreateSale(projectId: string) {
         const { success, response } = await runAction(
             mutateAsync({
                 projectId,
-                type: OrderType.SALE,
                 clientId: fromNone(values.clientId) ?? undefined,
                 customerName: values.customerName?.trim() || undefined,
                 customerPhone: values.customerPhone?.trim() || undefined,

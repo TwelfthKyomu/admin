@@ -8,13 +8,10 @@ import {
 import { ApplicationError } from '@/shared/api/errors';
 import { visibleSalesEmployeeId } from '@/shared/api/permission';
 import { searchFilters } from '@/shared/api/repository';
-import { DURATION_MINUTES_MAX } from '@/shared/constants/default';
 import { findClientInProject } from '@/contexts/client/Client.lib';
 import { findOrderCouponCode } from '@/contexts/coupon/Coupon.lib';
-import { assertActiveAssignments } from '@/contexts/employeeAssignment/EmployeeAssignment.lib';
 import {
     findMemberIdByUserId,
-    lockEmployees,
     memberNamesByIds,
 } from '@/contexts/organizationMember/OrganizationMember.lib';
 import { projectDefaultCurrency } from '@/contexts/project/Project.lib';
@@ -34,16 +31,12 @@ import {
 } from './Order.schema';
 import {
     type EmployeeRevenueView,
-    inferDurationMinutes,
     maskSeller,
     ORDERS_LIST_LIMIT,
     ORDERS_RANGE_LIMIT,
     type OrderListView,
-    OrderType,
-    orderRequiresSchedule,
     sumOrderItems,
 } from './Order.types';
-import { assertBookingFeasible } from './OrderBooking.lib';
 import { aggregateSellerRevenue } from './OrderStats.lib';
 import { orderEvents, orderItems, orders } from './Orders.table';
 
@@ -54,9 +47,6 @@ export const ordersAction = projectReadAction(ORDER_READ_PERMISSIONS)
         const ownEmployeeId = await visibleSalesEmployeeId(userId, projectId);
         const filters = [eq(orders.projectId, projectId)];
 
-        if (options.types && options.types.length > 0) {
-            filters.push(inArray(orders.type, options.types));
-        }
         if (options.statuses && options.statuses.length > 0) {
             filters.push(inArray(orders.status, options.statuses));
         }
@@ -64,11 +54,6 @@ export const ordersAction = projectReadAction(ORDER_READ_PERMISSIONS)
         if (options.to) filters.push(lt(orders.soldAt, options.to));
         if (options.clientId) {
             filters.push(eq(orders.clientId, options.clientId));
-        }
-        if (options.assignedEmployeeId) {
-            filters.push(
-                eq(orders.assignedEmployeeId, options.assignedEmployeeId),
-            );
         }
         if (options.sellerId && !ownEmployeeId) {
             filters.push(eq(orders.sellerId, options.sellerId));
@@ -180,23 +165,6 @@ export const createOrderAction = projectMutationAction(Permission.MANAGE_ORDERS)
     .action(async ({ parsedInput, ctx: { userId, organizationId } }) => {
         const { projectId } = parsedInput;
         const inputItems = parsedInput.items ?? [];
-        const assignedEmployeeId = parsedInput.assignedEmployeeId ?? null;
-        const scheduledAt = parsedInput.scheduledAt ?? null;
-        const requiresSchedule = orderRequiresSchedule(parsedInput.type);
-
-        if (requiresSchedule) {
-            if (!scheduledAt) {
-                throw new ApplicationError('Для записи нужна дата и время');
-            }
-            if (scheduledAt.getTime() < Date.now()) {
-                throw new ApplicationError(
-                    'Нельзя создать запись на прошедшее время',
-                );
-            }
-        }
-        if (parsedInput.type === OrderType.BOOKING && !assignedEmployeeId) {
-            throw new ApplicationError('Для записи нужен исполнитель');
-        }
 
         const [currency, sellerId] = await Promise.all([
             parsedInput.currency ?? projectDefaultCurrency(projectId),
@@ -206,26 +174,7 @@ export const createOrderAction = projectMutationAction(Permission.MANAGE_ORDERS)
                 : null,
         ]);
 
-        const [items] = await Promise.all([
-            resolveOrderItems(projectId, inputItems, currency),
-            assertActiveAssignments(projectId, [
-                assignedEmployeeId,
-                ...inputItems.map((item) => item.performerEmployeeId),
-            ]),
-        ]);
-
-        const durationMinutes =
-            parsedInput.durationMinutes ?? inferDurationMinutes(items);
-
-        if (parsedInput.type === OrderType.BOOKING && !durationMinutes) {
-            throw new ApplicationError(
-                'Для записи нужна длительность: укажите её или добавьте услугу с длительностью',
-            );
-        }
-        if (durationMinutes && durationMinutes > DURATION_MINUTES_MAX) {
-            throw new ApplicationError('Запись не может длиться дольше суток');
-        }
-
+        const items = await resolveOrderItems(projectId, inputItems, currency);
         const subtotalAmount = sumOrderItems(items);
         const discountAmount = parsedInput.discountAmount ?? 0;
 
@@ -235,39 +184,17 @@ export const createOrderAction = projectMutationAction(Permission.MANAGE_ORDERS)
             );
         }
 
-        const booking =
-            requiresSchedule &&
-            assignedEmployeeId &&
-            scheduledAt &&
-            durationMinutes
-                ? { assignedEmployeeId, scheduledAt, durationMinutes }
-                : null;
-
         return db.transaction(async (tx) => {
-            if (booking) {
-                await lockEmployees(tx, [booking.assignedEmployeeId]);
-
-                await assertBookingFeasible(tx, {
-                    projectId,
-                    ...booking,
-                    items,
-                });
-            }
-
             const { order } = await createOrderWithItems(
                 tx,
                 {
                     projectId,
                     organizationId,
-                    type: parsedInput.type,
                     clientId: parsedInput.clientId ?? null,
                     customerName: parsedInput.customerName?.trim() || null,
                     customerPhone: parsedInput.customerPhone?.trim() || null,
                     customerEmail:
                         parsedInput.customerEmail?.trim().toLowerCase() || null,
-                    assignedEmployeeId,
-                    scheduledAt,
-                    durationMinutes,
                     sellerId,
                     soldAt: new Date(),
                     currency,

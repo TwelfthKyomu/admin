@@ -10,7 +10,6 @@ import { listAssignedTasks } from '@/contexts/task/Task.lib';
 import { Permission } from '@/contexts/user/User.types';
 import { MyDayActionInputSchema } from './Order.schema';
 import type { DashboardView, MyDayView } from './Order.types';
-import { listEmployeeBookings } from './OrderBooking.lib';
 import { loadDashboardStats } from './OrderStats.lib';
 
 export const dashboardAction = organizationMemberAction().action(
@@ -50,19 +49,17 @@ export const myDayAction = organizationMemberAction()
             if (!employeeId) {
                 return {
                     shifts: [],
-                    bookings: [],
                     deliveries: [],
                     tasks: await listAssignedTasks(userId, taskProjectIds),
                 };
             }
 
-            const [shifts, bookings, deliveries, tasks] = await Promise.all([
+            const [shifts, deliveries, tasks] = await Promise.all([
                 listEmployeeShiftsBetween(employeeId, from, to),
-                listEmployeeBookings(employeeId, from, to),
                 listCourierDeliveriesInWork(employeeId),
                 listAssignedTasks(userId, taskProjectIds),
             ]);
 
-            return { shifts, bookings, deliveries, tasks };
+            return { shifts, deliveries, tasks };
         },
     );

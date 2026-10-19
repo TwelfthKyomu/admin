@@ -23,7 +23,6 @@ export const ItemsSection = ({ order, items }: ItemsSectionProps) => (
                         <div className="truncate text-[13px] font-medium">{item.name}</div>
                         <div className="text-[11px] tabular-nums text-muted-foreground">
                             {fmtMoney(item.unitPriceAmount, order.currency)} × {item.quantity}
-                            {item.durationMinutes ? ` · ${item.durationMinutes} мин` : ''}
                         </div>
                     </div>
                     <div className="text-[13px] font-semibold tabular-nums">

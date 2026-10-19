@@ -9,7 +9,7 @@ import {
     orderDetailAction,
     ordersAction,
 } from './Order.actions';
-import type { OrderStatus, OrderType } from './Order.types';
+import type { OrderStatus } from './Order.types';
 import {
     recordOrderPaymentAction,
     recordOrderRefundAction,
@@ -20,12 +20,10 @@ import { changeOrderStatusAction } from './OrderStatus.actions';
 
 interface ListOptions {
     projectId: string;
-    types?: OrderType[];
     statuses?: OrderStatus[];
     from?: Date;
     to?: Date;
     clientId?: string;
-    assignedEmployeeId?: string;
     sellerId?: string;
     search?: string;
     enabled?: boolean;
@@ -40,12 +38,10 @@ const orderQueries = {
     all: ['orders'] as const,
     list: ({
         projectId,
-        types,
         statuses,
         from,
         to,
         clientId,
-        assignedEmployeeId,
         sellerId,
         search,
         enabled = true,
@@ -55,24 +51,20 @@ const orderQueries = {
                 ...orderQueries.all,
                 'list',
                 projectId,
-                types?.join(',') ?? '',
                 statuses?.join(',') ?? '',
                 from?.toISOString() ?? '',
                 to?.toISOString() ?? '',
                 clientId ?? '',
-                assignedEmployeeId ?? '',
                 sellerId ?? '',
                 search ?? '',
             ],
             () =>
                 ordersAction({
                     projectId,
-                    types,
                     statuses,
                     from,
                     to,
                     clientId,
-                    assignedEmployeeId,
                     sellerId,
                     search,
                 }),

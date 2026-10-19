@@ -45,13 +45,6 @@ export function overlaps(
     return a.startsAt < b.endsAt && a.endsAt > b.startsAt;
 }
 
-export function covers(
-    outer: Pick<EmployeeShiftRecord, 'startsAt' | 'endsAt'>,
-    inner: Pick<EmployeeShiftRecord, 'startsAt' | 'endsAt'>,
-): boolean {
-    return outer.startsAt <= inner.startsAt && outer.endsAt >= inner.endsAt;
-}
-
 export const ShiftCancelReason = {
     SICK: 'sick',
     DAY_OFF: 'day_off',
@@ -84,7 +77,6 @@ export const SHIFT_DEFAULT_END_TIME = '18:00';
 export type ReplacementShiftView = EmployeeShiftRecord & {
     employeeName: string;
     kind: EmployeeKind;
-    bookingsCount: number;
     deliveriesCount: number;
     cashDue: number;
 };

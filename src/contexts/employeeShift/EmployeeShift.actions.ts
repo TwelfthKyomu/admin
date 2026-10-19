@@ -12,7 +12,6 @@ import {
 } from '@/shared/api/permission';
 import { updateOne } from '@/shared/api/repository';
 import { employeeAssignments } from '@/contexts/employeeAssignment/EmployeeAssignments.table';
-import { reassignBookings } from '@/contexts/order/OrderBooking.lib';
 import {
     SHIFT_READ_PERMISSIONS,
     SHIFT_WRITE_PERMISSIONS,
@@ -227,16 +226,8 @@ export const reassignShiftAction = projectMutationAction(
             },
         );
 
-        const bookings = await reassignBookings(
-            shift,
-            parsedInput.substituteEmployeeId,
-            userId,
-        );
-
         return {
             newShift: replaced.shift,
-            transferredBookings: bookings.transferred,
             transferredDeliveries: replaced.transferredDeliveries,
-            skippedBookings: bookings.skipped,
         };
     });

@@ -33,7 +33,6 @@ export const PRODUCT_DEFAULT: DefaultValues<CreateProductFormValues> = {
     images: [],
     currency: Currency.RUB,
     badges: [],
-    performerIds: [],
     isFeatured: false,
     attributes: defaultAttributesFor(ProductType.PHYSICAL),
     options: [],

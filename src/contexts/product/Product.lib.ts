@@ -30,15 +30,11 @@ import {
     type ProductVariantRecord,
     type ProductView,
     productBadges,
-    productPerformers,
     products,
     productVariants,
 } from './Products.table';
 
-type ProductRelations = Pick<
-    ProductView,
-    'variants' | 'badges' | 'performerIds' | 'soldCount'
->;
+type ProductRelations = Pick<ProductView, 'variants' | 'badges' | 'soldCount'>;
 
 export async function assertProductLimit(
     organizationId: string,
@@ -166,30 +162,6 @@ export async function replaceProductBadges(
     );
 }
 
-export async function replaceProductPerformers(
-    tx: Tx,
-    product: ProductRef,
-    organizationId: string,
-    employeeIds: string[],
-): Promise<void> {
-    await tx
-        .delete(productPerformers)
-        .where(eq(productPerformers.productId, product.id));
-
-    const unique = [...new Set(employeeIds)];
-
-    if (unique.length === 0) return;
-
-    await tx.insert(productPerformers).values(
-        unique.map((employeeId) => ({
-            productId: product.id,
-            employeeId,
-            projectId: product.projectId,
-            organizationId,
-        })),
-    );
-}
-
 export async function saveProductVariants(
     tx: Tx,
     product: ProductRef,
@@ -303,7 +275,7 @@ export async function loadSoldCounts(
 export async function loadProductRelations(
     productIds: string[],
 ): Promise<(productId: string) => ProductRelations> {
-    const [variants, badgeRows, performerRows, soldCounts] = await Promise.all([
+    const [variants, badgeRows, soldCounts] = await Promise.all([
         loadVariants(productIds),
         db
             .select({
@@ -317,24 +289,14 @@ export async function loadProductRelations(
             )
             .where(inArray(productBadges.productId, productIds))
             .orderBy(asc(productBadges.position)),
-        db
-            .select({
-                productId: productPerformers.productId,
-                employeeId: productPerformers.employeeId,
-            })
-            .from(productPerformers)
-            .where(inArray(productPerformers.productId, productIds)),
         loadSoldCounts(productIds),
     ]);
 
     const badges = Map.groupBy(badgeRows, (row) => row.productId);
-    const performers = Map.groupBy(performerRows, (row) => row.productId);
 
     return (productId) => ({
         variants: variants.get(productId) ?? [],
         badges: badges.get(productId)?.map((row) => row.code) ?? [],
-        performerIds:
-            performers.get(productId)?.map((row) => row.employeeId) ?? [],
         soldCount: soldCounts.get(productId) ?? 0,
     });
 }

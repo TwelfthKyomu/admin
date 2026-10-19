@@ -31,7 +31,6 @@ import {
     orderLines,
     paidContent,
     placedContent,
-    reminderContent,
     shippedContent,
     teamDetails,
 } from './OrderMail.types';
@@ -236,19 +235,5 @@ export function mailOrderShipped(deliveryId: string): Promise<void> {
         if (!mail) return;
 
         await notifyCustomer(mail, shippedContent(mail.order, delivery));
-    });
-}
-
-export function mailOrderReminder(orderId: string): Promise<void> {
-    return safely(async () => {
-        const mail = await loadMailOrder(orderId);
-        const scheduledAt = mail?.order.scheduledAt;
-
-        if (!mail || !scheduledAt) return;
-
-        await notifyCustomer(
-            mail,
-            reminderContent({ ...mail.order, scheduledAt }),
-        );
     });
 }

@@ -5,7 +5,7 @@ import { DELIVERY_STATUS_VARIANT, deliveryStatusLabel } from '@/shared/labels/de
 import { modal } from '@/shared/lib/modal';
 import { type DeliveryView, isOpenDelivery, useOrderDelivery } from '@/contexts/delivery';
 import { EmployeeKind, useProjectEmployees } from '@/contexts/employeeAssignment';
-import { OrderType, type OrderView } from '@/contexts/order';
+import type { OrderView } from '@/contexts/order';
 import { Permission } from '@/contexts/user';
 import { DeliveryModal } from '@/presentation/projects/[projectId]/orders/[orderId]/modal/DeliveryModal';
 import { employeeOptions } from '@/presentation/projects/[projectId]/schedule/lib/employees';
@@ -25,7 +25,7 @@ export const DeliverySection = ({ order, projectId }: DeliverySectionProps) => {
     const delivery = useOrderDelivery(projectId, order.id).data ?? undefined;
     const employees = useProjectEmployees({ projectId, enabled: canManage }).data ?? [];
 
-    if (order.type === OrderType.BOOKING || (!delivery && !canManage)) return null;
+    if (!delivery && !canManage) return null;
 
     const couriers = employeeOptions(
         employees.filter((employee) => employee.kind === EmployeeKind.COURIER),

@@ -4,7 +4,6 @@ import type { OrderItemInput } from './Order.schema';
 import {
     confirmationSeller,
     getNextOrderStatuses,
-    inferDurationMinutes,
     isOrderCancelled,
     isScheduledSale,
     maskSeller,
@@ -128,15 +127,23 @@ describe('переходы статусов заказа', () => {
         }
     });
 
-    it('после начала работы «не пришёл» уже не ставится', () => {
-        expect(getNextOrderStatuses(OrderStatus.IN_PROGRESS)).not.toContain(
-            OrderStatus.NO_SHOW,
-        );
+    it('из «Новый» можно подтвердить или отменить', () => {
+        expect(getNextOrderStatuses(OrderStatus.PENDING)).toEqual([
+            OrderStatus.CONFIRMED,
+            OrderStatus.CANCELLED,
+        ]);
     });
 
-    it('принимать оплату нельзя только в отменённый и «не пришёл»', () => {
+    it('подтверждённый можно взять в работу, выполнить или отменить', () => {
+        expect(getNextOrderStatuses(OrderStatus.CONFIRMED)).toEqual([
+            OrderStatus.IN_PROGRESS,
+            OrderStatus.COMPLETED,
+            OrderStatus.CANCELLED,
+        ]);
+    });
+
+    it('принимать оплату нельзя только в отменённый', () => {
         expect(isOrderCancelled(OrderStatus.CANCELLED)).toBe(true);
-        expect(isOrderCancelled(OrderStatus.NO_SHOW)).toBe(true);
         expect(isOrderCancelled(OrderStatus.COMPLETED)).toBe(false);
         expect(isOrderCancelled(OrderStatus.PENDING)).toBe(false);
     });
@@ -222,32 +229,6 @@ describe('sumOrderItems', () => {
 
     it('пустой заказ стоит ноль', () => {
         expect(sumOrderItems([])).toBe(0);
-    });
-});
-
-describe('inferDurationMinutes', () => {
-    it('складывает длительность только услуг', () => {
-        expect(
-            inferDurationMinutes([
-                item({
-                    type: ProductType.SERVICE,
-                    durationMinutes: 30,
-                    quantity: 2,
-                }),
-                item({ type: ProductType.SERVICE, durationMinutes: 15 }),
-                item({ type: ProductType.PHYSICAL, durationMinutes: 999 }),
-            ]),
-        ).toBe(75);
-    });
-
-    it('без услуг с длительностью — null', () => {
-        expect(
-            inferDurationMinutes([item({ type: ProductType.PHYSICAL })]),
-        ).toBeNull();
-
-        expect(
-            inferDurationMinutes([item({ type: ProductType.SERVICE })]),
-        ).toBeNull();
     });
 });
 

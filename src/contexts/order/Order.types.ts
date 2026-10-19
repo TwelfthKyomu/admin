@@ -7,19 +7,8 @@ import { ProductType } from '@/contexts/product/Product.types';
 import type { ProjectRecord } from '@/contexts/project/Projects.table';
 import type { StockLine } from '@/contexts/stockMovement/StockMovement.types';
 import type { MyTaskView } from '@/contexts/task/Task.types';
-import { addMinutes } from 'date-fns';
 import type { OrderItemInput } from './Order.schema';
 import type { OrderItemRecord, OrderRecord } from './Orders.table';
-
-export const OrderType = {
-    BOOKING: 'booking',
-    SALE: 'sale',
-    MIXED: 'mixed',
-} as const;
-
-export type OrderType = (typeof OrderType)[keyof typeof OrderType];
-
-export const ORDER_TYPE_VALUES = enumValues(OrderType);
 
 export const OrderSource = {
     STORE: 'store',
@@ -36,7 +25,6 @@ export const OrderStatus = {
     IN_PROGRESS: 'in_progress',
     COMPLETED: 'completed',
     CANCELLED: 'cancelled',
-    NO_SHOW: 'no_show',
 } as const;
 
 export type OrderStatus = (typeof OrderStatus)[keyof typeof OrderStatus];
@@ -47,15 +35,8 @@ export function isOrderStatus(value: string): value is OrderStatus {
     return ORDER_STATUS_VALUES.some((status) => status === value);
 }
 
-export const ORDER_ACTIVE_STATUSES: readonly OrderStatus[] = [
-    OrderStatus.PENDING,
-    OrderStatus.CONFIRMED,
-    OrderStatus.IN_PROGRESS,
-];
-
 export const ORDER_CANCELLED_STATUSES: readonly OrderStatus[] = [
     OrderStatus.CANCELLED,
-    OrderStatus.NO_SHOW,
 ];
 
 export const ORDER_TERMINAL_STATUSES: readonly OrderStatus[] = [
@@ -71,26 +52,16 @@ export function isOrderTerminal(status: OrderStatus): boolean {
     return ORDER_TERMINAL_STATUSES.includes(status);
 }
 
-export function orderRequiresSchedule(type: OrderType): boolean {
-    return type !== OrderType.SALE;
-}
-
 const ORDER_STATUS_TRANSITIONS: Record<OrderStatus, OrderStatus[]> = {
-    [OrderStatus.PENDING]: [
-        OrderStatus.CONFIRMED,
-        OrderStatus.CANCELLED,
-        OrderStatus.NO_SHOW,
-    ],
+    [OrderStatus.PENDING]: [OrderStatus.CONFIRMED, OrderStatus.CANCELLED],
     [OrderStatus.CONFIRMED]: [
         OrderStatus.IN_PROGRESS,
         OrderStatus.COMPLETED,
         OrderStatus.CANCELLED,
-        OrderStatus.NO_SHOW,
     ],
     [OrderStatus.IN_PROGRESS]: [OrderStatus.COMPLETED, OrderStatus.CANCELLED],
     [OrderStatus.COMPLETED]: [],
     [OrderStatus.CANCELLED]: [],
-    [OrderStatus.NO_SHOW]: [],
 };
 
 export function getNextOrderStatuses(current: OrderStatus): OrderStatus[] {
@@ -212,25 +183,6 @@ export function sumOrderItems(items: OrderItemInput[]): number {
     return items.reduce((sum, item) => sum + orderItemTotal(item), 0);
 }
 
-export function inferDurationMinutes(items: OrderItemInput[]): number | null {
-    const total = items.reduce(
-        (sum, item) =>
-            item.type === ProductType.SERVICE && item.durationMinutes
-                ? sum + item.durationMinutes * item.quantity
-                : sum,
-        0,
-    );
-
-    return total > 0 ? total : null;
-}
-
-export function bookingEndsAt(
-    scheduledAt: Date,
-    durationMinutes: number,
-): Date {
-    return addMinutes(scheduledAt, durationMinutes);
-}
-
 export function stockLinesFromOrderItems(
     items: Pick<
         OrderItemRecord,
@@ -256,8 +208,6 @@ export const OrderEventType = {
     DISCOUNT_APPLIED: 'discount_applied',
     PAYMENT_RECORDED: 'payment_recorded',
     REFUND_RECORDED: 'refund_recorded',
-    ASSIGNED_EMPLOYEE_CHANGED: 'assigned_employee_changed',
-    SCHEDULED_AT_CHANGED: 'scheduled_at_changed',
     SHIPMENT_UPDATED: 'shipment_updated',
     SELLER_CHANGED: 'seller_changed',
 } as const;
@@ -372,19 +322,8 @@ export interface DashboardView {
     stats: DashboardStatsView;
 }
 
-export type MyBookingView = Pick<
-    OrderRecord,
-    | 'id'
-    | 'projectId'
-    | 'scheduledAt'
-    | 'durationMinutes'
-    | 'customerName'
-    | 'status'
->;
-
 export interface MyDayView {
     shifts: MyShiftView[];
-    bookings: MyBookingView[];
     deliveries: MyDeliveryView[];
     tasks: MyTaskView[];
 }

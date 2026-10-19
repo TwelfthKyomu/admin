@@ -2,7 +2,6 @@
 
 import { useFormContext, useWatch } from 'react-hook-form';
 import { NONE } from '@/shared/lib/none';
-import { useProjectEmployees } from '@/contexts/employeeAssignment';
 import {
     defaultAttributesFor,
     isCategoryCompatible,
@@ -10,7 +9,6 @@ import {
 } from '@/contexts/product';
 import { useProjectBadgesList } from '@/contexts/projectBadge';
 import { useCategoriesList } from '@/contexts/projectCategory';
-import { employeeOptions } from '@/presentation/projects/[projectId]/schedule/lib/employees';
 import type { CreateProductFormValues } from '../form/formData';
 
 export function useProductForm(projectId: string) {
@@ -30,11 +28,6 @@ export function useProductForm(projectId: string) {
         includeInactive: false,
     });
 
-    const employeesQuery = useProjectEmployees({
-        projectId,
-        enabled: isService,
-    });
-
     const categories = categoriesQuery.data ?? [];
 
     const categoryOptions = [
@@ -48,8 +41,6 @@ export function useProductForm(projectId: string) {
         value: badge.code,
         label: badge.label,
     }));
-
-    const performerOptions = employeeOptions(employeesQuery.data ?? []);
 
     const onTypeChange = (next: ProductType) => {
         setValue(
@@ -76,7 +67,6 @@ export function useProductForm(projectId: string) {
         isService,
         categoryOptions,
         badgeOptions,
-        performerOptions,
         onTypeChange,
     };
 }

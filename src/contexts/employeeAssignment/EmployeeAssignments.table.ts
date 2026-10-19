@@ -6,7 +6,6 @@ import { projects } from '@/contexts/project/Projects.table';
 import { isNull } from 'drizzle-orm';
 import {
     bigint,
-    boolean,
     foreignKey,
     index,
     integer,
@@ -34,7 +33,6 @@ export const employeeAssignments = pgTable(
             .references(() => organizations.id, { onDelete: 'cascade' }),
         position: varchar('position', { length: 120 }).notNull(),
         kind: employeeKindEnum('kind').notNull().default('specialist'),
-        isBookable: boolean('is_bookable').notNull().default(false),
         shiftRateAmount: bigint('shift_rate_amount', { mode: 'number' }),
 
         commissionRate: integer('commission_rate'),

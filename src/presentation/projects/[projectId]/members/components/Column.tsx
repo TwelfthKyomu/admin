@@ -7,10 +7,10 @@ import {
     PROJECT_ROLE_LABEL,
     PROJECT_ROLE_OPTIONS,
 } from '@/shared/labels/team';
-import { EmployeeKind, type ProjectEmployeeView } from '@/contexts/employeeAssignment';
+import type { ProjectEmployeeView } from '@/contexts/employeeAssignment';
 import { isOrganizationManager } from '@/contexts/organizationMember';
 import type { ProjectRole } from '@/contexts/project';
-import { Badge, Checkbox, Select } from '@/ui/Base';
+import { Badge, Select } from '@/ui/Base';
 import type { TableActionItem } from '@/ui/Base/Table';
 import { ActionTableButton } from '@/ui/Base/Table/components/ActionTableButton';
 import { createColumnHelper } from '@tanstack/react-table';
@@ -25,9 +25,7 @@ interface ColumnsProps {
     currentUserId: string;
     currency: Currency;
     canManageRoles: boolean;
-    canManageStaff: boolean;
     onChangeRole: (memberId: string, role: ProjectRole) => void;
-    onToggleBookable: (assignmentId: string, isBookable: boolean) => void;
     onAddToSchedule: (userId: string) => void;
     onDetach: (memberId: string) => void;
 }
@@ -36,9 +34,7 @@ export const COLUMNS = ({
     currentUserId,
     currency,
     canManageRoles,
-    canManageStaff,
     onChangeRole,
-    onToggleBookable,
     onAddToSchedule,
     onDetach,
 }: ColumnsProps) => [
@@ -102,30 +98,6 @@ export const COLUMNS = ({
                     currency={currency}
                 />
             ) : null,
-    }),
-    display({
-        id: 'work',
-        header: 'Работа',
-        cell: ({ row: { original } }) => {
-            const employee = original.employee;
-
-            if (!employee) return null;
-            if (employee.kind === EmployeeKind.COURIER) return 'Берёт доставки';
-
-            return (
-                <div className="flex items-center gap-2">
-                    <Checkbox
-                        aria-label="Принимает записи"
-                        checked={employee.isBookable}
-                        disabled={!canManageStaff}
-                        onCheckedChange={(checked) =>
-                            onToggleBookable(employee.assignmentId, checked === true)
-                        }
-                    />
-                    {employee.isBookable ? 'Принимает записи' : 'Не принимает'}
-                </div>
-            );
-        },
     }),
     display({
         id: 'today',

@@ -10,8 +10,6 @@ import {
     productStatusEnum,
     productTypeEnum,
 } from '@/infrastructure/database/schemas/enums';
-import { organizations } from '@/contexts/organization/Organizations.table';
-import { organizationMembers } from '@/contexts/organizationMember/OrganizationMembers.table';
 import { projects } from '@/contexts/project/Projects.table';
 import { projectBadges } from '@/contexts/projectBadge/ProjectBadges.table';
 import { projectCategories } from '@/contexts/projectCategory/ProjectCategories.table';
@@ -179,38 +177,8 @@ export const productBadges = pgTable(
     ],
 );
 
-export const productPerformers = pgTable(
-    'product_performers',
-    {
-        productId: text('product_id').notNull(),
-        employeeId: text('employee_id').notNull(),
-        projectId: text('project_id').notNull(),
-        organizationId: text('organization_id')
-            .notNull()
-            .references(() => organizations.id, { onDelete: 'cascade' }),
-    },
-    (t) => [
-        primaryKey({ columns: [t.productId, t.employeeId] }),
-        foreignKey({
-            columns: [t.productId, t.projectId],
-            foreignColumns: [products.id, products.projectId],
-            name: 'product_performers_product_project_fk',
-        }).onDelete('cascade'),
-        foreignKey({
-            columns: [t.employeeId, t.organizationId],
-            foreignColumns: [
-                organizationMembers.id,
-                organizationMembers.organizationId,
-            ],
-            name: 'product_performers_employee_org_fk',
-        }).onDelete('cascade'),
-        index('product_performers_employee_idx').on(t.employeeId, t.projectId),
-    ],
-);
-
 export type ProductView = ProductRecord & {
     variants: ProductVariantRecord[];
     badges: string[];
-    performerIds: string[];
     soldCount: number;
 };
