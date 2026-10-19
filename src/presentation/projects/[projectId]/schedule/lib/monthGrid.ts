@@ -1,5 +1,7 @@
+import type { Currency } from '@/shared/constants/currency';
+import { fmtMoney } from '@/shared/format/money';
 import type { EmployeeShiftView } from '@/contexts/employeeShift';
-import type { OrderView } from '@/contexts/order';
+import { salesTotal } from '@/contexts/order';
 import {
     addDays,
     eachDayOfInterval,
@@ -8,12 +10,13 @@ import {
     startOfWeek,
     subDays,
 } from 'date-fns';
+import type { ScheduleSale } from './mapToScheduler';
 
 export interface MonthDay {
     date: Date;
     isInCurrentMonth: boolean;
     isToday: boolean;
-    orders: OrderView[];
+    sales: ScheduleSale[];
     shifts: EmployeeShiftView[];
 }
 
@@ -25,7 +28,7 @@ export function computeMonthRange(date: Date): { from: Date; to: Date } {
 
 export function buildMonthGrid(args: {
     date: Date;
-    orders: OrderView[];
+    sales: ScheduleSale[];
     shifts: EmployeeShiftView[];
 }): MonthDay[] {
     const { from, to } = computeMonthRange(args.date);
@@ -37,13 +40,18 @@ export function buildMonthGrid(args: {
             date: day,
             isInCurrentMonth: day.getMonth() === currentMonth,
             isToday: isSameDay(day, today),
-            orders: args.orders.filter(
-                (order) =>
-                    order.scheduledAt && isSameDay(order.scheduledAt, day),
-            ),
+            sales: args.sales.filter((sale) => isSameDay(sale.start, day)),
             shifts: args.shifts.filter((shift) =>
                 isSameDay(shift.startsAt, day),
             ),
         }),
     );
+}
+
+export function monthSales(days: MonthDay[]): ScheduleSale[] {
+    return days.flatMap((day) => (day.isInCurrentMonth ? day.sales : []));
+}
+
+export function salesAmount(sales: ScheduleSale[], currency: Currency): string {
+    return fmtMoney(salesTotal(sales.map((sale) => sale.order)), currency);
 }

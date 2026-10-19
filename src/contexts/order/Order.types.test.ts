@@ -6,6 +6,7 @@ import {
     getNextOrderStatuses,
     inferDurationMinutes,
     isOrderCancelled,
+    isScheduledSale,
     maskSeller,
     ORDER_STATUS_VALUES,
     ORDER_TERMINAL_STATUSES,
@@ -17,6 +18,7 @@ import {
     type ProjectRevenueView,
     recomputePaymentStatus,
     rollUpRevenueByCurrency,
+    salesTotal,
     stockLinesFromOrderItems,
     sumOrderItems,
 } from './Order.types';
@@ -341,5 +343,49 @@ describe('продавец заказа', () => {
                 refundedAmount: 5_000,
             }),
         ).toBe(0);
+    });
+});
+
+describe('продажи в расписании', () => {
+    it('продажа видна, если есть продавец и время продажи и она не отменена', () => {
+        const soldAt = new Date('2026-10-20T10:00');
+
+        expect(
+            isScheduledSale({
+                sellerId: 'm1',
+                soldAt,
+                status: OrderStatus.COMPLETED,
+            }),
+        ).toBe(true);
+
+        expect(
+            isScheduledSale({
+                sellerId: null,
+                soldAt,
+                status: OrderStatus.COMPLETED,
+            }),
+        ).toBe(false);
+
+        expect(
+            isScheduledSale({
+                sellerId: 'm1',
+                soldAt: null,
+                status: OrderStatus.COMPLETED,
+            }),
+        ).toBe(false);
+
+        expect(
+            isScheduledSale({
+                sellerId: 'm1',
+                soldAt,
+                status: OrderStatus.CANCELLED,
+            }),
+        ).toBe(false);
+    });
+
+    it('итог — сумма заказов', () => {
+        expect(
+            salesTotal([{ totalAmount: 1_500 }, { totalAmount: 2_500 }]),
+        ).toBe(4_000);
     });
 });

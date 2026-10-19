@@ -1,4 +1,5 @@
 import { WEEKDAYS_MON_FIRST } from '@/shared/constants';
+import type { Currency } from '@/shared/constants/currency';
 import { fmtMonth } from '@/shared/format/date';
 import { cn } from '@/shared/lib/utils';
 import { Button } from '@/ui/Base';
@@ -10,6 +11,7 @@ import { DayCell } from './DayCell';
 interface MonthCalendarProps {
     date: Date;
     days: MonthDay[];
+    currency: Currency;
     onDateChange: (d: Date) => void;
     onPickDay: (d: Date) => void;
     className?: string;
@@ -21,6 +23,7 @@ interface MonthCalendarProps {
 export const MonthCalendar = ({
     date,
     days,
+    currency,
     onDateChange,
     onPickDay,
     className,
@@ -79,6 +82,7 @@ export const MonthCalendar = ({
                     <DayCell
                         key={day.date.toISOString()}
                         day={day}
+                        currency={currency}
                         onPick={onPickDay}
                         selectable={selectable}
                         selected={selectedKeys?.has(format(day.date, 'yyyy-MM-dd')) ?? false}

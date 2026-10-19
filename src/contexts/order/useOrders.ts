@@ -16,10 +16,7 @@ import {
 } from './OrderPayment.actions';
 import { changeOrderSellerAction } from './OrderSeller.actions';
 import { dashboardAction, myDayAction } from './OrderStats.actions';
-import {
-    changeOrderScheduleAction,
-    changeOrderStatusAction,
-} from './OrderStatus.actions';
+import { changeOrderStatusAction } from './OrderStatus.actions';
 
 interface ListOptions {
     projectId: string;
@@ -98,9 +95,6 @@ export function useOrderDetail(opts: DetailOptions) {
 }
 
 export const useCreateOrder = makeScopedMutation(createOrderAction);
-export const useChangeOrderSchedule = makeScopedMutation(
-    changeOrderScheduleAction,
-);
 export const useChangeOrderStatus = makeScopedMutation(changeOrderStatusAction);
 export const useChangeOrderSeller = makeScopedMutation(changeOrderSellerAction);
 export const useRecordOrderPayment = makeScopedMutation(

@@ -2,7 +2,8 @@
 
 import { useProjectEmployees } from '@/contexts/employeeAssignment';
 import { useShiftsList } from '@/contexts/employeeShift';
-import { OrderType, useOrdersList } from '@/contexts/order';
+import { useOrdersList } from '@/contexts/order';
+import { toScheduleSales } from '../lib/mapToScheduler';
 
 interface UseScheduleDataOptions {
     projectId: string;
@@ -18,12 +19,7 @@ export function useScheduleData({
     const employeesQuery = useProjectEmployees({ projectId });
     const shiftsQuery = useShiftsList({ projectId, from, to });
 
-    const ordersQuery = useOrdersList({
-        projectId,
-        types: [OrderType.BOOKING],
-        from,
-        to,
-    });
+    const ordersQuery = useOrdersList({ projectId, from, to });
 
     const isLoading =
         employeesQuery.isFetching ||
@@ -34,6 +30,6 @@ export function useScheduleData({
         isLoading,
         employees: employeesQuery.data ?? [],
         shifts: shiftsQuery.data ?? [],
-        orders: ordersQuery.data ?? [],
+        sales: toScheduleSales(ordersQuery.data ?? []),
     };
 }

@@ -19,7 +19,7 @@ import {
 } from '@/contexts/organizationMember/OrganizationMember.lib';
 import { projectDefaultCurrency } from '@/contexts/project/Project.lib';
 import { ORDER_READ_PERMISSIONS, Permission } from '@/contexts/user/User.types';
-import { and, asc, desc, eq, gte, inArray, lt } from 'drizzle-orm';
+import { and, asc, desc, eq, gte, inArray, lt, sum } from 'drizzle-orm';
 import {
     createOrderWithItems,
     findOrderInProject,
@@ -38,13 +38,14 @@ import {
     maskSeller,
     ORDERS_LIST_LIMIT,
     ORDERS_RANGE_LIMIT,
+    type OrderListView,
     OrderType,
     orderRequiresSchedule,
     sumOrderItems,
 } from './Order.types';
 import { assertBookingFeasible } from './OrderBooking.lib';
 import { aggregateSellerRevenue } from './OrderStats.lib';
-import { orderEvents, orders } from './Orders.table';
+import { orderEvents, orderItems, orders } from './Orders.table';
 
 export const ordersAction = projectReadAction(ORDER_READ_PERMISSIONS)
     .inputSchema(OrdersActionInputSchema)
@@ -59,8 +60,8 @@ export const ordersAction = projectReadAction(ORDER_READ_PERMISSIONS)
         if (options.statuses && options.statuses.length > 0) {
             filters.push(inArray(orders.status, options.statuses));
         }
-        if (options.from) filters.push(gte(orders.scheduledAt, options.from));
-        if (options.to) filters.push(lt(orders.scheduledAt, options.to));
+        if (options.from) filters.push(gte(orders.soldAt, options.from));
+        if (options.to) filters.push(lt(orders.soldAt, options.to));
         if (options.clientId) {
             filters.push(eq(orders.clientId, options.clientId));
         }
@@ -94,7 +95,30 @@ export const ordersAction = projectReadAction(ORDER_READ_PERMISSIONS)
                     : ORDERS_LIST_LIMIT,
             );
 
-        return rows.map((order) => maskSeller(order, ownEmployeeId));
+        const counts = rows.length
+            ? await db
+                  .select({
+                      orderId: orderItems.orderId,
+                      itemsCount: sum(orderItems.quantity).mapWith(Number),
+                  })
+                  .from(orderItems)
+                  .where(
+                      inArray(
+                          orderItems.orderId,
+                          rows.map((order) => order.id),
+                      ),
+                  )
+                  .groupBy(orderItems.orderId)
+            : [];
+
+        const countByOrder = new Map(
+            counts.map((row) => [row.orderId, row.itemsCount]),
+        );
+
+        return rows.map<OrderListView>((order) => ({
+            ...maskSeller(order, ownEmployeeId),
+            itemsCount: countByOrder.get(order.id) ?? 0,
+        }));
     });
 
 export const orderDetailAction = projectReadAction(ORDER_READ_PERMISSIONS)

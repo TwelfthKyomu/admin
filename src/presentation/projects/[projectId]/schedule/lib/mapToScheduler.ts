@@ -2,43 +2,35 @@ import { fmtMinutesOfDay } from '@/shared/format/date';
 import { minutesIntoDay } from '@/shared/lib/dateMath';
 import { matchesSearch } from '@/shared/lib/search';
 import { type EmployeeShiftView, ShiftStatus } from '@/contexts/employeeShift';
-import type { OrderView } from '@/contexts/order';
+import { isScheduledSale, type OrderListView } from '@/contexts/order';
 import type { ScheduleItem } from '@/ui/Base/Scheduler';
 import { addMinutes, isSameDay } from 'date-fns';
 
-const DEFAULT_BOOKING_MINUTES = 60;
+const SALE_CARD_MINUTES = 30;
 
-export interface ScheduleBooking extends ScheduleItem {
-    employeeId: string;
-    order: OrderView;
+export interface ScheduleSale extends ScheduleItem {
+    sellerId: string;
+    order: OrderListView;
 }
 
-export function toScheduleBookings(orders: OrderView[]): ScheduleBooking[] {
-    const bookings: ScheduleBooking[] = [];
-
-    for (const order of orders) {
-        if (!order.scheduledAt || !order.assignedEmployeeId) continue;
-
-        bookings.push({
-            id: order.id,
-            start: order.scheduledAt,
-            end: addMinutes(
-                order.scheduledAt,
-                order.durationMinutes ?? DEFAULT_BOOKING_MINUTES,
-            ),
-            employeeId: order.assignedEmployeeId,
-            order,
-        });
-    }
-
-    return bookings;
+export function toScheduleSales(orders: OrderListView[]): ScheduleSale[] {
+    return orders.flatMap((order) =>
+        isScheduledSale(order) && order.sellerId && order.soldAt
+            ? [
+                  {
+                      id: order.id,
+                      start: order.soldAt,
+                      end: addMinutes(order.soldAt, SALE_CARD_MINUTES),
+                      sellerId: order.sellerId,
+                      order,
+                  },
+              ]
+            : [],
+    );
 }
 
-export function bookingMatches(
-    booking: ScheduleBooking,
-    query: string,
-): boolean {
-    const { customerName, customerPhone, notes } = booking.order;
+export function saleMatches(sale: ScheduleSale, query: string): boolean {
+    const { customerName, customerPhone, notes } = sale.order;
 
     return matchesSearch(query, customerName, customerPhone, notes);
 }
