@@ -3,7 +3,7 @@ import { Badge, Spinner } from '@/ui/Base';
 
 interface ScheduleFooterProps {
     isLoading: boolean;
-    stats: Option<number>[];
+    stats: Option<number | string>[];
 }
 
 export const ScheduleFooter = ({ isLoading, stats }: ScheduleFooterProps) => (

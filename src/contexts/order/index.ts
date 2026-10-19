@@ -5,6 +5,7 @@ import type {
     EmployeeRevenueView as ServerEmployeeRevenueView,
     MyBookingView as ServerMyBookingView,
     MyDayView as ServerMyDayView,
+    OrderListView as ServerOrderListView,
     ProjectRevenueView as ServerProjectRevenueView,
     RecentOrderView as ServerRecentOrderView,
     TopOrderItemView as ServerTopOrderItemView,
@@ -35,3 +36,4 @@ export type TopOrderItemView = NullToOptional<ServerTopOrderItemView>;
 export type OrderEventView = NullToOptional<ServerOrderEventView>;
 export type OrderItemView = NullToOptional<ServerOrderItemView>;
 export type OrderView = NullToOptional<ServerOrderView>;
+export type OrderListView = NullToOptional<ServerOrderListView>;

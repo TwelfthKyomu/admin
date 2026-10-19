@@ -1,24 +1,21 @@
 'use client';
 
 import { ScheduleFooter } from '../components/ScheduleFooter';
-import { buildMonthGrid } from '../lib/monthGrid';
+import { buildMonthGrid, monthSales, salesAmount } from '../lib/monthGrid';
 import { MonthCalendar } from './MonthCalendar';
 import { useScheduleContext } from './ScheduleProvider';
 
 export const CalendarTab = () => {
-    const { date, setDate, setMode, setTab, data, builder, workingEmployees } =
+    const { date, setDate, setMode, setTab, data, builder, workingEmployees, currency } =
         useScheduleContext();
 
     const days = buildMonthGrid({
         date,
-        orders: data.orders,
+        sales: data.sales,
         shifts: data.shifts,
     });
 
-    const ordersInMonth = days.reduce(
-        (acc, d) => acc + (d.isInCurrentMonth ? d.orders.length : 0),
-        0,
-    );
+    const sales = monthSales(days);
 
     const shiftsInMonth = days.reduce(
         (acc, d) => acc + (d.isInCurrentMonth ? d.shifts.length : 0),
@@ -36,6 +33,7 @@ export const CalendarTab = () => {
             <MonthCalendar
                 date={date}
                 days={days}
+                currency={currency}
                 onDateChange={setDate}
                 onPickDay={handlePickDay}
                 selectable={builder.active}
@@ -46,7 +44,8 @@ export const CalendarTab = () => {
             <ScheduleFooter
                 isLoading={data.isLoading}
                 stats={[
-                    { label: 'Заказов в месяце', value: ordersInMonth },
+                    { label: 'Продаж в месяце', value: sales.length },
+                    { label: 'Выручка', value: salesAmount(sales, currency) },
                     { label: 'Смен', value: shiftsInMonth },
                     { label: 'Сотрудников', value: workingEmployees.length },
                 ]}

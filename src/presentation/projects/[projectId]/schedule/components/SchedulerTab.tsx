@@ -1,28 +1,25 @@
 'use client';
 
-import { isOrderTerminal } from '@/contexts/order';
+import { fmtMoney } from '@/shared/format/money';
+import { salesTotal } from '@/contexts/order';
 import { Scheduler } from '@/ui/Base/Scheduler';
-import { BookingCard } from '../components/BookingCard';
 import { EmployeeFilter } from '../components/EmployeeFilter';
+import { SaleCard } from '../components/SaleCard';
 import { ScheduleFooter } from '../components/ScheduleFooter';
-import { useBookingActions } from '../hooks/useBookingActions';
 import { useScheduleColumns } from '../hooks/useScheduleColumns';
-import { bookingMatches, toScheduleBookings } from '../lib/mapToScheduler';
+import { saleMatches } from '../lib/mapToScheduler';
 import { useScheduleContext } from './ScheduleProvider';
 
 export const SchedulerTab = () => {
-    const { date, setDate, mode, setMode, data, workingEmployees, employeeFilter } =
+    const { date, setDate, mode, setMode, data, workingEmployees, employeeFilter, currency } =
         useScheduleContext();
 
-    const allBookings = toScheduleBookings(data.orders);
+    const columns = useScheduleColumns();
 
-    const bookings =
+    const sales =
         employeeFilter.size === 0
-            ? allBookings
-            : allBookings.filter((booking) => employeeFilter.has(booking.employeeId));
-
-    const { columns, columnsAreEmployees } = useScheduleColumns();
-    const actions = useBookingActions(columnsAreEmployees);
+            ? data.sales
+            : data.sales.filter((sale) => employeeFilter.has(sale.sellerId));
 
     return (
         <>
@@ -31,26 +28,27 @@ export const SchedulerTab = () => {
                 onDateChange={setDate}
                 mode={mode}
                 onModeChange={setMode}
-                items={bookings}
+                items={sales}
                 columns={columns}
                 renderItem={(ctx) => (
-                    <BookingCard
+                    <SaleCard
                         key={ctx.item.id}
                         {...ctx}
                     />
                 )}
-                onMove={actions.reschedule}
-                onResize={actions.reschedule}
-                onCreate={columnsAreEmployees ? actions.create : undefined}
-                isDragDisabled={(booking) => isOrderTerminal(booking.order.status)}
-                excludeFromConflict={columnsAreEmployees ? undefined : () => true}
-                searchPredicate={bookingMatches}
+                isDragDisabled={() => true}
+                excludeFromConflict={() => true}
+                searchPredicate={saleMatches}
                 topBarActionsSlot={<EmployeeFilter />}
             />
             <ScheduleFooter
                 isLoading={data.isLoading}
                 stats={[
-                    { label: 'Записей', value: bookings.length },
+                    { label: 'Продаж', value: sales.length },
+                    {
+                        label: 'Выручка',
+                        value: fmtMoney(salesTotal(sales.map((sale) => sale.order)), currency),
+                    },
                     { label: 'Сотрудников', value: workingEmployees.length },
                 ]}
             />

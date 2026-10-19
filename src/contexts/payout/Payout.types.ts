@@ -20,7 +20,7 @@ export interface PayoutAmounts {
     totalAmount: number;
 }
 
-export function commissionOf(revenue: number, rate: number): number {
+function commissionOf(revenue: number, rate: number): number {
     return Math.floor((revenue * rate) / 100);
 }
 

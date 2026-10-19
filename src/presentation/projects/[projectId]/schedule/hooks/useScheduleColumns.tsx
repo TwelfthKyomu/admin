@@ -12,7 +12,7 @@ import {
     pickShift,
     pickShiftWindow,
     pickTeamWindow,
-    type ScheduleBooking,
+    type ScheduleSale,
     shiftWindowLabel,
 } from '../lib/mapToScheduler';
 
@@ -20,19 +20,14 @@ const COLUMN_MIN_WIDTH = 160;
 
 const NO_SHIFT_WINDOW = [0, 0] as const;
 
-interface ScheduleColumns {
-    columns: ScheduleColumn<ScheduleBooking>[];
-    columnsAreEmployees: boolean;
-}
-
-export function useScheduleColumns(): ScheduleColumns {
+export function useScheduleColumns(): ScheduleColumn<ScheduleSale>[] {
     const { date, mode, data, visibleEmployees, workingEmployees, projectId } =
         useScheduleContext();
 
     const today = new Date();
 
     if (mode === 'day') {
-        const columns = visibleEmployees.map((employee): ScheduleColumn<ScheduleBooking> => {
+        const columns = visibleEmployees.map((employee): ScheduleColumn<ScheduleSale> => {
             const shift = pickShift(data.shifts, employee.employeeId, date);
             const shiftWindow = pickShiftWindow(data.shifts, employee.employeeId, date);
 
@@ -46,7 +41,7 @@ export function useScheduleColumns(): ScheduleColumns {
 
             return {
                 id: employee.employeeId,
-                match: (booking) => booking.employeeId === employee.employeeId,
+                match: (sale) => sale.sellerId === employee.employeeId,
                 minWidth: COLUMN_MIN_WIDTH,
                 showNow: isSameDay(date, today),
                 workingHours: shiftWindow ?? NO_SHIFT_WINDOW,
@@ -69,14 +64,14 @@ export function useScheduleColumns(): ScheduleColumns {
             };
         });
 
-        return { columns, columnsAreEmployees: true };
+        return columns;
     }
 
     const { from, to } = computeRange(date, mode);
     const days = eachDayOfInterval({ start: from, end: subDays(to, 1) });
     const employeeIds = visibleEmployees.map((employee) => employee.employeeId);
 
-    const columns = days.map((day): ScheduleColumn<ScheduleBooking> => {
+    const columns = days.map((day): ScheduleColumn<ScheduleSale> => {
         const key = format(day, 'yyyy-MM-dd');
         const isToday = isSameDay(day, today);
         const teamWindow = pickTeamWindow(data.shifts, employeeIds, day);
@@ -85,7 +80,7 @@ export function useScheduleColumns(): ScheduleColumns {
         return {
             id: key,
             date: day,
-            match: (booking) => format(booking.start, 'yyyy-MM-dd') === key,
+            match: (sale) => format(sale.start, 'yyyy-MM-dd') === key,
             minWidth: COLUMN_MIN_WIDTH,
             showNow: isToday,
             workingHours: teamWindow ?? NO_SHIFT_WINDOW,
@@ -98,5 +93,5 @@ export function useScheduleColumns(): ScheduleColumns {
         };
     });
 
-    return { columns, columnsAreEmployees: false };
+    return columns;
 }

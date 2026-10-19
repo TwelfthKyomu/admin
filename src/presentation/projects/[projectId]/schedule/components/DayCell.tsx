@@ -1,25 +1,27 @@
+import type { Currency } from '@/shared/constants/currency';
 import { cn } from '@/shared/lib/utils';
-import type { MonthDay } from '../lib/monthGrid';
+import { type MonthDay, salesAmount } from '../lib/monthGrid';
 
 interface DayCellProps {
     day: MonthDay;
+    currency: Currency;
     onPick: (date: Date) => void;
     selectable?: boolean;
     selected?: boolean;
     onToggle?: (date: Date) => void;
 }
 
-const MAX_ORDER_DOTS = 4;
 const MAX_SHIFT_AVATARS = 3;
 
 export const DayCell = ({
     day,
+    currency,
     onPick,
     selectable = false,
     selected = false,
     onToggle,
 }: DayCellProps) => {
-    const orders = day.orders;
+    const sales = day.sales;
     const shiftEmpIds = Array.from(new Set(day.shifts.map((shift) => shift.employeeId)));
 
     return (
@@ -42,27 +44,17 @@ export const DayCell = ({
                 >
                     {day.date.getDate()}
                 </div>
-                {orders.length > 0 && (
+                {sales.length > 0 && (
                     <span className="text-[10px] font-mono tabular-nums text-muted-foreground">
-                        {orders.length}
+                        {sales.length}
                     </span>
                 )}
             </div>
 
-            {orders.length > 0 && (
-                <div className="flex items-center gap-1">
-                    {orders.slice(0, MAX_ORDER_DOTS).map((order) => (
-                        <span
-                            key={order.id}
-                            className="w-1.5 h-1.5 rounded-full bg-primary/80"
-                        />
-                    ))}
-                    {orders.length > MAX_ORDER_DOTS && (
-                        <span className="text-[9px] text-muted-foreground tabular-nums">
-                            +{orders.length - MAX_ORDER_DOTS}
-                        </span>
-                    )}
-                </div>
+            {sales.length > 0 && (
+                <span className="text-[11px] font-mono tabular-nums text-emerald-500">
+                    {salesAmount(sales, currency)}
+                </span>
             )}
 
             {shiftEmpIds.length > 0 && (

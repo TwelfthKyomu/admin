@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { useProject } from '@/app/providers';
+import { worksShifts } from '@/contexts/employeeAssignment';
 import { computeRange, type SchedulerMode } from '@/ui/Base/Scheduler';
 import { employeeOptions } from '../lib/employees';
 import { computeMonthRange } from '../lib/monthGrid';
@@ -11,7 +12,7 @@ import { useScheduleData } from './useScheduleData';
 export type ScheduleTab = 'scheduler' | 'calendar';
 
 export function useScheduleState() {
-    const { projectId } = useProject();
+    const { projectId, currency } = useProject();
     const [tab, setTab] = useState<ScheduleTab>('scheduler');
     const [date, setDate] = useState(() => new Date());
     const [mode, setMode] = useState<SchedulerMode>('week');
@@ -25,8 +26,8 @@ export function useScheduleState() {
 
     const data = useScheduleData({ projectId, ...range });
 
-    const workingEmployees = data.employees.filter(
-        (employee) => employee.isBookable,
+    const workingEmployees = data.employees.filter((employee) =>
+        worksShifts(employee.projectRole),
     );
 
     const visibleEmployees =
@@ -53,6 +54,7 @@ export function useScheduleState() {
 
     return {
         projectId,
+        currency,
         tab,
         setTab,
         date,

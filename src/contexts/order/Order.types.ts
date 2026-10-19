@@ -358,6 +358,8 @@ export interface EmployeeRevenueView {
     revenueAmount: number;
 }
 
+export type OrderListView = OrderRecord & { itemsCount: number };
+
 export interface SellerRevenueRow {
     sellerId: string | null;
     source: OrderSource;
@@ -389,4 +391,20 @@ export interface MyDayView {
 
 export function orderNumber(order: Pick<OrderRecord, 'id'>): string {
     return order.id.slice(0, 8).toUpperCase();
+}
+
+export function isScheduledSale(order: {
+    sellerId?: string | null;
+    soldAt?: Date | null;
+    status: OrderStatus;
+}): boolean {
+    return (
+        Boolean(order.sellerId) &&
+        Boolean(order.soldAt) &&
+        order.status !== OrderStatus.CANCELLED
+    );
+}
+
+export function salesTotal(orders: Pick<OrderRecord, 'totalAmount'>[]): number {
+    return orders.reduce((sum, order) => sum + order.totalAmount, 0);
 }
