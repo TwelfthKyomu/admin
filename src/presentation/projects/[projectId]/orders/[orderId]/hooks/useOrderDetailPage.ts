@@ -2,7 +2,7 @@
 
 import { useProject } from '@/app/providers';
 import { useOrderDetail } from '@/contexts/order';
-import { ORDER_PERMISSIONS, Permission } from '@/contexts/user';
+import { Permission } from '@/contexts/user';
 import { useParams } from 'next/navigation';
 
 export function useOrderDetailPage() {
@@ -13,7 +13,7 @@ export function useOrderDetailPage() {
     return {
         query,
         projectId,
-        canEdit: can(ORDER_PERMISSIONS),
+        canEdit: can(Permission.MANAGE_ORDERS),
         canFinance: can(Permission.VIEW_FINANCES),
         canManageFinance: can(Permission.MANAGE_FINANCES),
     };

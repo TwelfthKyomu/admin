@@ -21,7 +21,7 @@ export const projectMembers = pgTable(
         projectId: text('project_id')
             .notNull()
             .references(() => projects.id, { onDelete: 'cascade' }),
-        role: projectRoleEnum('role').notNull().default(ProjectRole.MASTER),
+        role: projectRoleEnum('role').notNull().default(ProjectRole.EDITOR),
         joinedAt: timestamp('joined_at').notNull().defaultNow(),
         leftAt: timestamp('left_at'),
     },

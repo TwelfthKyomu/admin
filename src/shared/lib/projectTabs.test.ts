@@ -13,10 +13,6 @@ describe('стартовая вкладка проекта по роли', () =>
         expect(startTab(ProjectRole.COURIER)).toBe('deliveries');
     });
 
-    it('мастер начинает с расписания', () => {
-        expect(startTab(ProjectRole.MASTER)).toBe('schedule');
-    });
-
     it('бухгалтер начинает с выручки', () => {
         expect(startTab(ProjectRole.ACCOUNTANT)).toBe('revenue');
     });

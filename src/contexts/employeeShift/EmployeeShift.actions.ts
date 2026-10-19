@@ -7,8 +7,8 @@ import {
 } from '@/shared/api/action-client';
 import { ApplicationError } from '@/shared/api/errors';
 import {
-    assertFullBookingsAccess,
-    visibleBookingsEmployeeId,
+    assertFullShiftsAccess,
+    visibleShiftsEmployeeId,
 } from '@/shared/api/permission';
 import { updateOne } from '@/shared/api/repository';
 import { employeeAssignments } from '@/contexts/employeeAssignment/EmployeeAssignments.table';
@@ -49,7 +49,7 @@ import {
 export const shiftsAction = projectReadAction(SHIFT_READ_PERMISSIONS)
     .inputSchema(ShiftsActionInputSchema)
     .action(async ({ parsedInput, ctx: { userId } }) => {
-        const ownEmployeeId = await visibleBookingsEmployeeId(
+        const ownEmployeeId = await visibleShiftsEmployeeId(
             userId,
             parsedInput.projectId,
         );
@@ -98,7 +98,7 @@ export const bulkCreateShiftsAction = projectMutationAction(
         ];
 
         const [, assignments] = await Promise.all([
-            assertFullBookingsAccess(userId, projectId),
+            assertFullShiftsAccess(userId, projectId),
             db
                 .select({
                     employeeId: employeeAssignments.employeeId,
@@ -214,7 +214,7 @@ export const reassignShiftAction = projectMutationAction(
     .inputSchema(ReassignShiftActionInputSchema)
     .action(async ({ parsedInput, ctx: { userId } }) => {
         const [, shift] = await Promise.all([
-            assertFullBookingsAccess(userId, parsedInput.projectId),
+            assertFullShiftsAccess(userId, parsedInput.projectId),
             findShiftInProject(parsedInput.id, parsedInput.projectId),
         ]);
 

@@ -28,14 +28,13 @@ export const ORGANIZATION_ROLE_VARIANT: Record<OrganizationRole, BadgeVariant> =
 export const PROJECT_ROLE_LABEL: Record<ProjectRole, string> = {
     [ProjectRole.MANAGER]: 'Управляющий',
     [ProjectRole.EDITOR]: 'Продавец',
-    [ProjectRole.MASTER]: 'Мастер',
     [ProjectRole.COURIER]: 'Курьер',
     [ProjectRole.ACCOUNTANT]: 'Бухгалтер',
     [ProjectRole.VIEWER]: 'Наблюдатель',
 };
 
 export const EMPLOYEE_KIND_LABEL: Record<EmployeeKind, string> = {
-    [EmployeeKind.SPECIALIST]: 'Мастер',
+    [EmployeeKind.SPECIALIST]: 'Сотрудник',
     [EmployeeKind.COURIER]: 'Курьер',
 };
 
@@ -50,7 +49,6 @@ export const PROJECT_ROLE_OPTIONS = createOptions(
     [
         ProjectRole.MANAGER,
         ProjectRole.EDITOR,
-        ProjectRole.MASTER,
         ProjectRole.COURIER,
         ProjectRole.ACCOUNTANT,
         ProjectRole.VIEWER,

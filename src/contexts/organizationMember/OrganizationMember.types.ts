@@ -30,7 +30,6 @@ const ORG_ROLE_PERMISSIONS: Record<
         Permission.MANAGE_CATALOG,
         Permission.VIEW_CATALOG,
         Permission.MANAGE_ORDERS,
-        Permission.MANAGE_OWN_BOOKINGS,
         Permission.VIEW_ORDERS,
         Permission.MANAGE_DELIVERIES,
         Permission.VIEW_DELIVERIES,
@@ -41,7 +40,6 @@ const ORG_ROLE_PERMISSIONS: Record<
     [OrganizationRole.MEMBER]: new Set<Permission>([
         Permission.VIEW_MEMBERS,
         Permission.VIEW_CATALOG,
-        Permission.MANAGE_OWN_BOOKINGS,
     ]),
 };
 

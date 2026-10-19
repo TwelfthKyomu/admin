@@ -3,17 +3,16 @@
 import { db } from '@/infrastructure/database/client';
 import { projectMutationAction } from '@/shared/api/action-client';
 import { ApplicationError } from '@/shared/api/errors';
-import { assertFullBookingsAccess } from '@/shared/api/permission';
 import { reverseCouponRedemptionsForOrder } from '@/contexts/coupon/Coupon.lib';
 import { cancelActiveDelivery } from '@/contexts/delivery/Delivery.lib';
 import { assertActiveAssignments } from '@/contexts/employeeAssignment/EmployeeAssignment.lib';
 import { lockEmployees } from '@/contexts/organizationMember/OrganizationMember.lib';
 import { applyStockReturn } from '@/contexts/stockMovement/StockMovement.lib';
-import { ORDER_PERMISSIONS } from '@/contexts/user/User.types';
+import { Permission } from '@/contexts/user/User.types';
 import {
     changeOrderStatus,
     loadOrderItems,
-    lockOwnOrder,
+    lockOrder,
     setOrderAssignedEmployee,
     writeOrderUpdate,
 } from './Order.lib';
@@ -30,13 +29,14 @@ import {
 } from './Order.types';
 import { assertBookingFeasible } from './OrderBooking.lib';
 
-export const changeOrderStatusAction = projectMutationAction(ORDER_PERMISSIONS)
+export const changeOrderStatusAction = projectMutationAction(
+    Permission.MANAGE_ORDERS,
+)
     .inputSchema(ChangeOrderStatusActionInputSchema)
     .action(({ parsedInput, ctx: { userId } }) =>
         db.transaction(async (tx) => {
-            const order = await lockOwnOrder(
+            const order = await lockOrder(
                 tx,
-                userId,
                 parsedInput.id,
                 parsedInput.projectId,
             );
@@ -69,7 +69,7 @@ export const changeOrderStatusAction = projectMutationAction(ORDER_PERMISSIONS)
     );
 
 export const changeOrderScheduleAction = projectMutationAction(
-    ORDER_PERMISSIONS,
+    Permission.MANAGE_ORDERS,
 )
     .inputSchema(ChangeOrderScheduleActionInputSchema)
     .action(async ({ parsedInput, ctx: { userId } }) => {
@@ -81,12 +81,7 @@ export const changeOrderScheduleAction = projectMutationAction(
         }
 
         return db.transaction(async (tx) => {
-            const order = await lockOwnOrder(
-                tx,
-                userId,
-                parsedInput.id,
-                projectId,
-            );
+            const order = await lockOrder(tx, parsedInput.id, projectId);
 
             if (isOrderTerminal(order.status)) {
                 throw new ApplicationError(
@@ -97,8 +92,6 @@ export const changeOrderScheduleAction = projectMutationAction(
             const reassigning =
                 nextEmployeeId !== undefined &&
                 nextEmployeeId !== order.assignedEmployeeId;
-
-            if (reassigning) await assertFullBookingsAccess(userId, projectId);
 
             const employeeId = reassigning
                 ? nextEmployeeId

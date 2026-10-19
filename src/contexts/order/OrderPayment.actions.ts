@@ -5,7 +5,7 @@ import { projectMutationAction } from '@/shared/api/action-client';
 import { PaymentMethod } from '@/contexts/payment/Payment.types';
 import { refundOrderOnline } from '@/contexts/paymentIntent/PaymentIntentRefund.lib';
 import { Permission } from '@/contexts/user/User.types';
-import { lockOwnOrder } from './Order.lib';
+import { lockOrder } from './Order.lib';
 import {
     RecordOrderPaymentActionInputSchema,
     RecordOrderRefundActionInputSchema,
@@ -18,9 +18,8 @@ export const recordOrderPaymentAction = projectMutationAction(
     .inputSchema(RecordOrderPaymentActionInputSchema)
     .action(({ parsedInput, ctx: { userId } }) =>
         db.transaction(async (tx) => {
-            const order = await lockOwnOrder(
+            const order = await lockOrder(
                 tx,
-                userId,
                 parsedInput.id,
                 parsedInput.projectId,
             );
@@ -40,9 +39,8 @@ export const recordOrderRefundAction = projectMutationAction(
     .inputSchema(RecordOrderRefundActionInputSchema)
     .action(({ parsedInput, ctx: { userId } }) =>
         db.transaction(async (tx) => {
-            const order = await lockOwnOrder(
+            const order = await lockOrder(
                 tx,
-                userId,
                 parsedInput.id,
                 parsedInput.projectId,
             );

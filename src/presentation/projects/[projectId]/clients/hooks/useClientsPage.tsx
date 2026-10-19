@@ -4,7 +4,7 @@ import { useProject } from '@/app/providers';
 import { useDebouncedValue } from '@/shared/hooks/useDebouncedValue';
 import { modal } from '@/shared/lib/modal';
 import { type ClientView, useClientsList } from '@/contexts/client';
-import { ORDER_PERMISSIONS, Permission } from '@/contexts/user';
+import { Permission } from '@/contexts/user';
 import dynamic from 'next/dynamic';
 import { parseAsString, useQueryState } from 'nuqs';
 
@@ -38,7 +38,7 @@ export function useClientsPage() {
         search,
         setSearch,
         currency,
-        canCreate: can(ORDER_PERMISSIONS),
+        canCreate: can(Permission.MANAGE_ORDERS),
         onCreate,
         onEdit: canEdit ? onEdit : undefined,
     };

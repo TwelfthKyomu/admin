@@ -4,7 +4,11 @@ import {
 } from '@/contexts/organizationMember/OrganizationMember.types';
 import { Permission } from '@/contexts/user/User.types';
 import { describe, expect, it } from 'vitest';
-import { canInProject, ProjectRole } from './Project.types';
+import {
+    canInProject,
+    PROJECT_ROLE_VALUES,
+    ProjectRole,
+} from './Project.types';
 
 describe('права на деньги', () => {
     it('проводить оплаты и выплаты могут только управляющий и бухгалтер проекта', () => {
@@ -15,7 +19,6 @@ describe('права на деньги', () => {
         for (const role of [
             ProjectRole.EDITOR,
             ProjectRole.VIEWER,
-            ProjectRole.MASTER,
             ProjectRole.COURIER,
         ]) {
             expect(canInProject(role, Permission.MANAGE_FINANCES)).toBe(false);
@@ -56,5 +59,11 @@ describe('права на заказы', () => {
         expect(canInProject(ProjectRole.VIEWER, Permission.MANAGE_ORDERS)).toBe(
             false,
         );
+    });
+});
+
+describe('роли проекта', () => {
+    it('роли «мастер» больше нет', () => {
+        expect(PROJECT_ROLE_VALUES).not.toContain('master');
     });
 });

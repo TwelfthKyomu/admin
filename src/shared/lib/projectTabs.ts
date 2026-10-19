@@ -132,11 +132,6 @@ const ROLE_START_TABS: RoleStartTab[] = [
         tab: 'deliveries',
     },
     {
-        granted: Permission.MANAGE_OWN_BOOKINGS,
-        missing: Permission.MANAGE_ORDERS,
-        tab: 'schedule',
-    },
-    {
         granted: Permission.VIEW_FINANCES,
         missing: Permission.MANAGE_CATALOG,
         tab: 'revenue',
