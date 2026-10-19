@@ -8,6 +8,7 @@ import {
     employeeAssignments,
 } from '@/contexts/employeeAssignment/EmployeeAssignments.table';
 import { aggregateWorkedShiftsByEmployee } from '@/contexts/employeeShift/EmployeeShift.lib';
+import { OrderSource } from '@/contexts/order/Order.types';
 import { aggregateSellerRevenue } from '@/contexts/order/OrderStats.lib';
 import { and, desc, eq, gt, inArray, isNull, lt, lte, or } from 'drizzle-orm';
 import type { PayoutInputs } from './Payout.types';
@@ -15,7 +16,8 @@ import { type PayoutRecord, payouts } from './Payouts.table';
 
 export interface PayrollActivity {
     shifts: Map<string, number>;
-    revenue: Map<string, number>;
+    storeRevenue: Map<string, number>;
+    siteRevenue: Map<string, number>;
     delivered: Map<string, number>;
 }
 
@@ -105,10 +107,14 @@ export async function loadPayrollActivity(
         aggregateDeliveredByCourier(projectId, from, to),
     ]);
 
-    const revenue = new Map<string, number>();
+    const storeRevenue = new Map<string, number>();
+    const siteRevenue = new Map<string, number>();
 
     for (const row of sales) {
         if (!row.sellerId) continue;
+
+        const revenue =
+            row.source === OrderSource.STOREFRONT ? siteRevenue : storeRevenue;
 
         revenue.set(
             row.sellerId,
@@ -118,7 +124,8 @@ export async function loadPayrollActivity(
 
     return {
         shifts: new Map(shifts.map((row) => [row.employeeId, row.count])),
-        revenue,
+        storeRevenue,
+        siteRevenue,
         delivered: new Map(delivered.map((row) => [row.courierId, row.count])),
     };
 }
@@ -130,8 +137,10 @@ export function payoutInputsOf(
     return {
         shiftsCount: activity.shifts.get(assignment.employeeId) ?? 0,
         shiftRateAmount: assignment.shiftRateAmount ?? 0,
-        servicesRevenue: activity.revenue.get(assignment.employeeId) ?? 0,
+        storeRevenue: activity.storeRevenue.get(assignment.employeeId) ?? 0,
         commissionRate: assignment.commissionRate ?? 0,
+        siteRevenue: activity.siteRevenue.get(assignment.employeeId) ?? 0,
+        siteCommissionRate: assignment.siteCommissionRate ?? 0,
         deliveriesCount: activity.delivered.get(assignment.employeeId) ?? 0,
         deliveryRateAmount: assignment.deliveryRateAmount ?? 0,
     };

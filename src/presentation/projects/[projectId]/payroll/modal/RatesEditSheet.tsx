@@ -24,6 +24,7 @@ export const RatesEditSheet = ({ projectId, row }: RatesSheetProps) => {
         values: {
             shiftRateAmount: row.shiftRateAmount,
             commissionRate: row.commissionRate,
+            siteCommissionRate: row.siteCommissionRate || undefined,
             deliveryRateAmount: row.deliveryRateAmount,
         },
         resolver: zodResolver(UpdateRatesFormSchema),
@@ -37,6 +38,7 @@ export const RatesEditSheet = ({ projectId, row }: RatesSheetProps) => {
                 projectId,
                 shiftRateAmount: values.shiftRateAmount ?? 0,
                 commissionRate: courier ? undefined : (values.commissionRate ?? 0),
+                siteCommissionRate: courier ? undefined : (values.siteCommissionRate ?? null),
                 deliveryRateAmount: courier ? (values.deliveryRateAmount ?? 0) : undefined,
             }),
             { success: 'Ставки обновлены' },
@@ -52,7 +54,7 @@ export const RatesEditSheet = ({ projectId, row }: RatesSheetProps) => {
             description={
                 courier
                     ? 'Ставка за смену и оплата за каждую доставку. Используются в расчёте за период.'
-                    : 'Ставка за смену и процент комиссии с услуг. Используются в расчёте за период.'
+                    : 'Ставка за смену, процент с продаж в магазине и с заказов с сайта. Используются в расчёте за период.'
             }
             form={form}
             onSubmit={onSubmit}
@@ -73,14 +75,25 @@ export const RatesEditSheet = ({ projectId, row }: RatesSheetProps) => {
                     placeholder="0,00"
                 />
             ) : (
-                <Input
-                    name="commissionRate"
-                    label="Комиссия с услуг, %"
-                    type="number"
-                    min={0}
-                    max={100}
-                    placeholder="0"
-                />
+                <>
+                    <Input
+                        name="commissionRate"
+                        label="Процент с продаж в магазине, %"
+                        type="number"
+                        min={0}
+                        max={100}
+                        placeholder="0"
+                    />
+                    <Input
+                        name="siteCommissionRate"
+                        label="Процент с заказов с сайта, %"
+                        description="Пусто — за заказы с сайта не начисляется."
+                        type="number"
+                        min={0}
+                        max={100}
+                        placeholder="Не начисляется"
+                    />
+                </>
             )}
         </FormDialog>
     );

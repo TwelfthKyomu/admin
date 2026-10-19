@@ -8,5 +8,9 @@ export function pieceFormula(row: PayrollRowView, currency: Currency): string {
         return `${row.deliveriesCount} дост. × ${fmtMoney(row.deliveryRateAmount, currency)}`;
     }
 
-    return `${fmtMoney(row.servicesRevenue, currency)} выручки × ${row.commissionRate}%`;
+    const store = `${fmtMoney(row.storeRevenue, currency)} × ${row.commissionRate}%`;
+
+    if (row.siteCommissionRate <= 0) return store;
+
+    return `${store} + сайт ${fmtMoney(row.siteRevenue, currency)} × ${row.siteCommissionRate}%`;
 }

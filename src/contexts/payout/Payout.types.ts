@@ -4,8 +4,10 @@ import type { PayoutRecord } from './Payouts.table';
 export interface PayoutInputs {
     shiftsCount: number;
     shiftRateAmount: number;
-    servicesRevenue: number;
+    storeRevenue: number;
     commissionRate: number;
+    siteRevenue: number;
+    siteCommissionRate: number;
     deliveriesCount: number;
     deliveryRateAmount: number;
 }
@@ -13,15 +15,26 @@ export interface PayoutInputs {
 export interface PayoutAmounts {
     shiftsPay: number;
     commissionPay: number;
+    siteCommissionPay: number;
     deliveriesPay: number;
     totalAmount: number;
+}
+
+export function commissionOf(revenue: number, rate: number): number {
+    return Math.floor((revenue * rate) / 100);
 }
 
 export function calcPayout(inputs: PayoutInputs): PayoutAmounts {
     const shiftsPay = inputs.shiftsCount * inputs.shiftRateAmount;
 
-    const commissionPay = Math.floor(
-        (inputs.servicesRevenue * inputs.commissionRate) / 100,
+    const commissionPay = commissionOf(
+        inputs.storeRevenue,
+        inputs.commissionRate,
+    );
+
+    const siteCommissionPay = commissionOf(
+        inputs.siteRevenue,
+        inputs.siteCommissionRate,
     );
 
     const deliveriesPay = inputs.deliveriesCount * inputs.deliveryRateAmount;
@@ -29,9 +42,17 @@ export function calcPayout(inputs: PayoutInputs): PayoutAmounts {
     return {
         shiftsPay,
         commissionPay,
+        siteCommissionPay,
         deliveriesPay,
-        totalAmount: shiftsPay + commissionPay + deliveriesPay,
+        totalAmount:
+            shiftsPay + commissionPay + siteCommissionPay + deliveriesPay,
     };
+}
+
+export function isPreSalesSnapshot(
+    payout: Pick<PayoutRecord, 'siteCommissionRate'>,
+): boolean {
+    return payout.siteCommissionRate === null;
 }
 
 export interface PayrollRowView extends PayoutInputs, PayoutAmounts {

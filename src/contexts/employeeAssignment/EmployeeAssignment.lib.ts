@@ -340,6 +340,7 @@ export async function listProjectEmployees(
             ? {
                   shiftRateAmount: assignment.shiftRateAmount,
                   commissionRate: assignment.commissionRate,
+                  siteCommissionRate: assignment.siteCommissionRate,
                   deliveryRateAmount: assignment.deliveryRateAmount,
               }
             : null,
