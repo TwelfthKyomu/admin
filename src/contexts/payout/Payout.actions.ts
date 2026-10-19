@@ -30,7 +30,11 @@ import {
     PayrollPreviewActionInputSchema,
     RecordPayoutActionInputSchema,
 } from './Payout.schema';
-import { calcPayout, type PayrollRowView } from './Payout.types';
+import {
+    calcPayout,
+    isPreSalesSnapshot,
+    type PayrollRowView,
+} from './Payout.types';
 import { payouts } from './Payouts.table';
 
 export const payrollPreviewAction = projectReadAction(Permission.VIEW_FINANCES)
@@ -83,12 +87,15 @@ export const payrollPreviewAction = projectReadAction(Permission.VIEW_FINANCES)
                 kind: assignment.kind,
                 shiftsCount: shown.shiftsCount,
                 shiftRateAmount: shown.shiftRateAmount,
-                servicesRevenue: shown.servicesRevenue,
+                storeRevenue: shown.storeRevenue,
                 commissionRate: shown.commissionRate,
+                siteRevenue: shown.siteRevenue,
+                siteCommissionRate: shown.siteCommissionRate ?? 0,
                 deliveriesCount: shown.deliveriesCount,
                 deliveryRateAmount: shown.deliveryRateAmount,
                 shiftsPay: shown.shiftsPay,
                 commissionPay: shown.commissionPay,
+                siteCommissionPay: shown.siteCommissionPay,
                 deliveriesPay: shown.deliveriesPay,
                 totalAmount: shown.totalAmount,
                 payoutId: payout?.id ?? null,
@@ -98,7 +105,9 @@ export const payrollPreviewAction = projectReadAction(Permission.VIEW_FINANCES)
                     0,
                 ),
                 recalculatedTotal:
-                    snapshot && snapshot.totalAmount !== live.totalAmount
+                    snapshot &&
+                    !isPreSalesSnapshot(snapshot) &&
+                    snapshot.totalAmount !== live.totalAmount
                         ? live.totalAmount
                         : null,
             };

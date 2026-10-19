@@ -99,6 +99,7 @@ export const updateAssignmentRatesAction = projectMutationAction(
             {
                 shiftRateAmount: parsedInput.shiftRateAmount,
                 commissionRate: parsedInput.commissionRate,
+                siteCommissionRate: parsedInput.siteCommissionRate,
                 deliveryRateAmount: parsedInput.deliveryRateAmount,
             },
             'Назначение не найдено',

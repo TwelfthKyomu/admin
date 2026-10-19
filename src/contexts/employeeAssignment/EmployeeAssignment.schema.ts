@@ -24,5 +24,6 @@ export const UpdateAssignmentRatesActionInputSchema = z.object({
     projectId: idSchema,
     shiftRateAmount: z.nullish(moneyAmountSchema),
     commissionRate: z.nullish(z.int().check(z.gte(0), z.lte(PERCENT_MAX))),
+    siteCommissionRate: z.nullish(z.int().check(z.gte(0), z.lte(PERCENT_MAX))),
     deliveryRateAmount: z.nullish(moneyAmountSchema),
 });

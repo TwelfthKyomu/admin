@@ -17,7 +17,12 @@ export const RatesCell = ({ kind, rates, currency }: RatesCellProps) => {
         ? `${money(rates.shiftRateAmount)} за смену`
         : 'без ставки';
 
-    let extra = rates.commissionRate ? `комиссия ${rates.commissionRate}%` : 'без комиссии';
+    let extra = [
+        rates.commissionRate ? `продажи ${rates.commissionRate}%` : 'без процента с продаж',
+        rates.siteCommissionRate ? `сайт ${rates.siteCommissionRate}%` : undefined,
+    ]
+        .filter(Boolean)
+        .join(', ');
 
     if (kind === EmployeeKind.COURIER) {
         extra = rates.deliveryRateAmount

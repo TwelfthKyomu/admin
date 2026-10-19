@@ -20,6 +20,7 @@ export const EMPLOYEE_KIND_VALUES = enumValues(EmployeeKind);
 export interface ProjectEmployeeRatesView {
     shiftRateAmount: number | null;
     commissionRate: number | null;
+    siteCommissionRate: number | null;
     deliveryRateAmount: number | null;
 }
 

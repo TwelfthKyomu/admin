@@ -37,11 +37,18 @@ export const payouts = pgTable(
         shiftsPay: bigint('shifts_pay', { mode: 'number' })
             .notNull()
             .default(0),
-        servicesRevenue: bigint('services_revenue', { mode: 'number' })
+        storeRevenue: bigint('store_revenue', { mode: 'number' })
             .notNull()
             .default(0),
         commissionRate: integer('commission_rate').notNull().default(0),
         commissionPay: bigint('commission_pay', { mode: 'number' })
+            .notNull()
+            .default(0),
+        siteRevenue: bigint('site_revenue', { mode: 'number' })
+            .notNull()
+            .default(0),
+        siteCommissionRate: integer('site_commission_rate'),
+        siteCommissionPay: bigint('site_commission_pay', { mode: 'number' })
             .notNull()
             .default(0),
         deliveriesCount: integer('deliveries_count').notNull().default(0),

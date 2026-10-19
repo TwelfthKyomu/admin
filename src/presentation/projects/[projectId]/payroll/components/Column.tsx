@@ -58,7 +58,7 @@ export const COLUMNS = ({
                     {fmtMoney(
                         original.kind === EmployeeKind.COURIER
                             ? original.deliveriesPay
-                            : original.commissionPay,
+                            : original.commissionPay + original.siteCommissionPay,
                         currency,
                     )}
                 </div>

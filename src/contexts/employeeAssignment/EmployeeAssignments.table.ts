@@ -38,6 +38,7 @@ export const employeeAssignments = pgTable(
         shiftRateAmount: bigint('shift_rate_amount', { mode: 'number' }),
 
         commissionRate: integer('commission_rate'),
+        siteCommissionRate: integer('site_commission_rate'),
         deliveryRateAmount: bigint('delivery_rate_amount', { mode: 'number' }),
         startedAt: timestamp('started_at').notNull().defaultNow(),
         endedAt: timestamp('ended_at'),

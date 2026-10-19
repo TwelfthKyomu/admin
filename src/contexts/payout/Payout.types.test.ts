@@ -1,20 +1,23 @@
 import { describe, expect, it } from 'vitest';
-import { calcPayout, payoutCovers } from './Payout.types';
+import { calcPayout, isPreSalesSnapshot, payoutCovers } from './Payout.types';
 
 describe('calcPayout', () => {
-    it('складывает смены, процент с услуг и доставки', () => {
+    it('складывает смены, процент с продаж в магазине, с сайта и доставки', () => {
         expect(
             calcPayout({
                 shiftsCount: 5,
                 shiftRateAmount: 200_000,
-                servicesRevenue: 1_234_567,
+                storeRevenue: 1_234_567,
                 commissionRate: 30,
+                siteRevenue: 0,
+                siteCommissionRate: 0,
                 deliveriesCount: 4,
                 deliveryRateAmount: 15_000,
             }),
         ).toEqual({
             shiftsPay: 1_000_000,
             commissionPay: 370_370,
+            siteCommissionPay: 0,
             deliveriesPay: 60_000,
             totalAmount: 1_430_370,
         });
@@ -24,13 +27,58 @@ describe('calcPayout', () => {
         const { commissionPay } = calcPayout({
             shiftsCount: 0,
             shiftRateAmount: 0,
-            servicesRevenue: 1001,
+            storeRevenue: 1001,
             commissionRate: 50,
+            siteRevenue: 0,
+            siteCommissionRate: 0,
             deliveriesCount: 0,
             deliveryRateAmount: 0,
         });
 
         expect(commissionPay).toBe(500);
+    });
+
+    it('процент с сайта считается отдельно и тоже округляется вниз', () => {
+        expect(
+            calcPayout({
+                shiftsCount: 0,
+                shiftRateAmount: 0,
+                storeRevenue: 10_000,
+                commissionRate: 10,
+                siteRevenue: 1_001,
+                siteCommissionRate: 50,
+                deliveriesCount: 0,
+                deliveryRateAmount: 0,
+            }),
+        ).toEqual({
+            shiftsPay: 0,
+            commissionPay: 1_000,
+            siteCommissionPay: 500,
+            deliveriesPay: 0,
+            totalAmount: 1_500,
+        });
+    });
+
+    it('пустой процент с сайта — за заказы с сайта ничего', () => {
+        const { siteCommissionPay } = calcPayout({
+            shiftsCount: 0,
+            shiftRateAmount: 0,
+            storeRevenue: 0,
+            commissionRate: 0,
+            siteRevenue: 50_000,
+            siteCommissionRate: 0,
+            deliveriesCount: 0,
+            deliveryRateAmount: 0,
+        });
+
+        expect(siteCommissionPay).toBe(0);
+    });
+});
+
+describe('isPreSalesSnapshot', () => {
+    it('выплата до перехода на процент с продаж — без пересчёта', () => {
+        expect(isPreSalesSnapshot({ siteCommissionRate: null })).toBe(true);
+        expect(isPreSalesSnapshot({ siteCommissionRate: 0 })).toBe(false);
     });
 });
 

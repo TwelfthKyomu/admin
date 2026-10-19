@@ -6,6 +6,7 @@ export const UpdateRatesFormSchema = z.pick(
     {
         shiftRateAmount: true,
         commissionRate: true,
+        siteCommissionRate: true,
         deliveryRateAmount: true,
     },
 );
