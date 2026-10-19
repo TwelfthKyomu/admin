@@ -9,9 +9,9 @@ export const Permission = {
     MANAGE_CATALOG: 'manage_catalog',
     VIEW_CATALOG: 'view_catalog',
 
-    MANAGE_BOOKINGS: 'manage_bookings',
+    MANAGE_ORDERS: 'manage_orders',
     MANAGE_OWN_BOOKINGS: 'manage_own_bookings',
-    VIEW_BOOKINGS: 'view_bookings',
+    VIEW_ORDERS: 'view_orders',
 
     MANAGE_DELIVERIES: 'manage_deliveries',
     MANAGE_OWN_DELIVERIES: 'manage_own_deliveries',
@@ -25,14 +25,14 @@ export type Permission = (typeof Permission)[keyof typeof Permission];
 
 export const ALL_PERMISSIONS: Permission[] = Object.values(Permission);
 
-export const BOOKING_PERMISSIONS: Permission[] = [
-    Permission.MANAGE_BOOKINGS,
+export const ORDER_PERMISSIONS: Permission[] = [
+    Permission.MANAGE_ORDERS,
     Permission.MANAGE_OWN_BOOKINGS,
 ];
 
-export const BOOKING_READ_PERMISSIONS: Permission[] = [
-    ...BOOKING_PERMISSIONS,
-    Permission.VIEW_BOOKINGS,
+export const ORDER_READ_PERMISSIONS: Permission[] = [
+    ...ORDER_PERMISSIONS,
+    Permission.VIEW_ORDERS,
 ];
 
 export const DELIVERY_PERMISSIONS: Permission[] = [
@@ -46,12 +46,12 @@ export const DELIVERY_READ_PERMISSIONS: Permission[] = [
 ];
 
 export const SHIFT_WRITE_PERMISSIONS: Permission[] = [
-    ...BOOKING_PERMISSIONS,
+    ...ORDER_PERMISSIONS,
     Permission.MANAGE_OWN_DELIVERIES,
 ];
 
 export const SHIFT_READ_PERMISSIONS: Permission[] = [
-    ...BOOKING_READ_PERMISSIONS,
+    ...ORDER_READ_PERMISSIONS,
     Permission.MANAGE_OWN_DELIVERIES,
 ];
 
@@ -68,13 +68,13 @@ export const CATALOG_READ_PERMISSIONS: Permission[] = [
 ];
 
 export const CLIENT_READ_PERMISSIONS: Permission[] = [
-    ...BOOKING_READ_PERMISSIONS,
+    ...ORDER_READ_PERMISSIONS,
     Permission.VIEW_FINANCES,
 ];
 
 export const TASK_WRITE_PERMISSIONS: Permission[] = [
     Permission.MANAGE_MEMBERS,
-    Permission.MANAGE_BOOKINGS,
+    Permission.MANAGE_ORDERS,
 ];
 
 export const INTEGRATION_READ_PERMISSIONS: Permission[] = [

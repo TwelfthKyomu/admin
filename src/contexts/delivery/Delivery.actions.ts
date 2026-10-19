@@ -16,8 +16,8 @@ import {
 import { mailOrderShipped } from '@/contexts/order/OrderMail.lib';
 import { lockEmployees } from '@/contexts/organizationMember/OrganizationMember.lib';
 import {
-    BOOKING_READ_PERMISSIONS,
     DELIVERY_READ_PERMISSIONS,
+    ORDER_READ_PERMISSIONS,
     Permission,
 } from '@/contexts/user/User.types';
 import { eq } from 'drizzle-orm';
@@ -70,7 +70,7 @@ export const courierStatsAction = projectReadAction(Permission.VIEW_FINANCES)
         loadCourierStats(projectId, from, to),
     );
 
-export const orderDeliveryAction = projectReadAction(BOOKING_READ_PERMISSIONS)
+export const orderDeliveryAction = projectReadAction(ORDER_READ_PERMISSIONS)
     .inputSchema(OrderDeliveryActionInputSchema)
     .action(({ parsedInput: { projectId, orderId } }) =>
         findOrderDelivery(orderId, projectId),

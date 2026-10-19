@@ -125,7 +125,7 @@ async function findOrderManagerEmails(
                 .map((row) => row.email),
             ...projectRows
                 .filter((row) =>
-                    canInProject(row.role, Permission.MANAGE_BOOKINGS),
+                    canInProject(row.role, Permission.MANAGE_ORDERS),
                 )
                 .map((row) => row.email),
         ]),

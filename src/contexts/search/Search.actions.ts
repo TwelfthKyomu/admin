@@ -16,8 +16,8 @@ import { SEARCH_RESULTS_LIMIT, SearchActionInputSchema } from './Search.schema';
 import type { SearchResults } from './Search.types';
 
 const FULL_BOOKING_ACCESS: Permission[] = [
-    Permission.MANAGE_BOOKINGS,
-    Permission.VIEW_BOOKINGS,
+    Permission.MANAGE_ORDERS,
+    Permission.VIEW_ORDERS,
 ];
 
 const CLIENT_ACCESS: Permission[] = [

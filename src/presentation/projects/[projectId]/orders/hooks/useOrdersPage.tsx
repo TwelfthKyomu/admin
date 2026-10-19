@@ -36,7 +36,7 @@ export function useOrdersPage() {
 
     const onOpen = (orderId: string) => router.push(ROUTES.project(projectId, 'orders', orderId));
 
-    const canCreateSale = can(Permission.MANAGE_BOOKINGS);
+    const canCreateSale = can(Permission.MANAGE_ORDERS);
 
     const onCreateSale = () =>
         modal.open(

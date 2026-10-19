@@ -16,7 +16,7 @@ export const Buttons = () => {
     const { tab, projectId, workingEmployees, builder } = useScheduleContext();
     const { can } = useProject();
 
-    if (!can(Permission.MANAGE_BOOKINGS)) return null;
+    if (!can(Permission.MANAGE_ORDERS)) return null;
 
     const openGenerateShifts = () =>
         modal.open(

@@ -173,7 +173,7 @@ export function useMembersPage() {
         currentUserId: user.id,
         currency,
         canManageRoles: can(Permission.MANAGE_ROLES),
-        canManageStaff: can(Permission.MANAGE_BOOKINGS),
+        canManageStaff: can(Permission.MANAGE_ORDERS),
         onInvite,
         onChangeRole,
         onToggleBookable,

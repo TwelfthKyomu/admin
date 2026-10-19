@@ -1,9 +1,9 @@
 import {
-    BOOKING_READ_PERMISSIONS,
     CATALOG_READ_PERMISSIONS,
     CLIENT_READ_PERMISSIONS,
     DELIVERY_READ_PERMISSIONS,
     hasPermission,
+    ORDER_READ_PERMISSIONS,
     Permission,
     SHIFT_READ_PERMISSIONS,
 } from '@/contexts/user/User.types';
@@ -58,7 +58,7 @@ export const PROJECT_TAB_META: ProjectTabMeta[] = [
     {
         value: 'orders',
         group: 'selling',
-        permissions: BOOKING_READ_PERMISSIONS,
+        permissions: ORDER_READ_PERMISSIONS,
     },
     {
         value: 'deliveries',
@@ -88,7 +88,7 @@ export const PROJECT_TAB_META: ProjectTabMeta[] = [
     {
         value: 'schedule',
         group: 'schedule',
-        permissions: BOOKING_READ_PERMISSIONS,
+        permissions: ORDER_READ_PERMISSIONS,
     },
     {
         value: 'replacements',
@@ -133,7 +133,7 @@ const ROLE_START_TABS: RoleStartTab[] = [
     },
     {
         granted: Permission.MANAGE_OWN_BOOKINGS,
-        missing: Permission.MANAGE_BOOKINGS,
+        missing: Permission.MANAGE_ORDERS,
         tab: 'schedule',
     },
     {

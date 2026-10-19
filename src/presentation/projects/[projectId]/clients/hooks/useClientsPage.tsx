@@ -4,7 +4,7 @@ import { useProject } from '@/app/providers';
 import { useDebouncedValue } from '@/shared/hooks/useDebouncedValue';
 import { modal } from '@/shared/lib/modal';
 import { type ClientView, useClientsList } from '@/contexts/client';
-import { BOOKING_PERMISSIONS, Permission } from '@/contexts/user';
+import { ORDER_PERMISSIONS, Permission } from '@/contexts/user';
 import dynamic from 'next/dynamic';
 import { parseAsString, useQueryState } from 'nuqs';
 
@@ -21,7 +21,7 @@ export function useClientsPage() {
     const [search, setSearch] = useQueryState('q', parseAsString.withDefault(''));
     const debouncedSearch = useDebouncedValue(search);
     const query = useClientsList({ projectId, search: debouncedSearch.trim() });
-    const canEdit = can(Permission.MANAGE_BOOKINGS);
+    const canEdit = can(Permission.MANAGE_ORDERS);
 
     const onCreate = () => modal.open(<ClientCreateModal projectId={projectId} />);
 
@@ -38,7 +38,7 @@ export function useClientsPage() {
         search,
         setSearch,
         currency,
-        canCreate: can(BOOKING_PERMISSIONS),
+        canCreate: can(ORDER_PERMISSIONS),
         onCreate,
         onEdit: canEdit ? onEdit : undefined,
     };
