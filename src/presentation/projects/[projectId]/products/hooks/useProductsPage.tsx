@@ -11,6 +11,10 @@ const ProductCreateModal = dynamic(() =>
     import('../modal/ProductCreateModal').then((m) => m.ProductCreateModal),
 );
 
+const ProductImportModal = dynamic(() =>
+    import('../modal/ProductImportModal').then((m) => m.ProductImportModal),
+);
+
 const ProductEditSheet = dynamic(() =>
     import('../modal/ProductEditSheet').then((m) => m.ProductEditSheet),
 );
@@ -23,6 +27,8 @@ export function useProductsPage() {
     const { mutateAsync, isPending } = useDeleteProduct();
 
     const onCreate = () => modal.open(<ProductCreateModal projectId={projectId} />);
+
+    const onImport = () => modal.open(<ProductImportModal projectId={projectId} />);
 
     const onEdit = (product: ProductView) =>
         modal.open(
@@ -63,6 +69,7 @@ export function useProductsPage() {
         search,
         setSearch,
         onCreate,
+        onImport,
         onEdit,
         onDelete,
         onBulkDelete,

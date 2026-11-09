@@ -4,6 +4,7 @@ import {
     BARCODE_MAX,
     BARCODE_MIN,
     CODE_MAX,
+    DISPLAY_NAME_MAX,
     IMAGES_PER_ENTITY_MAX,
     LABEL_MAX,
     SKU_MAX,
@@ -13,6 +14,7 @@ import {
     TITLE_MAX,
 } from '@/shared/constants/default';
 import {
+    BARCODE_PATTERN,
     imageUrlField,
     LOWER_CODE_PATTERN,
     slugField,
@@ -33,6 +35,7 @@ import {
     PRODUCT_TYPE_VALUES,
     ProductType,
 } from './Product.types';
+import { PRODUCT_IMPORT_ROWS_MAX } from './ProductImport.types';
 
 const PhysicalAttributesSchema = z.object({
     weightGrams: z.nullish(z.int().check(z.nonnegative())),
@@ -58,7 +61,7 @@ const barcodeSchema = z
         z.trim(),
         z.minLength(BARCODE_MIN),
         z.maxLength(BARCODE_MAX),
-        z.regex(/^[0-9A-Za-z-]+$/, 'Штрихкод — цифры и латинские буквы'),
+        z.regex(BARCODE_PATTERN, 'Штрихкод — цифры и латинские буквы'),
     );
 
 const CommonProductFields = {
@@ -173,3 +176,28 @@ export function parseProductAttributes(
 
     return result.data;
 }
+
+export const ImportProductsActionInputSchema = z.object({
+    projectId: idSchema,
+    warehouseId: idSchema,
+    rows: z
+        .array(
+            z.object({
+                name: z
+                    .string()
+                    .check(z.trim(), z.minLength(1), z.maxLength(LABEL_MAX)),
+                sku: skuSchema,
+                price: z.int().check(z.gt(0)),
+                costAmount: z.nullable(z.int().check(z.gte(0))),
+                barcode: z.nullable(barcodeSchema),
+                category: z.nullable(
+                    z.string().check(z.maxLength(DISPLAY_NAME_MAX)),
+                ),
+                stock: z.nullable(z.int().check(z.gte(0))),
+                description: z.nullable(
+                    z.string().check(z.maxLength(TEXT_MAX)),
+                ),
+            }),
+        )
+        .check(z.minLength(1), z.maxLength(PRODUCT_IMPORT_ROWS_MAX)),
+});

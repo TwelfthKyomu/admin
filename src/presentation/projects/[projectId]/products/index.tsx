@@ -2,23 +2,40 @@
 
 import { CreateButton, QueryBoundary } from '@/shared/components/common';
 import { Button, Input, Table } from '@/ui/Base';
+import { Upload } from 'lucide-react';
 import { COLUMNS } from './components/Column';
 import { useProductsPage } from './hooks/useProductsPage';
 
 export const ProductsPage = () => {
-    const { query, search, setSearch, onCreate, onEdit, onDelete, onBulkDelete, isDeleting } =
-        useProductsPage();
+    const {
+        query,
+        search,
+        setSearch,
+        onCreate,
+        onImport,
+        onEdit,
+        onDelete,
+        onBulkDelete,
+        isDeleting,
+    } = useProductsPage();
 
     return (
         <>
             <div className="mb-3 flex flex-wrap items-center gap-2">
                 <Input
                     className="max-w-xs"
-                    placeholder="Поиск по названию или артикулу…"
+                    placeholder="Название, артикул или штрихкод…"
                     value={search}
                     onChange={(event) => setSearch(event.target.value)}
                 />
-                <div className="ml-auto">
+                <div className="ml-auto flex gap-2">
+                    <Button
+                        variant="outline"
+                        onClick={onImport}
+                    >
+                        <Upload />
+                        Импорт
+                    </Button>
                     <CreateButton
                         label="Товар"
                         onClick={onCreate}

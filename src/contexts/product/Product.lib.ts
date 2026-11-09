@@ -38,6 +38,7 @@ type ProductRelations = Pick<ProductView, 'variants' | 'badges' | 'soldCount'>;
 export async function assertProductLimit(
     organizationId: string,
     projectId: string,
+    adding = 1,
 ): Promise<void> {
     const [used] = await db
         .select({ value: count() })
@@ -49,7 +50,7 @@ export async function assertProductLimit(
     await assertPlanLimit(
         organizationId,
         'productsPerProject',
-        used?.value ?? 0,
+        (used?.value ?? 0) + adding - 1,
         'товаров',
     );
 }

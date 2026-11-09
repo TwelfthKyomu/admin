@@ -26,6 +26,10 @@ const CONSTRAINT_MESSAGES: Record<string, string> = {
     products_project_sku_unique: 'Товар с таким SKU уже есть',
     product_variants_project_sku_unique: 'Вариант с таким SKU уже есть',
     product_variants_combo_unique: 'Такая комбинация варианта уже есть',
+    products_project_barcode_unique: 'Товар с таким штрихкодом уже есть',
+    product_variants_project_barcode_unique:
+        'Вариант с таким штрихкодом уже есть',
+    warehouses_project_name_unique: 'Склад с таким названием уже есть',
     project_categories_project_parent_slug_unique:
         'Категория с таким slug уже есть на этом уровне',
     project_badges_project_code_unique: 'Бейдж с таким кодом уже есть',

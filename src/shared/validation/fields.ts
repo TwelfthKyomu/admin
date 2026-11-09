@@ -3,7 +3,9 @@ import * as z from 'zod/mini';
 
 export const SLUG_PATTERN = /^[a-z0-9]+(?:-[a-z0-9]+)*$/;
 
-const UPPER_CODE_PATTERN = /^[A-Z0-9-]+$/;
+export const UPPER_CODE_PATTERN = /^[A-Z0-9-]+$/;
+
+export const BARCODE_PATTERN = /^[0-9A-Za-z-]+$/;
 
 export const LOWER_CODE_PATTERN = /^[a-z0-9](?:[a-z0-9-]*[a-z0-9])?$/;
 

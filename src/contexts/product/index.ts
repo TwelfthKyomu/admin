@@ -4,6 +4,8 @@ import type { ProductView as ServerProductView } from './Products.table';
 export * from './Product.actions';
 export * from './Product.schema';
 export * from './Product.types';
+export * from './ProductImport.actions';
+export * from './ProductImport.types';
 export * from './useProducts';
 
 export type ProductView = NullToOptional<ServerProductView>;

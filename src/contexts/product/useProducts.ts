@@ -9,6 +9,7 @@ import {
     productsAction,
     updateProductAction,
 } from './Product.actions';
+import { importProductsAction } from './ProductImport.actions';
 
 interface ListOptions {
     projectId: string;
@@ -33,3 +34,4 @@ export function useProductsList(opts: ListOptions) {
 export const useCreateProduct = makeMutation(createProductAction);
 export const useUpdateProduct = makeMutation(updateProductAction);
 export const useDeleteProduct = makeMutation(deleteProductAction);
+export const useImportProducts = makeMutation(importProductsAction);

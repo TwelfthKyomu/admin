@@ -1,12 +1,6 @@
+import { unparse } from 'papaparse';
+
 type CsvCell = string | number | null | undefined;
-
-const DELIMITER = ';';
-
-function escapeCell(cell: CsvCell): string {
-    const text = cell === null || cell === undefined ? '' : String(cell);
-
-    return /[";\n\r]/.test(text) ? `"${text.replaceAll('"', '""')}"` : text;
-}
 
 export function csvAmount(minorUnits: number): string {
     return (minorUnits / 100).toFixed(2).replace('.', ',');
@@ -17,11 +11,12 @@ export function downloadCsv(
     header: string[],
     rows: CsvCell[][],
 ): void {
-    const lines = [header, ...rows].map((row) =>
-        row.map(escapeCell).join(DELIMITER),
+    const text = unparse(
+        { fields: header, data: rows },
+        { delimiter: ';', newline: '\r\n' },
     );
 
-    const blob = new Blob([`\uFEFF${lines.join('\r\n')}`], {
+    const blob = new Blob([`\uFEFF${text}`], {
         type: 'text/csv;charset=utf-8',
     });
 
