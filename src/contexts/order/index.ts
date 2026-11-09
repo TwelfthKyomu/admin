@@ -1,16 +1,16 @@
 import type { NullToOptional } from '@/shared/lib/optional';
+import type { OrderListView as ServerOrderListView } from './Order.types';
 import type {
     CurrencyTotalsView as ServerCurrencyTotalsView,
     DashboardStatsView as ServerDashboardStatsView,
     EmployeeRevenueView as ServerEmployeeRevenueView,
     MyDayView as ServerMyDayView,
     MySalesView as ServerMySalesView,
-    OrderListView as ServerOrderListView,
     ProjectRevenueView as ServerProjectRevenueView,
     RecentOrderView as ServerRecentOrderView,
     SalesSummaryView as ServerSalesSummaryView,
     TopOrderItemView as ServerTopOrderItemView,
-} from './Order.types';
+} from './OrderStats.types';
 import type {
     OrderEventView as ServerOrderEventView,
     OrderItemView as ServerOrderItemView,
@@ -23,6 +23,7 @@ export * from './Order.types';
 export * from './OrderPayment.actions';
 export * from './OrderSeller.actions';
 export * from './OrderStats.actions';
+export * from './OrderStats.types';
 export * from './OrderStatus.actions';
 export * from './useOrders';
 

@@ -1,7 +1,7 @@
 import 'server-only';
 
 import { db, type Tx } from '@/infrastructure/database/client';
-import { chatUploadUrl } from '@/infrastructure/storage/uploads';
+import { chatUploadUrl } from '@/infrastructure/storage/uploadUrls';
 import { ApplicationError } from '@/shared/api/errors';
 import { insertOne } from '@/shared/api/repository';
 import { PAGE_SIZE_HUGE } from '@/shared/constants/default';

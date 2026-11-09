@@ -1,9 +1,9 @@
 import 'server-only';
 
 import { db } from '@/infrastructure/database/client';
-import { uploadUrl } from '@/infrastructure/storage/uploads';
+import { uploadUrl } from '@/infrastructure/storage/uploadUrls';
 import { searchFilters } from '@/shared/api/repository';
-import { loadSoldCounts, loadVariants } from '@/contexts/product/Product.lib';
+import { loadSoldCounts } from '@/contexts/product/Product.lib';
 import {
     editionSizeOf,
     ProductStatus,
@@ -11,6 +11,7 @@ import {
     SELLABLE_PRODUCT_STATUSES,
 } from '@/contexts/product/Product.types';
 import { productBadges, products } from '@/contexts/product/Products.table';
+import { loadVariants } from '@/contexts/product/ProductVariant.lib';
 import { projectBadges } from '@/contexts/projectBadge/ProjectBadges.table';
 import { projectCategories } from '@/contexts/projectCategory/ProjectCategories.table';
 import { loadReservedStock } from '@/contexts/stockMovement/StockMovement.lib';

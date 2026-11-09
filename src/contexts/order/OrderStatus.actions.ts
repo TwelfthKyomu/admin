@@ -3,7 +3,7 @@
 import { db } from '@/infrastructure/database/client';
 import { projectMutationAction } from '@/shared/api/action-client';
 import { ApplicationError } from '@/shared/api/errors';
-import { reverseCouponRedemptionsForOrder } from '@/contexts/coupon/Coupon.lib';
+import { reverseCouponRedemptionsForOrder } from '@/contexts/coupon/CouponRedemption.lib';
 import { cancelActiveDelivery } from '@/contexts/delivery/Delivery.lib';
 import { findMemberIdByUserId } from '@/contexts/organizationMember/OrganizationMember.lib';
 import { applyStockReturn } from '@/contexts/stockMovement/StockMovement.lib';

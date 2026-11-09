@@ -2,7 +2,7 @@
 
 import { organizationMemberAction } from '@/shared/api/action-client';
 import { listProjectPermissions } from '@/shared/api/permission';
-import { listCourierDeliveriesInWork } from '@/contexts/delivery/Delivery.lib';
+import { listCourierDeliveriesInWork } from '@/contexts/delivery/DeliveryCourier.lib';
 import { findActiveAssignmentsOfEmployee } from '@/contexts/employeeAssignment/EmployeeAssignment.lib';
 import { listEmployeeShiftsBetween } from '@/contexts/employeeShift/EmployeeShift.lib';
 import { findMemberIdByUserId } from '@/contexts/organizationMember/OrganizationMember.lib';
@@ -13,13 +13,13 @@ import {
     MyDayActionInputSchema,
     MySalesActionInputSchema,
 } from './Order.schema';
+import { aggregateSellerRevenue, loadDashboardStats } from './OrderStats.lib';
 import {
     type DashboardView,
     type MyDayView,
     type MySalesView,
     summarizeSales,
-} from './Order.types';
-import { aggregateSellerRevenue, loadDashboardStats } from './OrderStats.lib';
+} from './OrderStats.types';
 
 export const dashboardAction = organizationMemberAction().action(
     async ({ ctx: { userId, organizationId } }): Promise<DashboardView> => {

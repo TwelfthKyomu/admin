@@ -1,6 +1,7 @@
 import { getServerSession } from '@/infrastructure/auth/getServerSession';
 import { detectImageType } from '@/infrastructure/storage/fileType';
-import { saveProjectFile, uploadUrl } from '@/infrastructure/storage/uploads';
+import { saveProjectFile } from '@/infrastructure/storage/uploads';
+import { uploadUrl } from '@/infrastructure/storage/uploadUrls';
 import { requireProjectPermission } from '@/shared/api/permission';
 import { HTTP } from '@/shared/constants/http';
 import { getErrorMessage } from '@/shared/lib/errors';

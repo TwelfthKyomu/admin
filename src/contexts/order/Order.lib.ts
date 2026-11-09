@@ -1,22 +1,19 @@
 import 'server-only';
 
-import { db, type Reader, type Tx } from '@/infrastructure/database/client';
+import { db, type Tx } from '@/infrastructure/database/client';
 import { ApplicationError } from '@/shared/api/errors';
 import {
     findInProject,
     insertOne,
     lockInProject,
 } from '@/shared/api/repository';
-import type { Currency } from '@/shared/constants/currency';
 import { addClientSpending } from '@/contexts/client/Client.lib';
 import { hasOpenDelivery } from '@/contexts/delivery/Delivery.lib';
-import { ProductType } from '@/contexts/product/Product.types';
-import { products, productVariants } from '@/contexts/product/Products.table';
 import {
     applyStockSale,
     reserveOrderStock,
 } from '@/contexts/stockMovement/StockMovement.lib';
-import { and, desc, eq, inArray, isNull } from 'drizzle-orm';
+import { and, desc, eq, inArray } from 'drizzle-orm';
 import type { OrderItemInput } from './Order.schema';
 import {
     getNextOrderStatuses,
@@ -27,6 +24,7 @@ import {
     recomputePaymentStatus,
     stockLinesFromOrderItems,
 } from './Order.types';
+import { loadOrderItems } from './OrderItem.lib';
 import {
     type NewOrderEventRecord,
     type NewOrderRecord,
@@ -52,16 +50,6 @@ export function lockOrder(
     projectId: string,
 ): Promise<OrderRecord> {
     return lockInProject(tx, orders, id, projectId, 'Заказ не найден');
-}
-
-export function loadOrderItems(
-    orderId: string,
-    executor: Reader = db,
-): Promise<OrderItemRecord[]> {
-    return executor
-        .select()
-        .from(orderItems)
-        .where(eq(orderItems.orderId, orderId));
 }
 
 export async function findClientOrders(
@@ -96,98 +84,6 @@ export async function findClientOrders(
         order,
         items: itemsByOrder.get(order.id) ?? [],
     }));
-}
-
-export async function resolveOrderItems(
-    projectId: string,
-    items: OrderItemInput[],
-    currency: Currency,
-): Promise<OrderItemInput[]> {
-    const productIds = [
-        ...new Set(items.flatMap((item) => item.productId ?? [])),
-    ];
-
-    const [productRows, variantRows] = await Promise.all([
-        db
-            .select({
-                id: products.id,
-                type: products.type,
-                currency: products.currency,
-            })
-            .from(products)
-            .where(
-                and(
-                    eq(products.projectId, projectId),
-                    inArray(products.id, productIds),
-                    isNull(products.deletedAt),
-                ),
-            ),
-        db
-            .select({
-                id: productVariants.id,
-                productId: productVariants.productId,
-            })
-            .from(productVariants)
-            .where(
-                and(
-                    eq(productVariants.projectId, projectId),
-                    inArray(productVariants.productId, productIds),
-                    eq(productVariants.isActive, true),
-                ),
-            ),
-    ]);
-
-    const productById = new Map(productRows.map((row) => [row.id, row]));
-
-    const productOfVariant = new Map(
-        variantRows.map((row) => [row.id, row.productId]),
-    );
-
-    const withVariants = new Set(variantRows.map((row) => row.productId));
-
-    return items.map((item) => {
-        if (!item.productId) {
-            if (item.variantId) {
-                throw new ApplicationError(
-                    `Вариант позиции «${item.name}» указан без товара`,
-                );
-            }
-
-            return item;
-        }
-
-        const product = productById.get(item.productId);
-
-        if (!product) {
-            throw new ApplicationError(
-                `Товар позиции «${item.name}» не найден в проекте`,
-            );
-        }
-        if (product.currency !== currency) {
-            throw new ApplicationError(
-                `Цена «${item.name}» указана в ${product.currency}, а заказ — в ${currency}. Поменяйте валюту товара.`,
-            );
-        }
-        if (
-            item.variantId &&
-            productOfVariant.get(item.variantId) !== product.id
-        ) {
-            throw new ApplicationError(
-                `Вариант позиции «${item.name}» не найден у этого товара`,
-            );
-        }
-        if (
-            !item.variantId &&
-            product.type !== ProductType.SERVICE &&
-            withVariants.has(product.id)
-        ) {
-            throw new ApplicationError(
-                `Выберите вариант товара «${item.name}»`,
-            );
-        }
-
-        return { ...item, type: product.type };
-    });
 }
 
 export async function recordOrderEvents(

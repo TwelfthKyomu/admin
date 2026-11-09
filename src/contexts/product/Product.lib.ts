@@ -7,7 +7,6 @@ import { ORDER_CANCELLED_STATUSES } from '@/contexts/order/Order.types';
 import { orderItems, orders } from '@/contexts/order/Orders.table';
 import { projectBadges } from '@/contexts/projectBadge/ProjectBadges.table';
 import { projectCategories } from '@/contexts/projectCategory/ProjectCategories.table';
-import type { ManualStockChange } from '@/contexts/stockMovement/StockMovement.types';
 import { assertPlanLimit } from '@/contexts/subscription/Subscription.lib';
 import {
     and,
@@ -25,14 +24,8 @@ import {
     type ProductRef,
     type ProductType,
 } from './Product.types';
-import {
-    type NewProductVariantRecord,
-    type ProductVariantRecord,
-    type ProductView,
-    productBadges,
-    products,
-    productVariants,
-} from './Products.table';
+import { type ProductView, productBadges, products } from './Products.table';
+import { loadVariants } from './ProductVariant.lib';
 
 type ProductRelations = Pick<ProductView, 'variants' | 'badges' | 'soldCount'>;
 
@@ -160,91 +153,6 @@ export async function replaceProductBadges(
             position,
         })),
     );
-}
-
-export async function saveProductVariants(
-    tx: Tx,
-    product: ProductRef,
-    records: NewProductVariantRecord[],
-    existing: ProductVariantRecord[],
-    createdBy: string,
-): Promise<ManualStockChange[]> {
-    const keptIds = records.flatMap((record) => record.id ?? []);
-    const added = records.filter((record) => record.id === undefined);
-
-    if (existing.length > 0) {
-        await tx
-            .delete(productVariants)
-            .where(
-                and(
-                    eq(productVariants.productId, product.id),
-                    keptIds.length > 0
-                        ? notInArray(productVariants.id, keptIds)
-                        : undefined,
-                ),
-            );
-    }
-
-    const stockBefore = new Map(
-        existing.map((variant) => [variant.id, variant.stock]),
-    );
-
-    const saved: Pick<ProductVariantRecord, 'id' | 'stock'>[] = [];
-
-    for (const { id, ...record } of records) {
-        if (id === undefined) continue;
-
-        const [row] = await tx
-            .update(productVariants)
-            .set(record)
-            .where(
-                and(
-                    eq(productVariants.id, id),
-                    eq(productVariants.productId, product.id),
-                ),
-            )
-            .returning({
-                id: productVariants.id,
-                stock: productVariants.stock,
-            });
-
-        if (row) saved.push(row);
-    }
-
-    if (added.length > 0) {
-        saved.push(
-            ...(await tx.insert(productVariants).values(added).returning({
-                id: productVariants.id,
-                stock: productVariants.stock,
-            })),
-        );
-    }
-
-    return saved.map((variant) => {
-        const before = stockBefore.get(variant.id) ?? null;
-
-        return {
-            projectId: product.projectId,
-            productId: product.id,
-            variantId: variant.id,
-            before,
-            after: variant.stock,
-            note: before === null ? 'Начальный остаток варианта' : null,
-            createdBy,
-        };
-    });
-}
-
-export async function loadVariants(
-    productIds: string[],
-): Promise<Map<string, ProductVariantRecord[]>> {
-    const rows = await db
-        .select()
-        .from(productVariants)
-        .where(inArray(productVariants.productId, productIds))
-        .orderBy(asc(productVariants.position));
-
-    return Map.groupBy(rows, (row) => row.productId);
 }
 
 export async function loadSoldCounts(

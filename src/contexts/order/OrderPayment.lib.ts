@@ -16,7 +16,7 @@ import {
     applyStockReturn,
     applyStockSale,
 } from '@/contexts/stockMovement/StockMovement.lib';
-import { loadOrderItems, writeOrderUpdate } from './Order.lib';
+import { writeOrderUpdate } from './Order.lib';
 import {
     isOrderCancelled,
     OrderEventType,
@@ -26,6 +26,7 @@ import {
     PaymentStatus,
     stockLinesFromOrderItems,
 } from './Order.types';
+import { loadOrderItems } from './OrderItem.lib';
 import type { OrderRecord } from './Orders.table';
 
 export type OrderPaymentInput = Pick<

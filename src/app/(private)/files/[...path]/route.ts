@@ -1,9 +1,9 @@
 import { getServerSession } from '@/infrastructure/auth/getServerSession';
 import {
     chatFileResponse,
-    parseUploadSegments,
     projectFileResponse,
 } from '@/infrastructure/storage/uploads';
+import { parseUploadSegments } from '@/infrastructure/storage/uploadUrls';
 import {
     requireProjectPermission,
     requireUserOrganization,

@@ -21,10 +21,6 @@ import {
     assertShiftAccess,
     findShiftInProject,
     insertShiftsWithoutOverlaps,
-    listReplacementShifts,
-    planShiftStatusChange,
-    replaceShiftEmployee,
-    updateShiftStatus,
 } from './EmployeeShift.lib';
 import {
     BulkCreateShiftsActionInputSchema,
@@ -40,6 +36,14 @@ import {
     shiftWindowError,
     skippedShift,
 } from './EmployeeShift.types';
+import {
+    listReplacementShifts,
+    replaceShiftEmployee,
+} from './EmployeeShiftReplacement.lib';
+import {
+    planShiftStatusChange,
+    updateShiftStatus,
+} from './EmployeeShiftStatus.lib';
 import {
     employeeShifts,
     type NewEmployeeShiftRecord,

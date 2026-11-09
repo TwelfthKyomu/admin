@@ -1,10 +1,8 @@
 import 'server-only';
 
 import { db } from '@/infrastructure/database/client';
-import {
-    deleteProjectFile,
-    parseUploadUrl,
-} from '@/infrastructure/storage/uploads';
+import { deleteProjectFile } from '@/infrastructure/storage/uploads';
+import { parseUploadUrl } from '@/infrastructure/storage/uploadUrls';
 import { insertOne } from '@/shared/api/repository';
 import { projectLooks } from '@/contexts/look/Looks.table';
 import { products } from '@/contexts/product/Products.table';

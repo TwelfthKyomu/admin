@@ -13,7 +13,6 @@ import { eq } from 'drizzle-orm';
 import {
     findOpenCashShift,
     listCourierBalances,
-    loadCashRegister,
     lockOpenCashShift,
 } from './CashShift.lib';
 import {
@@ -23,6 +22,7 @@ import {
     OpenCashShiftActionInputSchema,
     RecordCashCollectionActionInputSchema,
 } from './CashShift.schema';
+import { loadCashRegister } from './CashShiftRegister.lib';
 import {
     cashCollections,
     cashShifts,

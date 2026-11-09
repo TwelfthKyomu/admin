@@ -12,12 +12,12 @@ import {
     PROJECT_EMPLOYEES_READ_PERMISSIONS,
 } from '@/contexts/user/User.types';
 import { eq } from 'drizzle-orm';
-import { listProjectEmployees } from './EmployeeAssignment.lib';
 import {
     ProjectEmployeesActionInputSchema,
     UpdateAssignmentActionInputSchema,
     UpdateAssignmentRatesActionInputSchema,
 } from './EmployeeAssignment.schema';
+import { listProjectEmployees } from './EmployeeAssignmentList.lib';
 import {
     type EmployeeAssignmentRecord,
     employeeAssignments,

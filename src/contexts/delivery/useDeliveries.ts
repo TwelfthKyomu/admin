@@ -4,14 +4,10 @@ import { makeScopedMutation } from '@/shared/lib/mutations';
 import { itemQuery, listQuery } from '@/shared/lib/queries';
 import { useQuery } from '@tanstack/react-query';
 import {
-    assignDeliveryAction,
-    cancelDeliveryAction,
     courierStatsAction,
     createDeliveryAction,
     deliveriesAction,
     orderDeliveryAction,
-    requeueDeliveryAction,
-    setCarrierStatusAction,
     updateDeliveryAction,
 } from './Delivery.actions';
 import {
@@ -20,6 +16,12 @@ import {
     pickUpDeliveryAction,
     takeDeliveryAction,
 } from './DeliveryCourier.actions';
+import {
+    assignDeliveryAction,
+    cancelDeliveryAction,
+    requeueDeliveryAction,
+    setCarrierStatusAction,
+} from './DeliveryStatus.actions';
 
 const deliveryQueries = {
     all: ['deliveries'] as const,

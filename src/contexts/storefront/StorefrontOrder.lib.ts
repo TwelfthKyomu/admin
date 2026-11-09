@@ -4,12 +4,11 @@ import { db } from '@/infrastructure/database/client';
 import { ApplicationError } from '@/shared/api/errors';
 import { getErrorMessage } from '@/shared/lib/errors';
 import { findOrCreateClient } from '@/contexts/client/Client.lib';
-import { previewCoupon, redeemCoupon } from '@/contexts/coupon/Coupon.lib';
+import { previewCoupon } from '@/contexts/coupon/Coupon.lib';
+import { redeemCoupon } from '@/contexts/coupon/CouponRedemption.lib';
 import {
     createOrderWithItems,
     findClientOrders,
-    loadOrderItems,
-    resolveOrderItems,
 } from '@/contexts/order/Order.lib';
 import type { OrderItemInput } from '@/contexts/order/Order.schema';
 import {
@@ -18,6 +17,10 @@ import {
     orderItemTotal,
     sumOrderItems,
 } from '@/contexts/order/Order.types';
+import {
+    loadOrderItems,
+    resolveOrderItems,
+} from '@/contexts/order/OrderItem.lib';
 import { mailOrderPlaced } from '@/contexts/order/OrderMail.lib';
 import {
     type OrderItemRecord,
@@ -28,13 +31,13 @@ import {
     findActiveProviderId,
     startOnlinePayment,
 } from '@/contexts/paymentIntent/PaymentIntent.lib';
-import { loadVariants } from '@/contexts/product/Product.lib';
 import {
     ProductType,
     SELLABLE_PRODUCT_STATUSES,
     variantComboLabel,
 } from '@/contexts/product/Product.types';
 import { products } from '@/contexts/product/Products.table';
+import { loadVariants } from '@/contexts/product/ProductVariant.lib';
 import { STOCK_RESERVATION_MINUTES } from '@/contexts/stockMovement/StockMovement.types';
 import { addMinutes } from 'date-fns';
 import { and, eq, inArray, isNull } from 'drizzle-orm';

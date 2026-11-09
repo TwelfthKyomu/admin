@@ -20,8 +20,8 @@ import { Permission } from '@/contexts/user/User.types';
 import { users } from '@/contexts/user/Users.table';
 import { env } from '@/env';
 import { and, eq, isNull } from 'drizzle-orm';
-import { loadOrderItems } from './Order.lib';
 import { OrderEventType, orderNumber, PaymentStatus } from './Order.types';
+import { loadOrderItems } from './OrderItem.lib';
 import {
     adminOrderUrl,
     type CustomerMailContent,

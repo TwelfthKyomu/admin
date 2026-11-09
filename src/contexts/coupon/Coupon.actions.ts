@@ -15,7 +15,7 @@ import {
 import { lockOrder } from '@/contexts/order/Order.lib';
 import { Permission } from '@/contexts/user/User.types';
 import { and, desc, eq, isNull } from 'drizzle-orm';
-import { assertScopeInProject, redeemCoupon } from './Coupon.lib';
+import { assertScopeInProject } from './Coupon.lib';
 import {
     CouponsActionInputSchema,
     CreateCouponActionInputSchema,
@@ -28,6 +28,7 @@ import {
     assertValidRange,
     normalizeCouponCode,
 } from './Coupon.types';
+import { redeemCoupon } from './CouponRedemption.lib';
 import { type CouponRecord, coupons } from './Coupons.table';
 
 function findCouponInProject(

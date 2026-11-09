@@ -8,6 +8,7 @@ export * from './Delivery.actions';
 export * from './Delivery.schema';
 export * from './Delivery.types';
 export * from './DeliveryCourier.actions';
+export * from './DeliveryStatus.actions';
 export * from './useDeliveries';
 
 export type CourierStatsView = NullToOptional<ServerCourierStatsView>;

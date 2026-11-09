@@ -17,15 +17,17 @@ import {
     orderAmountDue,
     orderRevenueShare,
     PaymentStatus,
-    type ProjectRevenueView,
     readyPaymentDetails,
     recomputePaymentStatus,
-    rollUpRevenueByCurrency,
-    salesTotal,
     stockLinesFromOrderItems,
-    summarizeSales,
     sumOrderItems,
 } from './Order.types';
+import {
+    type ProjectRevenueView,
+    rollUpRevenueByCurrency,
+    salesTotal,
+    summarizeSales,
+} from './OrderStats.types';
 
 describe('recomputePaymentStatus', () => {
     it('бесплатный заказ без движений — не оплачен', () => {

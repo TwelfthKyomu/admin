@@ -19,6 +19,9 @@ import type {
 export * from './Chat.actions';
 export * from './Chat.schema';
 export * from './Chat.types';
+export * from './ChatMessage.actions';
+export * from './ChatText.types';
+export * from './useChatSend';
 export * from './useChats';
 
 export type ChannelAttachmentView = NullToOptional<ServerChannelAttachmentView>;

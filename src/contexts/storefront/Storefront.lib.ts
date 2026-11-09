@@ -1,10 +1,8 @@
 import 'server-only';
 
 import { db } from '@/infrastructure/database/client';
-import {
-    parseUploadSegments,
-    projectFileResponse,
-} from '@/infrastructure/storage/uploads';
+import { projectFileResponse } from '@/infrastructure/storage/uploads';
+import { parseUploadSegments } from '@/infrastructure/storage/uploadUrls';
 import { isApplicationError } from '@/shared/api/errors';
 import { BEARER_PREFIX, HTTP } from '@/shared/constants/http';
 import { getErrorMessage } from '@/shared/lib/errors';

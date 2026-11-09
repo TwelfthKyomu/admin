@@ -30,10 +30,8 @@ import {
     assertProductCodesFree,
     assertProductLimit,
     loadProductRelations,
-    loadVariants,
     replaceProductBadges,
     resolveBadgeIds,
-    saveProductVariants,
     withRelations,
 } from './Product.lib';
 import {
@@ -51,6 +49,7 @@ import {
     ProductType,
 } from './Product.types';
 import { type ProductRecord, products } from './Products.table';
+import { loadVariants, saveProductVariants } from './ProductVariant.lib';
 
 function findProductInProject(
     id: string,

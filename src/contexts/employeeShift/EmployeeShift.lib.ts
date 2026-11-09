@@ -3,28 +3,16 @@ import 'server-only';
 import { db, type Reader, type Tx } from '@/infrastructure/database/client';
 import { ApplicationError } from '@/shared/api/errors';
 import { ownShiftsEmployeeId } from '@/shared/api/permission';
-import { findInProject, insertOne, updateOne } from '@/shared/api/repository';
-import {
-    courierLoadInWindow,
-    moveCourierDeliveries,
-} from '@/contexts/delivery/Delivery.lib';
-import { findActiveAssignment } from '@/contexts/employeeAssignment/EmployeeAssignment.lib';
-import { EmployeeKind } from '@/contexts/employeeAssignment/EmployeeAssignment.types';
-import { employeeAssignments } from '@/contexts/employeeAssignment/EmployeeAssignments.table';
+import { findInProject } from '@/shared/api/repository';
 import { lockEmployees } from '@/contexts/organizationMember/OrganizationMember.lib';
-import { organizationMembers } from '@/contexts/organizationMember/OrganizationMembers.table';
-import { users } from '@/contexts/user/Users.table';
-import { addMinutes } from 'date-fns';
 import {
     and,
     asc,
     count,
-    desc,
     eq,
     gt,
     gte,
     inArray,
-    isNull,
     lt,
     lte,
     ne,
@@ -35,10 +23,6 @@ import {
     type MyShiftView,
     OPEN_SHIFT_STATUSES,
     overlaps,
-    type ReplacementShiftView,
-    SHIFT_EARLY_START_MINUTES,
-    ShiftAction,
-    ShiftCancelReason,
     ShiftStatus,
     WORKING_SHIFT_STATUSES,
 } from './EmployeeShift.types';
@@ -55,7 +39,7 @@ export function findShiftInProject(
     return findInProject(employeeShifts, id, projectId, 'Смена не найдена');
 }
 
-function findOverlappingShifts(
+export function findOverlappingShifts(
     executor: Reader,
     window: Omit<EmployeeWindow, 'projectId'> & { excludeShiftId?: string },
 ): Promise<EmployeeShiftRecord[]> {
@@ -158,54 +142,6 @@ export function aggregateWorkedShiftsByEmployee(
         .groupBy(employeeShifts.employeeId);
 }
 
-export async function listReplacementShifts(
-    projectId: string,
-): Promise<ReplacementShiftView[]> {
-    const rows = await db
-        .select({
-            shift: employeeShifts,
-            employeeName: users.name,
-            kind: employeeAssignments.kind,
-        })
-        .from(employeeShifts)
-        .innerJoin(
-            organizationMembers,
-            eq(organizationMembers.id, employeeShifts.employeeId),
-        )
-        .innerJoin(users, eq(users.id, organizationMembers.userId))
-        .leftJoin(
-            employeeAssignments,
-            and(
-                eq(employeeAssignments.employeeId, employeeShifts.employeeId),
-                eq(employeeAssignments.projectId, employeeShifts.projectId),
-                isNull(employeeAssignments.endedAt),
-            ),
-        )
-        .where(
-            and(
-                eq(employeeShifts.projectId, projectId),
-                eq(employeeShifts.seekingReplacement, true),
-                eq(employeeShifts.status, ShiftStatus.SCHEDULED),
-                gte(employeeShifts.startsAt, new Date()),
-            ),
-        )
-        .orderBy(asc(employeeShifts.startsAt));
-
-    return Promise.all(
-        rows.map(async ({ shift, employeeName, kind }) => {
-            const load = await courierLoadInWindow(shift);
-
-            return {
-                ...shift,
-                employeeName,
-                kind: kind ?? EmployeeKind.SPECIALIST,
-                deliveriesCount: load.count,
-                cashDue: load.cashDue,
-            };
-        }),
-    );
-}
-
 export async function isCoveredByShift(
     executor: Reader,
     window: EmployeeWindow,
@@ -240,7 +176,7 @@ export async function assertShiftAccess(
     return { fullAccess: ownEmployeeId === null };
 }
 
-async function assertShiftWindowFree(
+export async function assertShiftWindowFree(
     shift: EmployeeShiftRecord,
     window: Pick<EmployeeShiftRecord, 'startsAt' | 'endsAt'>,
 ): Promise<void> {
@@ -256,264 +192,6 @@ async function assertShiftWindowFree(
             'Смена в новых границах пересекается с другой сменой сотрудника',
         );
     }
-}
-
-async function planShiftStart(
-    shift: EmployeeShiftRecord,
-    at: Date,
-): Promise<Partial<NewEmployeeShiftRecord>> {
-    if (shift.status !== ShiftStatus.SCHEDULED) {
-        throw new ApplicationError('Начать можно только запланированную смену');
-    }
-    if (at < addMinutes(shift.startsAt, -SHIFT_EARLY_START_MINUTES)) {
-        throw new ApplicationError(
-            `Начать смену можно не раньше чем за ${SHIFT_EARLY_START_MINUTES} мин до её начала`,
-        );
-    }
-    if (at >= shift.endsAt) {
-        throw new ApplicationError(
-            'Смена уже закончилась — отметьте её завершённой',
-        );
-    }
-
-    if (at < shift.startsAt) {
-        await assertShiftWindowFree(shift, {
-            startsAt: at,
-            endsAt: shift.endsAt,
-        });
-
-        return { status: ShiftStatus.IN_PROGRESS, startsAt: at };
-    }
-
-    return { status: ShiftStatus.IN_PROGRESS };
-}
-
-async function planShiftComplete(
-    shift: EmployeeShiftRecord,
-    at: Date,
-    fullAccess: boolean,
-): Promise<Partial<NewEmployeeShiftRecord>> {
-    const completable =
-        shift.status === ShiftStatus.IN_PROGRESS ||
-        (fullAccess && shift.status === ShiftStatus.SCHEDULED);
-
-    if (!completable) {
-        throw new ApplicationError(
-            fullAccess
-                ? 'Завершить можно только идущую или запланированную смену'
-                : 'Сначала начните смену',
-        );
-    }
-    if (at <= shift.startsAt) {
-        throw new ApplicationError('Нельзя завершить смену до её начала');
-    }
-
-    if (at > shift.endsAt) {
-        await assertShiftWindowFree(shift, {
-            startsAt: shift.startsAt,
-            endsAt: at,
-        });
-
-        return { status: ShiftStatus.COMPLETED, endsAt: at };
-    }
-
-    return { status: ShiftStatus.COMPLETED };
-}
-
-async function planShiftCancel(
-    shift: EmployeeShiftRecord,
-    cancelReason?: ShiftCancelReason,
-): Promise<Partial<NewEmployeeShiftRecord>> {
-    if (!OPEN_SHIFT_STATUSES.includes(shift.status)) {
-        throw new ApplicationError(
-            'Отменить можно только запланированную или идущую смену',
-        );
-    }
-
-    return {
-        status: ShiftStatus.CANCELLED,
-        cancelReason: cancelReason ?? null,
-        seekingReplacement: false,
-    };
-}
-
-async function planShiftNoShow(
-    shift: EmployeeShiftRecord,
-    at: Date,
-    fullAccess: boolean,
-): Promise<Partial<NewEmployeeShiftRecord>> {
-    if (!fullAccess) {
-        throw new ApplicationError(
-            'Отметить неявку может только администратор расписания',
-        );
-    }
-    if (shift.status !== ShiftStatus.SCHEDULED) {
-        throw new ApplicationError(
-            'Отметить неявку можно только для запланированной смены',
-        );
-    }
-    if (at < shift.startsAt) {
-        throw new ApplicationError(
-            'Неявку можно отметить только после начала смены',
-        );
-    }
-
-    return { status: ShiftStatus.NO_SHOW, seekingReplacement: false };
-}
-
-export function planShiftStatusChange(
-    shift: EmployeeShiftRecord,
-    change: {
-        action: ShiftAction;
-        at: Date;
-        fullAccess: boolean;
-        cancelReason?: ShiftCancelReason;
-    },
-): Promise<Partial<NewEmployeeShiftRecord>> {
-    switch (change.action) {
-        case ShiftAction.START:
-            return planShiftStart(shift, change.at);
-        case ShiftAction.COMPLETE:
-            return planShiftComplete(shift, change.at, change.fullAccess);
-        case ShiftAction.CANCEL:
-            return planShiftCancel(shift, change.cancelReason);
-        case ShiftAction.NO_SHOW:
-            return planShiftNoShow(shift, change.at, change.fullAccess);
-    }
-}
-
-export function updateShiftStatus(
-    shift: EmployeeShiftRecord,
-    patch: Partial<NewEmployeeShiftRecord>,
-    executor?: Tx,
-): Promise<EmployeeShiftRecord> {
-    return updateOne(
-        employeeShifts,
-        and(
-            eq(employeeShifts.id, shift.id),
-            eq(employeeShifts.status, shift.status),
-        ),
-        patch,
-        'Смена изменилась в другом окне — обновите страницу',
-        executor,
-    );
-}
-
-async function assertEligibleSubstitute(
-    shift: EmployeeShiftRecord,
-    substituteId: string,
-): Promise<void> {
-    if (shift.employeeId === substituteId) {
-        throw new ApplicationError(
-            'Замещающий совпадает с текущим сотрудником',
-        );
-    }
-
-    const [[substitute], active, [original]] = await Promise.all([
-        db
-            .select({ id: organizationMembers.id })
-            .from(organizationMembers)
-            .where(
-                and(
-                    eq(organizationMembers.id, substituteId),
-                    eq(
-                        organizationMembers.organizationId,
-                        shift.organizationId,
-                    ),
-                    isNull(organizationMembers.leftAt),
-                ),
-            )
-            .limit(1),
-        findActiveAssignment(substituteId, shift.projectId),
-        db
-            .select({ kind: employeeAssignments.kind })
-            .from(employeeAssignments)
-            .where(
-                and(
-                    eq(employeeAssignments.employeeId, shift.employeeId),
-                    eq(employeeAssignments.projectId, shift.projectId),
-                ),
-            )
-            .orderBy(desc(employeeAssignments.startedAt))
-            .limit(1),
-    ]);
-
-    if (!substitute) {
-        throw new ApplicationError('Замещающий сотрудник не найден');
-    }
-    if (!active) {
-        throw new ApplicationError(
-            'У замещающего нет активного назначения на этот проект',
-        );
-    }
-    if (original && original.kind !== active.kind) {
-        throw new ApplicationError(
-            'Заменить можно только сотрудником того же вида работы: курьера — курьером, мастера — мастером',
-        );
-    }
-}
-
-export async function replaceShiftEmployee(
-    shift: EmployeeShiftRecord,
-    substituteId: string,
-    input: { note: string; byUserId: string },
-): Promise<{ shift: EmployeeShiftRecord; transferredDeliveries: number }> {
-    if (!OPEN_SHIFT_STATUSES.includes(shift.status)) {
-        throw new ApplicationError(
-            'Заменить можно только активную (запланированную или текущую) смену',
-        );
-    }
-
-    await assertEligibleSubstitute(shift, substituteId);
-
-    return db.transaction(async (tx) => {
-        await lockEmployees(tx, [substituteId]);
-
-        const busy = await findOverlappingShifts(tx, {
-            employeeId: substituteId,
-            startsAt: shift.startsAt,
-            endsAt: shift.endsAt,
-        });
-
-        if (busy.length > 0) {
-            throw new ApplicationError(
-                'У замещающего уже есть смена, пересекающаяся с этим окном',
-            );
-        }
-
-        await updateShiftStatus(
-            shift,
-            {
-                status: ShiftStatus.CANCELLED,
-                cancelReason: ShiftCancelReason.REPLACED,
-                seekingReplacement: false,
-            },
-            tx,
-        );
-
-        const created = await insertOne(
-            employeeShifts,
-            {
-                employeeId: substituteId,
-                projectId: shift.projectId,
-                organizationId: shift.organizationId,
-                startsAt: shift.startsAt,
-                endsAt: shift.endsAt,
-                breakMinutes: shift.breakMinutes,
-                notes: input.note,
-            },
-            'Не удалось создать смену для замены',
-            tx,
-        );
-
-        const transferredDeliveries = await moveCourierDeliveries(tx, {
-            ...shift,
-            toEmployeeId: substituteId,
-            byUserId: input.byUserId,
-        });
-
-        return { shift: created, transferredDeliveries };
-    });
 }
 
 export function listEmployeeShiftsBetween(

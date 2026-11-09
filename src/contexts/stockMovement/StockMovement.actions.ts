@@ -6,9 +6,9 @@ import {
     projectReadAction,
 } from '@/shared/api/action-client';
 import { PAGE_SIZE_LARGE } from '@/shared/constants/default';
-import { loadVariants } from '@/contexts/product/Product.lib';
 import { variantComboLabel } from '@/contexts/product/Product.types';
 import { products } from '@/contexts/product/Products.table';
+import { loadVariants } from '@/contexts/product/ProductVariant.lib';
 import {
     CATALOG_READ_PERMISSIONS,
     Permission,

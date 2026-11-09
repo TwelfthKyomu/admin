@@ -4,17 +4,15 @@ import { db } from '@/infrastructure/database/client';
 import { PAGE_SIZE_SMALL } from '@/shared/constants/default';
 import type { ProjectRecord } from '@/contexts/project/Projects.table';
 import { and, count, desc, eq, gt, gte, inArray, lt, sum } from 'drizzle-orm';
+import { OrderStatus, orderRevenueShare, paidShareOf } from './Order.types';
 import {
     type DashboardStatsView,
-    OrderStatus,
-    orderRevenueShare,
     type ProjectRevenueView,
-    paidShareOf,
     type RecentOrderView,
     rollUpRevenueByCurrency,
     type SellerRevenueRow,
     type TopOrderItemView,
-} from './Order.types';
+} from './OrderStats.types';
 import { orderItems, orders } from './Orders.table';
 
 type DashboardProject = Pick<ProjectRecord, 'id' | 'defaultCurrency'>;

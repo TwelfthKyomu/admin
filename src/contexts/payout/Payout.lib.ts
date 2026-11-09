@@ -2,7 +2,7 @@ import 'server-only';
 
 import type { Reader } from '@/infrastructure/database/client';
 import { ApplicationError } from '@/shared/api/errors';
-import { aggregateDeliveredByCourier } from '@/contexts/delivery/Delivery.lib';
+import { aggregateDeliveredByCourier } from '@/contexts/delivery/DeliveryCourier.lib';
 import {
     type EmployeeAssignmentRecord,
     employeeAssignments,

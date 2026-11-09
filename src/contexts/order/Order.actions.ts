@@ -9,7 +9,7 @@ import { ApplicationError } from '@/shared/api/errors';
 import { visibleSalesEmployeeId } from '@/shared/api/permission';
 import { searchFilters } from '@/shared/api/repository';
 import { findClientInProject } from '@/contexts/client/Client.lib';
-import { findOrderCouponCode } from '@/contexts/coupon/Coupon.lib';
+import { findOrderCouponCode } from '@/contexts/coupon/CouponRedemption.lib';
 import {
     findMemberIdByUserId,
     memberNamesByIds,
@@ -17,12 +17,7 @@ import {
 import { projectDefaultCurrency } from '@/contexts/project/Project.lib';
 import { ORDER_READ_PERMISSIONS, Permission } from '@/contexts/user/User.types';
 import { and, asc, desc, eq, gte, inArray, lt, sum } from 'drizzle-orm';
-import {
-    createOrderWithItems,
-    findOrderInProject,
-    loadOrderItems,
-    resolveOrderItems,
-} from './Order.lib';
+import { createOrderWithItems, findOrderInProject } from './Order.lib';
 import {
     CreateOrderActionInputSchema,
     EmployeeRevenueActionInputSchema,
@@ -30,14 +25,15 @@ import {
     OrdersActionInputSchema,
 } from './Order.schema';
 import {
-    type EmployeeRevenueView,
     maskSeller,
     ORDERS_LIST_LIMIT,
     ORDERS_RANGE_LIMIT,
     type OrderListView,
     sumOrderItems,
 } from './Order.types';
+import { loadOrderItems, resolveOrderItems } from './OrderItem.lib';
 import { aggregateSellerRevenue } from './OrderStats.lib';
+import type { EmployeeRevenueView } from './OrderStats.types';
 import { orderEvents, orderItems, orders } from './Orders.table';
 
 export const ordersAction = projectReadAction(ORDER_READ_PERMISSIONS)
