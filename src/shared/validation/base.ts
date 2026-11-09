@@ -1,4 +1,7 @@
+import { ru } from 'zod/locales';
 import * as z from 'zod/mini';
+
+z.config(ru());
 
 export const idSchema = z.string().check(z.minLength(1));
 

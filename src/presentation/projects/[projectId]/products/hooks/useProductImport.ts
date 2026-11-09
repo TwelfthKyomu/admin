@@ -17,6 +17,7 @@ export function useProductImport(projectId: string) {
     const [parsed, setParsed] = useState<ParsedImportRow[]>([]);
     const [warehouseId, setWarehouseId] = useState<string>();
     const [result, setResult] = useState<ProductImportResult>();
+    const [fileName, setFileName] = useState<string>();
 
     const rows = parsed.flatMap((line) => line.row ?? []);
     const invalid = parsed.filter((line) => line.error);
@@ -24,6 +25,7 @@ export function useProductImport(projectId: string) {
 
     const onFile = async (file: File | undefined) => {
         setResult(undefined);
+        setFileName(file?.name);
         setParsed(file ? await readImportFile(file) : []);
     };
 
@@ -47,6 +49,7 @@ export function useProductImport(projectId: string) {
         invalid,
         tooMany,
         result,
+        fileName,
         isPending,
         onFile,
         submit,

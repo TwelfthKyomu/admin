@@ -72,7 +72,7 @@ export const SaleForm = ({
             {itemFields.map((field, index) => (
                 <div
                     key={field.id}
-                    className="grid grid-cols-[1fr_5rem_7rem_auto] items-start gap-2"
+                    className="grid grid-cols-[minmax(0,1fr)_5rem_7rem_auto] items-start gap-2"
                 >
                     <Combobox
                         name={`items.${index}.itemKey`}

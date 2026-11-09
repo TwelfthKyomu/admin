@@ -5,13 +5,15 @@ import {
     PRODUCT_IMPORT_ROWS_MAX,
 } from '@/contexts/product';
 import type { WarehouseView } from '@/contexts/warehouse';
-import { Button, Input, Select } from '@/ui/Base';
+import { Button, Select } from '@/ui/Base';
+import { FileUp } from 'lucide-react';
 import { downloadImportTemplate } from '../lib/importFile';
 import { ImportIssues } from './ImportIssues';
 
 interface ImportUploadProps {
     warehouses: WarehouseView[];
     warehouseId?: string;
+    fileName?: string;
     rowsCount: number;
     invalid: ParsedImportRow[];
     tooMany: boolean;
@@ -24,6 +26,7 @@ interface ImportUploadProps {
 export const ImportUpload = ({
     warehouses,
     warehouseId,
+    fileName,
     rowsCount,
     invalid,
     tooMany,
@@ -45,11 +48,21 @@ export const ImportUpload = ({
                 Скачать шаблон
             </Button>
         </p>
-        <Input
-            type="file"
-            accept=".csv,text/csv"
-            onChange={(event) => onFile(event.target.files?.[0])}
-        />
+        <Button
+            asChild
+            variant="outline"
+        >
+            <label className="cursor-pointer">
+                <FileUp />
+                {fileName ?? 'Выбрать CSV-файл'}
+                <input
+                    type="file"
+                    accept=".csv,text/csv"
+                    className="sr-only"
+                    onChange={(event) => onFile(event.target.files?.[0])}
+                />
+            </label>
+        </Button>
         {warehouses.length > 1 && (
             <Select
                 options={warehouses.map((warehouse) => ({

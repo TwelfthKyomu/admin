@@ -1,7 +1,6 @@
 import { Widget, WidgetBody, WidgetHeader } from '@/shared/components/common';
 import { type ProjectSetupView, type ProjectView, SETUP_STEP_VALUES } from '@/contexts/project';
 import { Button } from '@/ui/Base';
-import { Rocket } from 'lucide-react';
 import { SetupStepRow } from './SetupStepRow';
 
 interface SetupChecklistProps {
@@ -15,16 +14,19 @@ export const SetupChecklist = ({ setup, project, onHide }: SetupChecklistProps) 
         padding="md"
         className="gap-3"
     >
-        <WidgetHeader icon={<Rocket className="size-4" />}>
+        <WidgetHeader
+            icon={
+                <Button
+                    variant="ghost"
+                    size="sm"
+                    className="h-auto px-2 py-0.5 text-[11px]"
+                    onClick={() => onHide(setup.projectId)}
+                >
+                    Скрыть
+                </Button>
+            }
+        >
             Первые шаги{project ? ` · ${project.name}` : ''}
-            <Button
-                variant="ghost"
-                size="sm"
-                className="ml-auto"
-                onClick={() => onHide(setup.projectId)}
-            >
-                Скрыть
-            </Button>
         </WidgetHeader>
         <WidgetBody>
             <ul className="grid gap-1 sm:grid-cols-2">
