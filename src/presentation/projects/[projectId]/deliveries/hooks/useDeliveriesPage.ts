@@ -61,9 +61,9 @@ export function useDeliveriesPage() {
     const employeesQuery = useProjectEmployees({ projectId });
     const cashQuery = useCashSummary(canFinance ? projectId : '');
 
-    const assign = useAssignDelivery(projectId);
-    const requeue = useRequeueDelivery(projectId);
-    const cancel = useCancelDelivery(projectId);
+    const assign = useAssignDelivery();
+    const requeue = useRequeueDelivery();
+    const cancel = useCancelDelivery();
 
     const all = query.data ?? [];
 

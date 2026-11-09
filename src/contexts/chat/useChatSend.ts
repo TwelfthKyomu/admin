@@ -1,6 +1,5 @@
 'use client';
 
-import { broadcastScope } from '@/shared/realtime/scope';
 import {
     type QueryClient,
     type QueryKey,
@@ -10,7 +9,6 @@ import {
 import { markChatReadAction } from './Chat.actions';
 import {
     type ChatTarget,
-    chatChannelsScope,
     chatScopeKey,
     setMessageReaction,
 } from './Chat.types';
@@ -139,9 +137,6 @@ export function useSendChatMessage(
                 queryKey: chatQueries.all,
                 predicate: (query) => query.queryKey.includes(scope),
             });
-
-            broadcastScope(scope);
-            broadcastScope(chatChannelsScope(organizationId));
         },
     });
 }
@@ -186,7 +181,6 @@ export function useSetChatReaction(scope: string) {
         onSettled: () => {
             void queryClient.invalidateQueries({ queryKey: messagesKey });
             void queryClient.invalidateQueries({ queryKey: threadKey });
-            broadcastScope(scope);
         },
     });
 }
@@ -201,8 +195,6 @@ export function useMarkChatRead(organizationId: string) {
             void queryClient.invalidateQueries({
                 queryKey: chatQueries.channels(organizationId),
             });
-
-            broadcastScope(chatChannelsScope(organizationId));
         },
     });
 }

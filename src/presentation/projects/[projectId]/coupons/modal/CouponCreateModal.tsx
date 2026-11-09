@@ -15,7 +15,7 @@ import {
 
 export const CouponCreateModal = ({ projectId }: { projectId: string }) => {
     const close = useModalClose();
-    const { mutateAsync, isPending } = useCreateCoupon(projectId);
+    const { mutateAsync, isPending } = useCreateCoupon();
 
     const form = useForm<CreateCouponFormValues>({
         resolver: zodResolver(CreateCouponFormSchema),

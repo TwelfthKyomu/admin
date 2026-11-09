@@ -1,6 +1,6 @@
 'use client';
 
-import { makeScopedMutation } from '@/shared/lib/mutations';
+import { makeMutation } from '@/shared/lib/mutations';
 import { itemQuery, listQuery } from '@/shared/lib/queries';
 import { useQuery } from '@tanstack/react-query';
 import {
@@ -73,13 +73,13 @@ export function useOrderDelivery(projectId: string, orderId: string) {
     return useQuery(deliveryQueries.order(projectId, orderId));
 }
 
-export const useCreateDelivery = makeScopedMutation(createDeliveryAction);
-export const useUpdateDelivery = makeScopedMutation(updateDeliveryAction);
-export const useAssignDelivery = makeScopedMutation(assignDeliveryAction);
-export const useTakeDelivery = makeScopedMutation(takeDeliveryAction);
-export const usePickUpDelivery = makeScopedMutation(pickUpDeliveryAction);
-export const useCompleteDelivery = makeScopedMutation(completeDeliveryAction);
-export const useFailDelivery = makeScopedMutation(failDeliveryAction);
-export const useRequeueDelivery = makeScopedMutation(requeueDeliveryAction);
-export const useCancelDelivery = makeScopedMutation(cancelDeliveryAction);
-export const useSetCarrierStatus = makeScopedMutation(setCarrierStatusAction);
+export const useCreateDelivery = makeMutation(createDeliveryAction);
+export const useUpdateDelivery = makeMutation(updateDeliveryAction);
+export const useAssignDelivery = makeMutation(assignDeliveryAction);
+export const useTakeDelivery = makeMutation(takeDeliveryAction);
+export const usePickUpDelivery = makeMutation(pickUpDeliveryAction);
+export const useCompleteDelivery = makeMutation(completeDeliveryAction);
+export const useFailDelivery = makeMutation(failDeliveryAction);
+export const useRequeueDelivery = makeMutation(requeueDeliveryAction);
+export const useCancelDelivery = makeMutation(cancelDeliveryAction);
+export const useSetCarrierStatus = makeMutation(setCarrierStatusAction);

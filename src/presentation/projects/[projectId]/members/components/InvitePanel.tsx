@@ -16,7 +16,7 @@ import { Badge, Button } from '@/ui/Base';
 export const InvitePanel = ({ onInvite }: { onInvite: () => void }) => {
     const { projectId } = useProject();
     const invites = useProjectInvitesList(projectId).data ?? [];
-    const { mutateAsync, isPending } = useRevokeProjectInvite(projectId);
+    const { mutateAsync, isPending } = useRevokeProjectInvite();
 
     const copy = async (token: string) => {
         await navigator.clipboard.writeText(absoluteUrl(ROUTES.invite(token))).catch(() => {});

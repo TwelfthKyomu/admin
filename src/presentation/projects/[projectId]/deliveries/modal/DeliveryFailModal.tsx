@@ -16,7 +16,7 @@ interface FailDeliveryModalProps {
 
 export const DeliveryFailModal = ({ projectId, delivery }: FailDeliveryModalProps) => {
     const close = useModalClose();
-    const { mutateAsync, isPending } = useFailDelivery(projectId);
+    const { mutateAsync, isPending } = useFailDelivery();
 
     const form = useForm<FailDeliveryFormValues>({
         resolver: zodResolver(FailDeliveryFormSchema),

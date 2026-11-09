@@ -20,7 +20,7 @@ interface AdjustStockSheetProps {
 
 export const StockAdjustSheet = ({ projectId, product }: AdjustStockSheetProps) => {
     const close = useModalClose();
-    const { mutateAsync, isPending } = useAdjustStock(projectId);
+    const { mutateAsync, isPending } = useAdjustStock();
 
     const form = useForm<AdjustStockFormValues>({
         values: {

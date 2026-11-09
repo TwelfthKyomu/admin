@@ -29,7 +29,7 @@ export function useOnlinePayment({
     defaultAmount,
 }: UseOnlinePaymentOptions) {
     const [confirmationUrl, setConfirmationUrl] = useState<string>();
-    const { mutateAsync, isPending } = useCreatePaymentIntent(projectId);
+    const { mutateAsync, isPending } = useCreatePaymentIntent();
 
     const form = useForm<OnlinePaymentFormValues>({
         resolver: zodResolver(OnlinePaymentFormSchema),

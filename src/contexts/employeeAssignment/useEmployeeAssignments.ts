@@ -1,6 +1,6 @@
 'use client';
 
-import { makeScopedMutation } from '@/shared/lib/mutations';
+import { makeMutation } from '@/shared/lib/mutations';
 import { listQuery } from '@/shared/lib/queries';
 import { useQuery } from '@tanstack/react-query';
 import {
@@ -29,7 +29,7 @@ export function useProjectEmployees(opts: ListOptions) {
     return useQuery(assignmentQueries.list(opts));
 }
 
-export const useUpdateAssignment = makeScopedMutation(updateAssignmentAction);
-export const useUpdateAssignmentRates = makeScopedMutation(
+export const useUpdateAssignment = makeMutation(updateAssignmentAction);
+export const useUpdateAssignmentRates = makeMutation(
     updateAssignmentRatesAction,
 );

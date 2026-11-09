@@ -1,13 +1,13 @@
 'use client';
 
-import { type SubmitHandler, useForm, useWatch } from 'react-hook-form';
+import { type SubmitHandler, useForm } from 'react-hook-form';
 import { FormDialog } from '@/shared/components/common';
 import { runAction } from '@/shared/lib/action-result';
 import { useModalClose } from '@/shared/lib/modal';
 import { toast } from '@/shared/lib/toast';
 import type { ChatMessageView } from '@/contexts/chat';
 import type { ProjectView } from '@/contexts/project';
-import { TaskPriority, TaskStatus, useCreateTaskFromChat } from '@/contexts/task';
+import { TaskPriority, TaskStatus, useCreateTask } from '@/contexts/task';
 import { FieldGroup } from '@/ui/Base';
 import { Input, Select, Textarea } from '@/ui/Controlled';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -16,14 +16,12 @@ import { taskKeyLabel, taskTitleFromMessage } from '../lib/task';
 
 interface TaskFromMessageModalProps {
     message: ChatMessageView;
-    scope: string;
     projects: ProjectView[];
     defaultProjectId: string;
 }
 
 export const TaskFromMessageModal = ({
     message,
-    scope,
     projects,
     defaultProjectId,
 }: TaskFromMessageModalProps) => {
@@ -39,8 +37,7 @@ export const TaskFromMessageModal = ({
         mode: 'onChange',
     });
 
-    const projectId = useWatch({ control: form.control, name: 'projectId' });
-    const { mutateAsync, isPending } = useCreateTaskFromChat(projectId, scope);
+    const { mutateAsync, isPending } = useCreateTask();
 
     const onSubmit: SubmitHandler<TaskFromMessageFormValues> = async (values) => {
         const { success, response } = await runAction(

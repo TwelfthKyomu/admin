@@ -1,6 +1,6 @@
 'use client';
 
-import { makeScopedMutation } from '@/shared/lib/mutations';
+import { makeMutation } from '@/shared/lib/mutations';
 import { listQuery } from '@/shared/lib/queries';
 import { useQuery } from '@tanstack/react-query';
 import {
@@ -55,11 +55,11 @@ export function useReplacementShifts(projectId: string) {
     return useQuery(replacementShiftQueries.list(projectId));
 }
 
-export const useSetShiftSeekingReplacement = makeScopedMutation(
+export const useSetShiftSeekingReplacement = makeMutation(
     setShiftSeekingReplacementAction,
 );
 
-export const useBulkCreateShifts = makeScopedMutation(bulkCreateShiftsAction);
-export const useChangeShiftStatus = makeScopedMutation(changeShiftStatusAction);
+export const useBulkCreateShifts = makeMutation(bulkCreateShiftsAction);
+export const useChangeShiftStatus = makeMutation(changeShiftStatusAction);
 
-export const useReassignShift = makeScopedMutation(reassignShiftAction);
+export const useReassignShift = makeMutation(reassignShiftAction);

@@ -20,7 +20,7 @@ const CategoryEditSheet = dynamic(() =>
 export function useCategoriesPage() {
     const { projectId } = useProject();
     const query = useCategoriesList({ projectId, includeInactive: true });
-    const { mutateAsync, isPending } = useDeleteCategory(projectId);
+    const { mutateAsync, isPending } = useDeleteCategory();
 
     const onCreate = () => modal.open(<CategoryCreateModal projectId={projectId} />);
 

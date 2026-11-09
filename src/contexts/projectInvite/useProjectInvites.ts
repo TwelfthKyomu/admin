@@ -1,6 +1,6 @@
 'use client';
 
-import { makeScopedMutation } from '@/shared/lib/mutations';
+import { makeMutation } from '@/shared/lib/mutations';
 import { listQuery } from '@/shared/lib/queries';
 import { useMutation, useQuery } from '@tanstack/react-query';
 import {
@@ -24,12 +24,8 @@ export function useProjectInvitesList(projectId: string) {
     return useQuery(inviteQueries.list(projectId));
 }
 
-export const useCreateProjectInvite = makeScopedMutation(
-    createProjectInviteAction,
-);
-export const useRevokeProjectInvite = makeScopedMutation(
-    revokeProjectInviteAction,
-);
+export const useCreateProjectInvite = makeMutation(createProjectInviteAction);
+export const useRevokeProjectInvite = makeMutation(revokeProjectInviteAction);
 
 export function useAcceptProjectInvite() {
     return useMutation({ mutationFn: acceptProjectInviteAction });

@@ -23,7 +23,7 @@ interface PaymentIntentsListProps {
 }
 
 export const PaymentIntentsList = ({ projectId, intents, canManage }: PaymentIntentsListProps) => {
-    const refund = useRefundUnappliedIntent(projectId);
+    const refund = useRefundUnappliedIntent();
 
     const onRefund = (intent: PaymentIntentView) =>
         confirmDestructive({

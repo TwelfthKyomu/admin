@@ -20,7 +20,7 @@ import { ProductForm } from '../form/ProductForm';
 export const ProductCreateModal = ({ projectId }: { projectId: string }) => {
     const close = useModalClose();
     const { projects } = useStaticData();
-    const { mutateAsync, isPending } = useCreateProduct(projectId);
+    const { mutateAsync, isPending } = useCreateProduct();
     const projectCurrency = projects?.find((project) => project.id === projectId)?.defaultCurrency;
 
     const form = useForm<CreateProductFormValues>({

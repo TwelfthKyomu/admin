@@ -20,7 +20,7 @@ interface BadgeEditSheetProps {
 
 export const BadgeEditSheet = ({ projectId, badge }: BadgeEditSheetProps) => {
     const close = useModalClose();
-    const { mutateAsync, isPending } = useUpdateProjectBadge(projectId);
+    const { mutateAsync, isPending } = useUpdateProjectBadge();
 
     const form = useForm<UpdateBadgeFormValues>({
         values: { ...badge, projectId },

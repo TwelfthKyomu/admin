@@ -1,10 +1,8 @@
 'use client';
 
-import { makeScopedMutation } from '@/shared/lib/mutations';
-import { nullToOptional } from '@/shared/lib/optional';
+import { makeMutation } from '@/shared/lib/mutations';
 import { listQuery } from '@/shared/lib/queries';
-import { broadcastScope } from '@/shared/realtime/scope';
-import { useMutation, useQuery } from '@tanstack/react-query';
+import { useQuery } from '@tanstack/react-query';
 import {
     createTaskAction,
     deleteTaskAction,
@@ -26,17 +24,6 @@ export function useTasksList(projectId: string) {
     return useQuery(taskQueries.list(projectId));
 }
 
-export const useCreateTask = makeScopedMutation(createTaskAction);
-export const useUpdateTask = makeScopedMutation(updateTaskAction);
-export const useDeleteTask = makeScopedMutation(deleteTaskAction);
-
-export function useCreateTaskFromChat(projectId: string, chatScope: string) {
-    return useMutation({
-        mutationFn: async (input: Parameters<typeof createTaskAction>[0]) =>
-            nullToOptional(await createTaskAction(input)),
-        onSuccess: () => {
-            broadcastScope(projectId);
-            broadcastScope(chatScope);
-        },
-    });
-}
+export const useCreateTask = makeMutation(createTaskAction);
+export const useUpdateTask = makeMutation(updateTaskAction);
+export const useDeleteTask = makeMutation(deleteTaskAction);

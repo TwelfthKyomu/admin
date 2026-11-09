@@ -17,7 +17,7 @@ interface RatesSheetProps {
 
 export const RatesEditSheet = ({ projectId, row }: RatesSheetProps) => {
     const close = useModalClose();
-    const { mutateAsync, isPending } = useUpdateAssignmentRates(projectId);
+    const { mutateAsync, isPending } = useUpdateAssignmentRates();
     const courier = row.kind === EmployeeKind.COURIER;
 
     const form = useForm<UpdateRatesFormValues>({

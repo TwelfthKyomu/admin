@@ -30,10 +30,10 @@ export const DeliveryActions = ({
     couriers,
     onEdit,
 }: DeliveryActionsProps) => {
-    const assign = useAssignDelivery(projectId);
-    const requeue = useRequeueDelivery(projectId);
-    const cancel = useCancelDelivery(projectId);
-    const setCarrierStatus = useSetCarrierStatus(projectId);
+    const assign = useAssignDelivery();
+    const requeue = useRequeueDelivery();
+    const cancel = useCancelDelivery();
+    const setCarrierStatus = useSetCarrierStatus();
 
     const input = { projectId, id: delivery.id };
     const isCourier = delivery.kind === DeliveryKind.COURIER;

@@ -20,7 +20,7 @@ export function useProductsPage() {
     const [search, setSearch] = useQueryState('q', parseAsString.withDefault(''));
     const debouncedSearch = useDebouncedValue(search);
     const query = useProductsList({ projectId, search: debouncedSearch });
-    const { mutateAsync, isPending } = useDeleteProduct(projectId);
+    const { mutateAsync, isPending } = useDeleteProduct();
 
     const onCreate = () => modal.open(<ProductCreateModal projectId={projectId} />);
 

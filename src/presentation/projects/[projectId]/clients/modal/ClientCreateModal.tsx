@@ -11,7 +11,7 @@ import { CLIENT_DEFAULT, type CreateClientFormValues } from '../form/formData';
 
 export const ClientCreateModal = ({ projectId }: { projectId: string }) => {
     const close = useModalClose();
-    const { mutateAsync, isPending } = useCreateClient(projectId);
+    const { mutateAsync, isPending } = useCreateClient();
 
     const form = useForm<CreateClientFormValues>({
         resolver: zodResolver(CreateClientActionInputSchema),

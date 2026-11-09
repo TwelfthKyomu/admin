@@ -18,7 +18,7 @@ interface TaskCreateModalProps {
 
 export const TaskCreateModal = ({ projectId, assigneeOptions }: TaskCreateModalProps) => {
     const close = useModalClose();
-    const { mutateAsync, isPending } = useCreateTask(projectId);
+    const { mutateAsync, isPending } = useCreateTask();
 
     const form = useForm<TaskFormValues>({
         defaultValues: TASK_DEFAULT,

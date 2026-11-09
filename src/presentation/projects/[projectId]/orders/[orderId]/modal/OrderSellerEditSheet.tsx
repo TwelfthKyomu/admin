@@ -18,7 +18,7 @@ interface OrderSellerEditSheetProps {
 
 export const OrderSellerEditSheet = ({ projectId, order, options }: OrderSellerEditSheetProps) => {
     const close = useModalClose();
-    const { mutateAsync, isPending } = useChangeOrderSeller(projectId);
+    const { mutateAsync, isPending } = useChangeOrderSeller();
 
     const form = useForm<OrderSellerFormValues>({
         values: { sellerId: order.sellerId ?? NO_SELLER },

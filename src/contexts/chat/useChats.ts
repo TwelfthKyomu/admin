@@ -1,7 +1,7 @@
 'use client';
 
 import { SEARCH_QUERY_MIN } from '@/shared/constants/default';
-import { makeScopedMutation } from '@/shared/lib/mutations';
+import { makeMutation } from '@/shared/lib/mutations';
 import { itemQuery, listQuery } from '@/shared/lib/queries';
 import { useQuery } from '@tanstack/react-query';
 import {
@@ -127,10 +127,10 @@ export function useChatMessageSearch(organizationId: string, query: string) {
     );
 }
 
-export const useEditChatMessage = makeScopedMutation(editChatMessageAction);
+export const useEditChatMessage = makeMutation(editChatMessageAction);
 
-export const useDeleteChatMessage = makeScopedMutation(deleteChatMessageAction);
+export const useDeleteChatMessage = makeMutation(deleteChatMessageAction);
 
-export const useSetChatMessagePin = makeScopedMutation(setChatMessagePinAction);
+export const useSetChatMessagePin = makeMutation(setChatMessagePinAction);
 
-export const useStartDirectChat = makeScopedMutation(startDirectChatAction);
+export const useStartDirectChat = makeMutation(startDirectChatAction);

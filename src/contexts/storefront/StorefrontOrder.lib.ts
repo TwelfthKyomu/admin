@@ -3,6 +3,7 @@ import 'server-only';
 import { db } from '@/infrastructure/database/client';
 import { ApplicationError } from '@/shared/api/errors';
 import { getErrorMessage } from '@/shared/lib/errors';
+import { publishScopeEvent } from '@/shared/realtime/scopeEvents';
 import { findOrCreateClient } from '@/contexts/client/Client.lib';
 import { previewCoupon } from '@/contexts/coupon/Coupon.lib';
 import { redeemCoupon } from '@/contexts/coupon/CouponRedemption.lib';
@@ -15,6 +16,7 @@ import {
     OrderSource,
     orderAmountDue,
     orderItemTotal,
+    orderNumber,
     sumOrderItems,
 } from '@/contexts/order/Order.types';
 import {
@@ -206,6 +208,13 @@ export async function createStorefrontOrder(
     });
 
     after(() => revalidateStorefronts(access.projectId));
+
+    after(() =>
+        publishScopeEvent(access.projectId, {
+            type: 'sync',
+            notice: `Новый заказ с сайта № ${orderNumber(order)}`,
+        }),
+    );
 
     const view = toStorefrontOrder(order, savedItems);
 

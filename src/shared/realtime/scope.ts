@@ -1,6 +1,8 @@
 'use client';
 
 import { useEffect, useRef } from 'react';
+import { useStaticData } from '@/app/providers/StaticDataProvider';
+import { toast } from '@/shared/lib/toast';
 import { useQueryClient } from '@tanstack/react-query';
 
 export interface ScopeTypingEvent {
@@ -9,31 +11,51 @@ export interface ScopeTypingEvent {
     name: string;
 }
 
-interface BroadcastBody {
+interface ScopeSyncEvent {
     scopeId: string;
-    typing?: boolean;
-    origin?: string;
+    userId?: string;
+    notice?: string;
 }
 
-const TAB_ID = `${Date.now().toString(36)}${Math.random().toString(36).slice(2)}`;
+const LOCAL_ECHO_MS = 2000;
 
-function post(body: BroadcastBody): void {
-    if (!body.scopeId || typeof window === 'undefined') return;
+const localMutations = { inFlight: 0, settledAt: 0 };
+
+export function startLocalMutation(): void {
+    localMutations.inFlight += 1;
+}
+
+export function settleLocalMutation(): void {
+    localMutations.inFlight = Math.max(0, localMutations.inFlight - 1);
+    localMutations.settledAt = Date.now();
+}
+
+function isLocalEcho(event: ScopeSyncEvent, userId: string): boolean {
+    if (event.userId !== userId) return false;
+
+    return (
+        localMutations.inFlight > 0 ||
+        Date.now() - localMutations.settledAt < LOCAL_ECHO_MS
+    );
+}
+
+export function broadcastTyping(scopeId: string): void {
+    if (!scopeId) return;
 
     void fetch('/api/realtime', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(body),
+        body: JSON.stringify({ scopeId }),
         keepalive: true,
     }).catch(() => {});
 }
 
-export function broadcastScope(scopeId: string): void {
-    post({ scopeId, origin: TAB_ID });
-}
-
-export function broadcastTyping(scopeId: string): void {
-    post({ scopeId, typing: true });
+function parse<T>(event: MessageEvent<string>): T | undefined {
+    try {
+        return JSON.parse(event.data) as T;
+    } catch {
+        return undefined;
+    }
 }
 
 export function useRealtimeSync(
@@ -41,6 +63,7 @@ export function useRealtimeSync(
     options: { onTyping?: (event: ScopeTypingEvent) => void } = {},
 ): void {
     const queryClient = useQueryClient();
+    const { user } = useStaticData();
     const optionsRef = useRef(options);
 
     useEffect(() => {
@@ -60,18 +83,13 @@ export function useRealtimeSync(
 
         const source = new EventSource(`/api/realtime?${query}`);
 
-        const parse = <T>(event: MessageEvent<string>): T | undefined => {
-            try {
-                return JSON.parse(event.data) as T;
-            } catch {
-                return undefined;
-            }
-        };
-
         const handleSync = (event: MessageEvent<string>) => {
-            const payload = parse<{ scopeId: string; origin?: string }>(event);
+            const payload = parse<ScopeSyncEvent>(event);
 
-            if (!payload || payload.origin === TAB_ID) return;
+            if (!payload) return;
+
+            if (payload.notice) toast.info(payload.notice);
+            if (isLocalEcho(payload, user.id)) return;
 
             queryClient.invalidateQueries({
                 predicate: (query) => query.queryKey.includes(payload.scopeId),
@@ -93,5 +111,5 @@ export function useRealtimeSync(
             source.removeEventListener('typing', handleTyping);
             source.close();
         };
-    }, [key, queryClient]);
+    }, [key, queryClient, user.id]);
 }

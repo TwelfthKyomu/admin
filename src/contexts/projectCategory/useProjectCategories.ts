@@ -1,6 +1,6 @@
 'use client';
 
-import { makeScopedMutation } from '@/shared/lib/mutations';
+import { makeMutation } from '@/shared/lib/mutations';
 import { listQuery } from '@/shared/lib/queries';
 import { useQuery } from '@tanstack/react-query';
 import {
@@ -34,6 +34,6 @@ export function useCategoriesList(opts: ListOptions) {
     return useQuery(categoryQueries.list(opts));
 }
 
-export const useCreateCategory = makeScopedMutation(createCategoryAction);
-export const useUpdateCategory = makeScopedMutation(updateCategoryAction);
-export const useDeleteCategory = makeScopedMutation(deleteCategoryAction);
+export const useCreateCategory = makeMutation(createCategoryAction);
+export const useUpdateCategory = makeMutation(updateCategoryAction);
+export const useDeleteCategory = makeMutation(deleteCategoryAction);

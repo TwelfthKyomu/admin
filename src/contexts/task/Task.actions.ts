@@ -12,7 +12,10 @@ import {
     updateInProject,
 } from '@/shared/api/repository';
 import { mapDefined } from '@/shared/lib/utils';
-import { requireAccessibleMessage } from '@/contexts/chat/Chat.lib';
+import {
+    publishChannelChange,
+    requireAccessibleMessage,
+} from '@/contexts/chat/Chat.lib';
 import { nextTaskNumber } from '@/contexts/project/Project.lib';
 import { findActiveProjectMember } from '@/contexts/projectMember/ProjectMember.lib';
 import { Permission, TASK_WRITE_PERMISSIONS } from '@/contexts/user/User.types';
@@ -55,7 +58,7 @@ export const tasksAction = projectReadAction(Permission.VIEW_MEMBERS)
 export const createTaskAction = projectMutationAction(TASK_WRITE_PERMISSIONS)
     .inputSchema(CreateTaskActionInputSchema)
     .action(async ({ parsedInput, ctx: { userId, organizationId } }) => {
-        await Promise.all([
+        const [, chatMessage] = await Promise.all([
             assertAssigneeInProject(
                 parsedInput.projectId,
                 parsedInput.assigneeUserId,
@@ -69,7 +72,7 @@ export const createTaskAction = projectMutationAction(TASK_WRITE_PERMISSIONS)
                 : null,
         ]);
 
-        return db.transaction(async (tx) => {
+        const task = await db.transaction(async (tx) => {
             const number = await nextTaskNumber(tx, parsedInput.projectId);
 
             return insertOne(
@@ -84,6 +87,12 @@ export const createTaskAction = projectMutationAction(TASK_WRITE_PERMISSIONS)
                 tx,
             );
         });
+
+        if (chatMessage) {
+            publishChannelChange(organizationId, chatMessage.channel, userId);
+        }
+
+        return task;
     });
 
 export const updateTaskAction = projectMutationAction(TASK_WRITE_PERMISSIONS)

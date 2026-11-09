@@ -56,7 +56,7 @@ export function useChatComposer({
     const draftBeforeEdit = useRef<string>(undefined);
 
     const send = useSendChatMessage(organizationId, target, viewer);
-    const edit = useEditChatMessage(scope);
+    const edit = useEditChatMessage();
     const isPending = send.isPending || edit.isPending;
 
     const patchAttachment = (key: string, patch: Partial<PendingAttachment>) =>

@@ -22,7 +22,7 @@ interface CompleteDeliveryModalProps {
 
 export const DeliveryCompleteModal = ({ projectId, delivery }: CompleteDeliveryModalProps) => {
     const close = useModalClose();
-    const { mutateAsync, isPending } = useCompleteDelivery(projectId);
+    const { mutateAsync, isPending } = useCompleteDelivery();
     const maxAmount = delivery.amountDue;
 
     const form = useForm<CompleteDeliveryFormValues>({

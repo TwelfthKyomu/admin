@@ -1,6 +1,6 @@
 'use client';
 
-import { makeScopedMutation } from '@/shared/lib/mutations';
+import { makeMutation } from '@/shared/lib/mutations';
 import { listQuery } from '@/shared/lib/queries';
 import { useQuery } from '@tanstack/react-query';
 import {
@@ -29,12 +29,10 @@ export function usePaymentIntentsList(opts: ListOptions) {
     return useQuery(paymentQueries.list(opts));
 }
 
-export const useConnectPaymentProvider = makeScopedMutation(
+export const useConnectPaymentProvider = makeMutation(
     connectPaymentProviderAction,
 );
-export const useCreatePaymentIntent = makeScopedMutation(
-    createPaymentIntentAction,
-);
-export const useRefundUnappliedIntent = makeScopedMutation(
+export const useCreatePaymentIntent = makeMutation(createPaymentIntentAction);
+export const useRefundUnappliedIntent = makeMutation(
     refundUnappliedIntentAction,
 );

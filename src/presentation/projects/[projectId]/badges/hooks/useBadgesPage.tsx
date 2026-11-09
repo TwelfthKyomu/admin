@@ -20,7 +20,7 @@ const BadgeEditSheet = dynamic(() =>
 export function useBadgesPage() {
     const { projectId } = useProject();
     const query = useProjectBadgesList({ projectId, includeInactive: true });
-    const { mutateAsync, isPending } = useDeleteProjectBadge(projectId);
+    const { mutateAsync, isPending } = useDeleteProjectBadge();
 
     const onCreate = () => modal.open(<BadgeCreateModal projectId={projectId} />);
 

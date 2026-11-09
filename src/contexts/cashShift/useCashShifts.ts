@@ -1,6 +1,6 @@
 'use client';
 
-import { makeScopedMutation } from '@/shared/lib/mutations';
+import { makeMutation } from '@/shared/lib/mutations';
 import { itemQuery } from '@/shared/lib/queries';
 import { useQuery } from '@tanstack/react-query';
 import {
@@ -36,10 +36,8 @@ export function useMyCourierCash(projectId: string, enabled = true) {
     );
 }
 
-export const useAcceptCourierCash = makeScopedMutation(acceptCourierCashAction);
+export const useAcceptCourierCash = makeMutation(acceptCourierCashAction);
 
-export const useOpenCashShift = makeScopedMutation(openCashShiftAction);
-export const useCloseCashShift = makeScopedMutation(closeCashShiftAction);
-export const useRecordCashCollection = makeScopedMutation(
-    recordCashCollectionAction,
-);
+export const useOpenCashShift = makeMutation(openCashShiftAction);
+export const useCloseCashShift = makeMutation(closeCashShiftAction);
+export const useRecordCashCollection = makeMutation(recordCashCollectionAction);

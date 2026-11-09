@@ -23,7 +23,7 @@ export function useScheduleBuilder({
     projectId,
     defaultEmployeeId,
 }: UseScheduleBuilderOptions) {
-    const bulk = useBulkCreateShifts(projectId);
+    const bulk = useBulkCreateShifts();
 
     const [active, setActive] = useState(false);
     const [chosenEmployeeId, setChosenEmployeeId] = useState('');

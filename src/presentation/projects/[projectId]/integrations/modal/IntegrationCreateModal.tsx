@@ -21,7 +21,7 @@ interface CreateIntegrationModalProps {
 
 export const IntegrationCreateModal = ({ projectId, onIssued }: CreateIntegrationModalProps) => {
     const close = useModalClose();
-    const { mutateAsync, isPending } = useCreateIntegration(projectId);
+    const { mutateAsync, isPending } = useCreateIntegration();
 
     const form = useForm<CreateIntegrationFormValues>({
         defaultValues: INTEGRATION_DEFAULT,

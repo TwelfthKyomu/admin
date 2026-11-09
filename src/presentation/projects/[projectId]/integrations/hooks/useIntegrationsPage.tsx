@@ -27,7 +27,7 @@ export function useIntegrationsPage() {
     const { projectId } = useProject();
     const [issuedKey, setIssuedKey] = useState<string>();
     const query = useIntegrationsList(projectId);
-    const revoke = useRevokeIntegration(projectId);
+    const revoke = useRevokeIntegration();
 
     const onCreate = () =>
         modal.open(

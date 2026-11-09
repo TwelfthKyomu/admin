@@ -1,6 +1,6 @@
 'use client';
 
-import { makeScopedMutation } from '@/shared/lib/mutations';
+import { makeMutation } from '@/shared/lib/mutations';
 import { listQuery } from '@/shared/lib/queries';
 import { useQuery } from '@tanstack/react-query';
 import {
@@ -30,6 +30,6 @@ export function useProductsList(opts: ListOptions) {
     return useQuery(productQueries.list(opts));
 }
 
-export const useCreateProduct = makeScopedMutation(createProductAction);
-export const useUpdateProduct = makeScopedMutation(updateProductAction);
-export const useDeleteProduct = makeScopedMutation(deleteProductAction);
+export const useCreateProduct = makeMutation(createProductAction);
+export const useUpdateProduct = makeMutation(updateProductAction);
+export const useDeleteProduct = makeMutation(deleteProductAction);

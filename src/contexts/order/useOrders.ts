@@ -1,6 +1,6 @@
 'use client';
 
-import { makeScopedMutation } from '@/shared/lib/mutations';
+import { makeMutation } from '@/shared/lib/mutations';
 import { itemQuery, listQuery } from '@/shared/lib/queries';
 import { useQuery } from '@tanstack/react-query';
 import {
@@ -90,13 +90,11 @@ export function useOrderDetail(opts: DetailOptions) {
     return useQuery(orderQueries.detail(opts));
 }
 
-export const useCreateOrder = makeScopedMutation(createOrderAction);
-export const useChangeOrderStatus = makeScopedMutation(changeOrderStatusAction);
-export const useChangeOrderSeller = makeScopedMutation(changeOrderSellerAction);
-export const useRecordOrderPayment = makeScopedMutation(
-    recordOrderPaymentAction,
-);
-export const useRecordOrderRefund = makeScopedMutation(recordOrderRefundAction);
+export const useCreateOrder = makeMutation(createOrderAction);
+export const useChangeOrderStatus = makeMutation(changeOrderStatusAction);
+export const useChangeOrderSeller = makeMutation(changeOrderSellerAction);
+export const useRecordOrderPayment = makeMutation(recordOrderPaymentAction);
+export const useRecordOrderRefund = makeMutation(recordOrderRefundAction);
 
 interface RevenueOptions {
     projectId: string;

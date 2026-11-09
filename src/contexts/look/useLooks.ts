@@ -1,6 +1,6 @@
 'use client';
 
-import { makeScopedMutation } from '@/shared/lib/mutations';
+import { makeMutation } from '@/shared/lib/mutations';
 import { listQuery } from '@/shared/lib/queries';
 import { useQuery } from '@tanstack/react-query';
 import {
@@ -24,6 +24,6 @@ export function useLooksList(projectId: string) {
     return useQuery(lookQueries.list(projectId));
 }
 
-export const useCreateLook = makeScopedMutation(createLookAction);
-export const useUpdateLook = makeScopedMutation(updateLookAction);
-export const useDeleteLook = makeScopedMutation(deleteLookAction);
+export const useCreateLook = makeMutation(createLookAction);
+export const useUpdateLook = makeMutation(updateLookAction);
+export const useDeleteLook = makeMutation(deleteLookAction);

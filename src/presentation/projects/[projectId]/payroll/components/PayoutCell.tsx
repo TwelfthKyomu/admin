@@ -14,8 +14,8 @@ interface PayoutCellProps {
 }
 
 export const PayoutCell = ({ row, projectId, from, to, canManage }: PayoutCellProps) => {
-    const record = useRecordPayout(projectId);
-    const remove = useDeletePayout(projectId);
+    const record = useRecordPayout();
+    const remove = useDeletePayout();
     const busy = record.isPending || remove.isPending;
     const { payoutId } = row;
 

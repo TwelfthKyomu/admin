@@ -1,6 +1,6 @@
 'use client';
 
-import { makeScopedMutation } from '@/shared/lib/mutations';
+import { makeMutation } from '@/shared/lib/mutations';
 import { listQuery } from '@/shared/lib/queries';
 import { useQuery } from '@tanstack/react-query';
 import {
@@ -24,6 +24,6 @@ export function useIntegrationsList(projectId: string) {
     return useQuery(integrationQueries.list(projectId));
 }
 
-export const useCreateIntegration = makeScopedMutation(createIntegrationAction);
-export const useRevokeIntegration = makeScopedMutation(revokeIntegrationAction);
-export const useConnectStorage = makeScopedMutation(connectStorageAction);
+export const useCreateIntegration = makeMutation(createIntegrationAction);
+export const useRevokeIntegration = makeMutation(revokeIntegrationAction);
+export const useConnectStorage = makeMutation(connectStorageAction);

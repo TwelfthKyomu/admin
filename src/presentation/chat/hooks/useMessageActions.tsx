@@ -36,9 +36,9 @@ interface UseMessageActionsOptions {
 
 export function useMessageActions({ target, scope }: UseMessageActionsOptions) {
     const { projects, projectPermissions } = useStaticData();
-    const remove = useDeleteChatMessage(scope);
+    const remove = useDeleteChatMessage();
     const react = useSetChatReaction(scope);
-    const pin = useSetChatMessagePin(scope);
+    const pin = useSetChatMessagePin();
 
     const deleteMessage = (messageId: string) => {
         void confirmDestructive({
@@ -90,7 +90,6 @@ export function useMessageActions({ target, scope }: UseMessageActionsOptions) {
         void modal.open(
             <TaskFromMessageModal
                 message={message}
-                scope={scope}
                 projects={taskProjects}
                 defaultProjectId={defaultProjectId ?? ''}
             />,

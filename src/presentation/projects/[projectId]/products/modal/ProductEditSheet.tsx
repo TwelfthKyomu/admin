@@ -17,7 +17,7 @@ interface ProductEditSheetProps {
 
 export const ProductEditSheet = ({ projectId, product }: ProductEditSheetProps) => {
     const close = useModalClose();
-    const { mutateAsync, isPending } = useUpdateProduct(projectId);
+    const { mutateAsync, isPending } = useUpdateProduct();
 
     const form = useForm<UpdateProductFormValues>({
         values: {

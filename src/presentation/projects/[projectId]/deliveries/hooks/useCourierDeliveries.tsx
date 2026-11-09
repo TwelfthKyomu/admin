@@ -47,9 +47,9 @@ export function useCourierDeliveries() {
     const deliveriesQuery = useDeliveries({ projectId, ...range });
     const employeesQuery = useProjectEmployees({ projectId });
     const cashQuery = useMyCourierCash(projectId);
-    const take = useTakeDelivery(projectId);
-    const pickUp = usePickUpDelivery(projectId);
-    const complete = useCompleteDelivery(projectId);
+    const take = useTakeDelivery();
+    const pickUp = usePickUpDelivery();
+    const complete = useCompleteDelivery();
 
     const me = (employeesQuery.data ?? []).find((employee) => employee.userId === user.id);
     const all = deliveriesQuery.data ?? [];

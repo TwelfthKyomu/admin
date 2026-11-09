@@ -1,6 +1,6 @@
 'use client';
 
-import { makeScopedMutation } from '@/shared/lib/mutations';
+import { makeMutation } from '@/shared/lib/mutations';
 import { listQuery } from '@/shared/lib/queries';
 import { useQuery } from '@tanstack/react-query';
 import {
@@ -38,4 +38,4 @@ export function useStockMovements(opts: MovementsOptions) {
     return useQuery(stockQueries.movements(opts));
 }
 
-export const useAdjustStock = makeScopedMutation(adjustStockAction);
+export const useAdjustStock = makeMutation(adjustStockAction);

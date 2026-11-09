@@ -17,7 +17,7 @@ interface CloseShiftSheetProps {
 
 export const CashShiftCloseSheet = ({ projectId, expectedCash }: CloseShiftSheetProps) => {
     const close = useModalClose();
-    const { mutateAsync, isPending } = useCloseCashShift(projectId);
+    const { mutateAsync, isPending } = useCloseCashShift();
 
     const form = useForm<CloseCashShiftFormValues>({
         resolver: zodResolver(CloseCashShiftActionInputSchema),

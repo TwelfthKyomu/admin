@@ -19,7 +19,7 @@ interface TaskEditSheetProps {
 
 export const TaskEditSheet = ({ projectId, task, assigneeOptions }: TaskEditSheetProps) => {
     const close = useModalClose();
-    const { mutateAsync, isPending } = useUpdateTask(projectId);
+    const { mutateAsync, isPending } = useUpdateTask();
 
     const form = useForm<TaskFormValues>({
         values: {

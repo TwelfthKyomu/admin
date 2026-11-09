@@ -16,7 +16,7 @@ import { BADGE_DEFAULT, type CreateBadgeFormValues } from '../form/formData';
 
 export const BadgeCreateModal = ({ projectId }: { projectId: string }) => {
     const close = useModalClose();
-    const { mutateAsync, isPending } = useCreateProjectBadge(projectId);
+    const { mutateAsync, isPending } = useCreateProjectBadge();
 
     const form = useForm<CreateBadgeFormValues>({
         defaultValues: { ...BADGE_DEFAULT, projectId },

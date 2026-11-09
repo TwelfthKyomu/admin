@@ -11,6 +11,7 @@ import { createStripePayment } from '@/infrastructure/payments/stripe';
 import { ApplicationError } from '@/shared/api/errors';
 import { insertOne, updateOne } from '@/shared/api/repository';
 import { getErrorMessage } from '@/shared/lib/errors';
+import { publishScopeEvent } from '@/shared/realtime/scopeEvents';
 import { decryptCredentials } from '@/shared/security/encryption';
 import { IntegrationType } from '@/contexts/integration/Integration.types';
 import { projectIntegrations } from '@/contexts/integration/Integrations.table';
@@ -156,6 +157,8 @@ export async function applyPaymentWebhookEvent(
                 .set({ status: PaymentIntentStatus.CANCELLED })
                 .where(eq(paymentIntents.id, intent.id));
 
+            after(() => publishScopeEvent(intent.projectId, { type: 'sync' }));
+
             return 'cancelled';
         }
         if (event.status !== PaymentIntentStatus.SUCCEEDED) return 'ignored';
@@ -173,6 +176,8 @@ export async function applyPaymentWebhookEvent(
                     : intent.metadata,
             })
             .where(eq(paymentIntents.id, intent.id));
+
+        after(() => publishScopeEvent(intent.projectId, { type: 'sync' }));
 
         if (!applyError) after(() => mailOrderPaid(intent.orderId));
 

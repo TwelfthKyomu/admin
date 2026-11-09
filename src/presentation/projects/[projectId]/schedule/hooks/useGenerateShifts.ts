@@ -33,8 +33,8 @@ export function useGenerateShifts({
     employees,
     onDone,
 }: UseGenerateShiftsOptions) {
-    const bulk = useBulkCreateShifts(projectId);
-    const updateAssignment = useUpdateAssignment(projectId);
+    const bulk = useBulkCreateShifts();
+    const updateAssignment = useUpdateAssignment();
 
     const [employeeId, setEmployeeId] = useState(
         employees[0]?.employeeId ?? '',

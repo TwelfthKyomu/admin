@@ -14,7 +14,7 @@ import type { RecordCashCollectionFormValues } from '../form/formData';
 
 export const CashCollectSheet = ({ projectId }: { projectId: string }) => {
     const close = useModalClose();
-    const { mutateAsync, isPending } = useRecordCashCollection(projectId);
+    const { mutateAsync, isPending } = useRecordCashCollection();
 
     const form = useForm<RecordCashCollectionFormValues>({
         resolver: zodResolver(RecordCashCollectionActionInputSchema),

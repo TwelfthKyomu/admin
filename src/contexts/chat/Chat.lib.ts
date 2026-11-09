@@ -4,6 +4,7 @@ import { db } from '@/infrastructure/database/client';
 import { ApplicationError } from '@/shared/api/errors';
 import { canSeeProject, listProjectPermissions } from '@/shared/api/permission';
 import { PAGE_SIZE_HUGE } from '@/shared/constants/default';
+import { publishScopeEvent } from '@/shared/realtime/scopeEvents';
 import { findMemberIdByUserId } from '@/contexts/organizationMember/OrganizationMember.lib';
 import { organizationMembers } from '@/contexts/organizationMember/OrganizationMembers.table';
 import { listOrganizationProjects } from '@/contexts/project/Project.lib';
@@ -14,6 +15,9 @@ import {
     type ChatContactView,
     type ChatProjectChannelView,
     type ChatTarget,
+    channelTarget,
+    chatChannelsScope,
+    chatScopeKey,
     type DirectChannelView,
     directChannelPair,
     isChatParticipant,
@@ -283,4 +287,27 @@ export function listChatContacts(
         )
         .orderBy(desc(organizationMembers.joinedAt))
         .limit(PAGE_SIZE_HUGE);
+}
+
+export function publishChannelChange(
+    organizationId: string,
+    channel: Pick<ChatChannelRecord, 'id' | 'type' | 'projectId'>,
+    userId: string,
+): void {
+    publishScopeEvent(chatScopeKey(organizationId, channelTarget(channel)), {
+        type: 'sync',
+        userId,
+    });
+
+    publishChannelsChange(organizationId, userId);
+}
+
+export function publishChannelsChange(
+    organizationId: string,
+    userId: string,
+): void {
+    publishScopeEvent(chatChannelsScope(organizationId), {
+        type: 'sync',
+        userId,
+    });
 }

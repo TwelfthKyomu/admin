@@ -21,7 +21,7 @@ import { buildProviderPayload } from '../lib/providerPayload';
 
 export const PaymentProviderConnectModal = ({ projectId }: { projectId: string }) => {
     const close = useModalClose();
-    const { mutateAsync, isPending } = useConnectPaymentProvider(projectId);
+    const { mutateAsync, isPending } = useConnectPaymentProvider();
 
     const form = useForm<ConnectPaymentProviderFormValues>({
         resolver: zodResolver(ConnectPaymentProviderFormSchema),

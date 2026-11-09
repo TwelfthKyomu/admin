@@ -66,7 +66,7 @@ function sellablesOf(product: ProductView): Sellable[] {
 export function useCreateSale(projectId: string) {
     const close = useModalClose();
     const router = useRouter();
-    const { mutateAsync, isPending } = useCreateOrder(projectId);
+    const { mutateAsync, isPending } = useCreateOrder();
     const productsQuery = useProductsList({ projectId });
 
     const form = useForm<CreateSaleFormValues>({

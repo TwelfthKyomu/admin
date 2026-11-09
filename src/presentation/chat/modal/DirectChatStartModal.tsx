@@ -6,7 +6,7 @@ import { ORGANIZATION_ROLE_LABEL } from '@/shared/labels/team';
 import { runAction } from '@/shared/lib/action-result';
 import { useModalClose } from '@/shared/lib/modal';
 import { matchesSearch } from '@/shared/lib/search';
-import { chatChannelsScope, useChatContacts, useStartDirectChat } from '@/contexts/chat';
+import { useChatContacts, useStartDirectChat } from '@/contexts/chat';
 import { Input, Modal } from '@/ui/Base';
 
 interface StartDmModalProps {
@@ -18,7 +18,7 @@ export const DirectChatStartModal = ({ organizationId, onOpened }: StartDmModalP
     const close = useModalClose();
     const [search, setSearch] = useState('');
     const contacts = useChatContacts(organizationId, true);
-    const { mutateAsync, isPending } = useStartDirectChat(chatChannelsScope(organizationId));
+    const { mutateAsync, isPending } = useStartDirectChat();
 
     const visible = (contacts.data ?? []).filter((contact) =>
         matchesSearch(search, contact.name, contact.email),

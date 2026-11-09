@@ -17,7 +17,7 @@ interface CouponSectionProps {
 
 export const CouponSection = ({ order, couponCode, projectId }: CouponSectionProps) => {
     const [code, setCode] = useState('');
-    const { mutateAsync, isPending } = useRedeemCoupon(projectId);
+    const { mutateAsync, isPending } = useRedeemCoupon();
 
     const apply = async () => {
         const trimmed = code.trim();

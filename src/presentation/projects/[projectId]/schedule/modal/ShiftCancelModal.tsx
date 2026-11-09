@@ -16,7 +16,7 @@ interface ShiftCancelModalProps {
 export const ShiftCancelModal = ({ projectId, shiftId, employeeName }: ShiftCancelModalProps) => {
     const close = useModalClose();
     const [reason, setReason] = useState<ShiftCancelReason>(ShiftCancelReason.SICK);
-    const { mutateAsync, isPending } = useChangeShiftStatus(projectId);
+    const { mutateAsync, isPending } = useChangeShiftStatus();
 
     const onConfirm = async () => {
         const { success } = await runAction(

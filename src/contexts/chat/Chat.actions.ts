@@ -11,6 +11,7 @@ import {
     listChatContacts,
     listChatProjects,
     listDirectChannels,
+    publishChannelsChange,
     requireAccessibleMessage,
     startDirectChannel,
 } from './Chat.lib';
@@ -172,6 +173,8 @@ export const markChatReadAction = organizationMemberMutationAction()
 
             if (channel) await markChannelRead(channel.id, userId);
 
+            publishChannelsChange(organizationId, userId);
+
             return { ok: true };
         },
     );
@@ -184,6 +187,8 @@ export const startDirectChatAction = organizationMemberMutationAction()
             organizationId,
             parsedInput.otherUserId,
         );
+
+        publishChannelsChange(organizationId, userId);
 
         return { channelId };
     });

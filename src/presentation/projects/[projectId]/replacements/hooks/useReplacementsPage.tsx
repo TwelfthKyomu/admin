@@ -36,7 +36,7 @@ export function useReplacementsPage() {
     const employeesQuery = useProjectEmployees({ projectId });
     const [openedAt] = useState(() => new Date());
     const shiftsQuery = useShiftsList({ projectId, from: openedAt });
-    const seekingMutation = useSetShiftSeekingReplacement(projectId);
+    const seekingMutation = useSetShiftSeekingReplacement();
 
     const employees = employeesQuery.data ?? [];
     const shifts = shiftsQuery.data ?? [];

@@ -22,9 +22,9 @@ const TaskEditSheet = dynamic(() => import('../modal/TaskEditSheet').then((m) =>
 
 export function useTaskActions(assigneeOptions: Option[]) {
     const { projectId } = useProject();
-    const create = useCreateTask(projectId);
-    const update = useUpdateTask(projectId);
-    const remove = useDeleteTask(projectId);
+    const create = useCreateTask();
+    const update = useUpdateTask();
+    const remove = useDeleteTask();
 
     const onCreate = () =>
         modal.open(

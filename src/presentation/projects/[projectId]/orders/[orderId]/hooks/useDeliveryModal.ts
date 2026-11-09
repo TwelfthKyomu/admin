@@ -35,8 +35,8 @@ export function useDeliveryModal({
     initial,
 }: UseDeliveryModalOptions) {
     const close = useModalClose();
-    const create = useCreateDelivery(projectId);
-    const update = useUpdateDelivery(projectId);
+    const create = useCreateDelivery();
+    const update = useUpdateDelivery();
     const isPending = create.isPending || update.isPending;
     const amountDue = orderAmountDue(order);
     const currency = order.currency;

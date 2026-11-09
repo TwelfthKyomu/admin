@@ -16,7 +16,7 @@ interface LookEditSheetProps {
 
 export const LookEditSheet = ({ projectId, look }: LookEditSheetProps) => {
     const close = useModalClose();
-    const { mutateAsync, isPending } = useUpdateLook(projectId);
+    const { mutateAsync, isPending } = useUpdateLook();
 
     const form = useForm<UpdateLookFormValues>({
         values: { ...look, projectId, description: look.description ?? '' },

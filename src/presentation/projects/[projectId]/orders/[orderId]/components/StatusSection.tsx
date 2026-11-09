@@ -28,7 +28,7 @@ interface StatusSectionProps {
 }
 
 export const StatusSection = ({ order, projectId, canEdit, hasDelivery }: StatusSectionProps) => {
-    const { mutateAsync, isPending } = useChangeOrderStatus(projectId);
+    const { mutateAsync, isPending } = useChangeOrderStatus();
     const next = getNextOrderStatuses(order.status, { hasDelivery });
 
     const onTransition = (status: OrderStatus) => {

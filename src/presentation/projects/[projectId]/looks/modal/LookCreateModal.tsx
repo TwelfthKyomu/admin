@@ -11,7 +11,7 @@ import { LookForm } from '../form/LookForm';
 
 export const LookCreateModal = ({ projectId }: { projectId: string }) => {
     const close = useModalClose();
-    const { mutateAsync, isPending } = useCreateLook(projectId);
+    const { mutateAsync, isPending } = useCreateLook();
 
     const form = useForm<CreateLookFormValues>({
         defaultValues: { ...LOOK_DEFAULT, projectId },

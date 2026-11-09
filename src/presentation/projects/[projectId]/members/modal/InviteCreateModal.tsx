@@ -22,7 +22,7 @@ interface CreateInviteModalProps {
 
 export const InviteCreateModal = ({ projectId }: CreateInviteModalProps) => {
     const close = useModalClose();
-    const { mutateAsync, isPending } = useCreateProjectInvite(projectId);
+    const { mutateAsync, isPending } = useCreateProjectInvite();
 
     const form = useForm<CreateInviteFormValues>({
         resolver: zodResolver(CreateProjectInviteActionInputSchema),

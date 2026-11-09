@@ -28,7 +28,7 @@ export const ShiftReassignSheet = ({
     candidates,
 }: ShiftReassignSheetProps) => {
     const close = useModalClose();
-    const { mutateAsync, isPending } = useReassignShift(projectId);
+    const { mutateAsync, isPending } = useReassignShift();
 
     const form = useForm<ReassignShiftFormValues>({
         values: { id: shiftId, projectId, substituteEmployeeId: '', reason: '' },

@@ -11,7 +11,7 @@ import type { OpenCashShiftFormValues } from '../form/formData';
 
 export const CashShiftOpenSheet = ({ projectId }: { projectId: string }) => {
     const close = useModalClose();
-    const { mutateAsync, isPending } = useOpenCashShift(projectId);
+    const { mutateAsync, isPending } = useOpenCashShift();
 
     const form = useForm<OpenCashShiftFormValues>({
         resolver: zodResolver(OpenCashShiftActionInputSchema),

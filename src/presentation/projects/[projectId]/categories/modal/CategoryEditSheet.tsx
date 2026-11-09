@@ -40,7 +40,7 @@ interface CategoryEditSheetProps {
 
 export const CategoryEditSheet = ({ projectId, category }: CategoryEditSheetProps) => {
     const close = useModalClose();
-    const { mutateAsync, isPending } = useUpdateCategory(projectId);
+    const { mutateAsync, isPending } = useUpdateCategory();
     const categories = useCategoriesList({ projectId, includeInactive: true }).data ?? [];
     const excluded = subtreeIds(category.id, categories);
 

@@ -1,6 +1,6 @@
 'use client';
 
-import { makeScopedMutation } from '@/shared/lib/mutations';
+import { makeMutation } from '@/shared/lib/mutations';
 import { listQuery } from '@/shared/lib/queries';
 import { useQuery } from '@tanstack/react-query';
 import {
@@ -35,5 +35,5 @@ export function usePayrollPreview(opts: PreviewOptions) {
     return useQuery(payrollQueries.preview(opts));
 }
 
-export const useRecordPayout = makeScopedMutation(recordPayoutAction);
-export const useDeletePayout = makeScopedMutation(deletePayoutAction);
+export const useRecordPayout = makeMutation(recordPayoutAction);
+export const useDeletePayout = makeMutation(deletePayoutAction);

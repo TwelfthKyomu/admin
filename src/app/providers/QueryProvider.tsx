@@ -1,11 +1,14 @@
 'use client';
 
 import { type PropsWithChildren, useState } from 'react';
+import { settleLocalMutation, startLocalMutation } from '@/shared/realtime/scope';
 import { MutationCache, QueryClient, QueryClientProvider } from '@tanstack/react-query';
 
 function createQueryClient() {
     const queryClient: QueryClient = new QueryClient({
         mutationCache: new MutationCache({
+            onMutate: startLocalMutation,
+            onSettled: settleLocalMutation,
             onSuccess: (_data, _variables, _result, mutation) => {
                 if (mutation.meta?.invalidatesAll === false) return;
 

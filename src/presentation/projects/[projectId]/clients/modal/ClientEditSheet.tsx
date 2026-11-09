@@ -17,7 +17,7 @@ interface ClientEditSheetProps {
 
 export const ClientEditSheet = ({ projectId, client }: ClientEditSheetProps) => {
     const close = useModalClose();
-    const { mutateAsync, isPending } = useUpdateClient(projectId);
+    const { mutateAsync, isPending } = useUpdateClient();
 
     const form = useForm<UpdateClientFormValues>({
         resolver: zodResolver(UpdateClientActionInputSchema),

@@ -70,7 +70,7 @@ export function useChatPage() {
         onTyping: typing.handleTyping,
     });
 
-    const startDm = useStartDirectChat(chatChannelsScope(organizationId));
+    const startDm = useStartDirectChat();
 
     const openDirectChat = async (otherUserId: string) => {
         const { success, response } = await runAction(startDm.mutateAsync({ otherUserId }));

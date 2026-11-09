@@ -1,6 +1,6 @@
 'use client';
 
-import { makeScopedMutation } from '@/shared/lib/mutations';
+import { makeMutation } from '@/shared/lib/mutations';
 import { listQuery } from '@/shared/lib/queries';
 import { useQuery } from '@tanstack/react-query';
 import {
@@ -35,5 +35,5 @@ export function useClientsList(opts: ListOptions) {
     return useQuery(clientQueries.list(opts));
 }
 
-export const useCreateClient = makeScopedMutation(createClientAction);
-export const useUpdateClient = makeScopedMutation(updateClientAction);
+export const useCreateClient = makeMutation(createClientAction);
+export const useUpdateClient = makeMutation(updateClientAction);

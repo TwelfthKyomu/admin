@@ -170,11 +170,7 @@ export async function POST(request: Request) {
         return new Response('Bad request', { status: 400 });
     }
 
-    const { scopeId, typing, origin } = (body ?? {}) as {
-        scopeId?: unknown;
-        typing?: unknown;
-        origin?: unknown;
-    };
+    const { scopeId } = (body ?? {}) as { scopeId?: unknown };
 
     if (typeof scopeId !== 'string' || scopeId.length === 0) {
         return new Response('Bad request', { status: 400 });
@@ -186,19 +182,11 @@ export async function POST(request: Request) {
         return new Response('Forbidden', { status: 403 });
     }
 
-    publishScopeEvent(
-        scopeId,
-        typing === true
-            ? {
-                  type: 'typing',
-                  userId: session.user.id,
-                  name: session.user.name,
-              }
-            : {
-                  type: 'sync',
-                  origin: typeof origin === 'string' ? origin : undefined,
-              },
-    );
+    publishScopeEvent(scopeId, {
+        type: 'typing',
+        userId: session.user.id,
+        name: session.user.name,
+    });
 
     return new Response(null, { status: 204 });
 }

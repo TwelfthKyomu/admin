@@ -16,7 +16,7 @@ import { CATEGORY_DEFAULT, type CreateCategoryFormValues } from '../form/formDat
 
 export const CategoryCreateModal = ({ projectId }: { projectId: string }) => {
     const close = useModalClose();
-    const { mutateAsync, isPending } = useCreateCategory(projectId);
+    const { mutateAsync, isPending } = useCreateCategory();
     const categories = useCategoriesList({ projectId, includeInactive: false }).data ?? [];
 
     const parentOptions = categories.length

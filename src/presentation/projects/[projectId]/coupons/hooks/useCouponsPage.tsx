@@ -16,7 +16,7 @@ const CouponEditSheet = dynamic(() =>
 export function useCouponsPage() {
     const { projectId, currency } = useProject();
     const query = useCouponsList(projectId);
-    const { mutateAsync, isPending } = useDeleteCoupon(projectId);
+    const { mutateAsync, isPending } = useDeleteCoupon();
 
     const onCreate = () => modal.open(<CouponCreateModal projectId={projectId} />);
 

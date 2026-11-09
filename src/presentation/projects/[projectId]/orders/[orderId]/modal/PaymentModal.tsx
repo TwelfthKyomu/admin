@@ -27,8 +27,8 @@ interface PaymentModalProps {
 
 export const PaymentModal = ({ projectId, order, mode, maxAmount }: PaymentModalProps) => {
     const close = useModalClose();
-    const recordPayment = useRecordOrderPayment(projectId);
-    const recordRefund = useRecordOrderRefund(projectId);
+    const recordPayment = useRecordOrderPayment();
+    const recordRefund = useRecordOrderRefund();
     const meta = PAYMENT_DIALOG_LABEL[mode];
     const isRefund = mode === 'refund';
     const max = fmtMoney(maxAmount, order.currency);

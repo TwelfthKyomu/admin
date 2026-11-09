@@ -23,7 +23,7 @@ export const CourierCashAcceptSheet = ({
     currency,
 }: AcceptCourierCashSheetProps) => {
     const close = useModalClose();
-    const { mutateAsync, isPending } = useAcceptCourierCash(projectId);
+    const { mutateAsync, isPending } = useAcceptCourierCash();
 
     const form = useForm<AcceptCourierCashFormValues>({
         resolver: zodResolver(AcceptCourierCashFormSchema),

@@ -13,7 +13,7 @@ type StorageFormValues = z.infer<typeof ConnectStorageActionInputSchema>;
 
 export const StorageConnectModal = ({ projectId }: { projectId: string }) => {
     const close = useModalClose();
-    const { mutateAsync, isPending } = useConnectStorage(projectId);
+    const { mutateAsync, isPending } = useConnectStorage();
 
     const form = useForm<StorageFormValues>({
         resolver: zodResolver(ConnectStorageActionInputSchema),

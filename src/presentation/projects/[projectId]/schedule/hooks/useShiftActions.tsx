@@ -35,7 +35,7 @@ export function useShiftActions({
     workingEmployees,
 }: UseShiftActionsOptions) {
     const { can } = useProject();
-    const { mutateAsync, isPending } = useChangeShiftStatus(projectId);
+    const { mutateAsync, isPending } = useChangeShiftStatus();
 
     const isScheduled = shift.status === ShiftStatus.SCHEDULED;
     const isActive = isScheduled || shift.status === ShiftStatus.IN_PROGRESS;

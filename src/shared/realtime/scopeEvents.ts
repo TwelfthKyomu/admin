@@ -1,7 +1,7 @@
 import 'server-only';
 
 export type ScopeEvent =
-    | { type: 'sync'; origin?: string }
+    | { type: 'sync'; userId?: string; notice?: string }
     | {
           type: 'typing';
           userId: string;

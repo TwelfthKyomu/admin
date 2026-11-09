@@ -16,7 +16,7 @@ interface CouponEditSheetProps {
 
 export const CouponEditSheet = ({ projectId, coupon }: CouponEditSheetProps) => {
     const close = useModalClose();
-    const { mutateAsync, isPending } = useUpdateCoupon(projectId);
+    const { mutateAsync, isPending } = useUpdateCoupon();
 
     const form = useForm<UpdateCouponFormValues>({
         resolver: zodResolver(UpdateCouponFormSchema),

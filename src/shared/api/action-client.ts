@@ -13,6 +13,7 @@ import {
 } from '@/shared/api/permission';
 import { AUTH_REQUIRED_MESSAGE } from '@/shared/constants/auth';
 import { getErrorMessage } from '@/shared/lib/errors';
+import { publishScopeEvent } from '@/shared/realtime/scopeEvents';
 import {
     enforceRateLimit,
     type RateLimitKey,
@@ -86,6 +87,11 @@ export function projectMutationAction(
             const result = await next();
 
             if (result.success) {
+                publishScopeEvent(ctx.projectId, {
+                    type: 'sync',
+                    userId: ctx.userId,
+                });
+
                 after(() => revalidateStorefronts(ctx.projectId));
             }
 

@@ -6,7 +6,11 @@ import { ApplicationError } from '@/shared/api/errors';
 import { insertOne } from '@/shared/api/repository';
 import { isOrganizationManager } from '@/contexts/organizationMember/OrganizationMember.types';
 import { eq, or } from 'drizzle-orm';
-import { getOrCreateChannel, requireAccessibleMessage } from './Chat.lib';
+import {
+    getOrCreateChannel,
+    publishChannelChange,
+    requireAccessibleMessage,
+} from './Chat.lib';
 import {
     ChatMessageRefActionInputSchema,
     EditChatMessageActionInputSchema,
@@ -99,6 +103,8 @@ export const sendChatMessageAction = organizationMemberMutationAction()
 
         await markChannelRead(channel.id, userId);
 
+        publishChannelChange(organizationId, channel, userId);
+
         return message;
     });
 
@@ -109,7 +115,7 @@ export const editChatMessageAction = organizationMemberMutationAction()
             parsedInput: { messageId, body },
             ctx: { userId, organizationId },
         }) => {
-            const { message } = await requireAccessibleMessage(
+            const { message, channel } = await requireAccessibleMessage(
                 userId,
                 organizationId,
                 messageId,
@@ -132,6 +138,8 @@ export const editChatMessageAction = organizationMemberMutationAction()
                 .set({ body: nextBody, editedAt: new Date() })
                 .where(eq(chatMessages.id, messageId));
 
+            publishChannelChange(organizationId, channel, userId);
+
             return { ok: true };
         },
     );
@@ -143,7 +151,7 @@ export const deleteChatMessageAction = organizationMemberMutationAction()
             parsedInput: { messageId },
             ctx: { userId, organizationId, role },
         }) => {
-            const { message } = await requireAccessibleMessage(
+            const { message, channel } = await requireAccessibleMessage(
                 userId,
                 organizationId,
                 messageId,
@@ -167,6 +175,8 @@ export const deleteChatMessageAction = organizationMemberMutationAction()
                         eq(chatMessages.threadRootId, message.id),
                     ),
                 );
+
+            publishChannelChange(organizationId, channel, userId);
 
             return { ok: true };
         },
@@ -204,6 +214,8 @@ export const setChatMessagePinAction = organizationMemberMutationAction()
 
             await setMessagePin(messageId, pinned);
 
+            publishChannelChange(organizationId, channel, userId);
+
             return { pinned };
         },
     );
@@ -215,8 +227,16 @@ export const setChatReactionAction = organizationMemberMutationAction()
             parsedInput: { messageId, emoji },
             ctx: { userId, organizationId },
         }) => {
-            await requireAccessibleMessage(userId, organizationId, messageId);
+            const { channel } = await requireAccessibleMessage(
+                userId,
+                organizationId,
+                messageId,
+            );
 
-            return setReaction(messageId, userId, emoji);
+            const reactions = await setReaction(messageId, userId, emoji);
+
+            publishChannelChange(organizationId, channel, userId);
+
+            return reactions;
         },
     );
