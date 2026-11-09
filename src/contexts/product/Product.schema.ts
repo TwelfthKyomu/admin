@@ -1,6 +1,8 @@
 import { ApplicationError } from '@/shared/api/errors';
 import { CURRENCY_VALUES } from '@/shared/constants/currency';
 import {
+    BARCODE_MAX,
+    BARCODE_MIN,
     CODE_MAX,
     IMAGES_PER_ENTITY_MAX,
     LABEL_MAX,
@@ -50,6 +52,15 @@ function attributesSchemaFor(type: ProductType) {
 
 const skuSchema = upperCodeField(SKU_MAX, SKU_MIN);
 
+const barcodeSchema = z
+    .string()
+    .check(
+        z.trim(),
+        z.minLength(BARCODE_MIN),
+        z.maxLength(BARCODE_MAX),
+        z.regex(/^[0-9A-Za-z-]+$/, 'Штрихкод — цифры и латинские буквы'),
+    );
+
 const CommonProductFields = {
     projectId: idSchema,
     categoryId: z.nullish(idSchema),
@@ -59,6 +70,8 @@ const CommonProductFields = {
     sku: skuSchema,
     description: z.nullish(z.string().check(z.maxLength(TEXT_MAX))),
     price: z.int().check(z.gte(0)),
+    costAmount: z.nullish(z.int().check(z.gte(0))),
+    barcode: z.nullish(z.union([z.literal(''), barcodeSchema])),
     currency: z.optional(z.enum(CURRENCY_VALUES)),
     status: z.optional(z.enum(PRODUCT_STATUS_VALUES)),
     images: z.optional(
@@ -117,6 +130,7 @@ const CommonProductFields = {
                 optionValues: z.record(z.string(), z.string()),
 
                 sku: z.nullable(optionalText(skuSchema)),
+                barcode: z.nullish(z.union([z.literal(''), barcodeSchema])),
                 price: z.nullish(z.int().check(z.gte(0))),
                 stock: z.nullish(z.int().check(z.gte(0))),
                 isActive: z.optional(z.boolean()),

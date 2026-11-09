@@ -17,6 +17,7 @@ import {
 import { changeOrderSellerAction } from './OrderSeller.actions';
 import {
     dashboardAction,
+    marginAction,
     myDayAction,
     mySalesAction,
 } from './OrderStats.actions';
@@ -120,6 +121,16 @@ const employeeRevenueQueries = {
 
 export function useEmployeeRevenue(opts: RevenueOptions) {
     return useQuery(employeeRevenueQueries.range(opts));
+}
+
+export function useMargin({ projectId, from, to }: RevenueOptions) {
+    return useQuery(
+        itemQuery(
+            ['margin', projectId, from.toISOString(), to.toISOString()],
+            () => marginAction({ projectId, from, to }),
+            { enabled: projectId.length > 0 },
+        ),
+    );
 }
 
 const dashboardQueries = {

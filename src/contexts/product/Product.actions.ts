@@ -26,6 +26,7 @@ import {
 } from '@/contexts/user/User.types';
 import { and, asc, eq, isNull } from 'drizzle-orm';
 import {
+    assertBarcodesFree,
     assertCategoryCompatible,
     assertProductCodesFree,
     assertProductLimit,
@@ -71,6 +72,7 @@ export const productsAction = projectReadAction(CATALOG_READ_PERMISSIONS)
                 products.name,
                 products.slug,
                 products.sku,
+                products.barcode,
             ]),
         );
 
@@ -119,6 +121,12 @@ export const createProductAction = projectMutationAction(
             assertProductLimit(organizationId, projectId),
             assertCategoryCompatible(projectId, categoryId, type),
             assertProductCodesFree(projectId, { slug, sku: parsedInput.sku }),
+            assertBarcodesFree(projectId, [
+                parsedInput.barcode,
+                ...(parsedInput.variants ?? []).map(
+                    (variant) => variant.barcode,
+                ),
+            ]),
         ]);
 
         const created = await db.transaction(async (tx) => {
@@ -131,8 +139,10 @@ export const createProductAction = projectMutationAction(
                     name,
                     slug,
                     sku: parsedInput.sku,
+                    barcode: parsedInput.barcode || null,
                     description: parsedInput.description?.trim() || null,
                     price: parsedInput.price,
+                    costAmount: parsedInput.costAmount ?? null,
                     currency,
                     status: parsedInput.status,
                     images: (parsedInput.images ?? []).filter(
@@ -249,6 +259,16 @@ export const updateProductAction = projectMutationAction(
                 },
                 product.id,
             ),
+            assertBarcodesFree(
+                product.projectId,
+                [
+                    parsedInput.barcode,
+                    ...(parsedInput.variants ?? []).map(
+                        (variant) => variant.barcode,
+                    ),
+                ],
+                product.id,
+            ),
         ]);
 
         const existingVariants = variantsByProduct?.get(product.id) ?? [];
@@ -272,11 +292,16 @@ export const updateProductAction = projectMutationAction(
                     name: parsedInput.name?.trim(),
                     slug: parsedInput.slug,
                     sku: parsedInput.sku,
+                    barcode: mapDefined(
+                        parsedInput.barcode,
+                        (value) => value || null,
+                    ),
                     description: mapDefined(
                         parsedInput.description,
                         (value) => value?.trim() || null,
                     ),
                     price: parsedInput.price,
+                    costAmount: parsedInput.costAmount,
                     currency: parsedInput.currency,
                     status: parsedInput.status,
                     categoryId: parsedInput.categoryId,

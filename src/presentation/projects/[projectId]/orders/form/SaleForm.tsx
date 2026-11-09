@@ -78,7 +78,7 @@ export const SaleForm = ({
                         name={`items.${index}.itemKey`}
                         options={productOptions}
                         placeholder="Товар…"
-                        searchPlaceholder="Название или артикул…"
+                        searchPlaceholder="Название, артикул или штрихкод…"
                         emptyText="Нет активных товаров"
                         onValueChange={(itemKey) => onItemChange(index, itemKey)}
                     />

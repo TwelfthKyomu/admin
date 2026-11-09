@@ -64,6 +64,13 @@
       "when": 1794193363324,
       "tag": "0008_warehouses",
       "breakpoints": true
+    },
+    {
+      "idx": 9,
+      "version": "7",
+      "when": 1794193887441,
+      "tag": "0009_product_cost_barcode",
+      "breakpoints": true
     }
   ]
 }

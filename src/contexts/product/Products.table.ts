@@ -13,7 +13,7 @@ import {
 import { projects } from '@/contexts/project/Projects.table';
 import { projectBadges } from '@/contexts/projectBadge/ProjectBadges.table';
 import { projectCategories } from '@/contexts/projectCategory/ProjectCategories.table';
-import { isNotNull, isNull, sql } from 'drizzle-orm';
+import { and, isNotNull, isNull, sql } from 'drizzle-orm';
 import {
     bigint,
     boolean,
@@ -49,8 +49,10 @@ export const products = pgTable(
         name: varchar('name', { length: 255 }).notNull(),
         slug: varchar('slug', { length: 140 }).notNull(),
         sku: varchar('sku', { length: 64 }).notNull(),
+        barcode: varchar('barcode', { length: 64 }),
         description: text('description'),
         price: bigint('price', { mode: 'number' }).notNull().default(0),
+        costAmount: bigint('cost_amount', { mode: 'number' }),
         currency: currencyEnum('currency').notNull().default('RUB'),
         status: productStatusEnum('status')
             .notNull()
@@ -86,6 +88,9 @@ export const products = pgTable(
         uniqueIndex('products_project_sku_unique')
             .on(t.projectId, t.sku)
             .where(isNull(t.deletedAt)),
+        uniqueIndex('products_project_barcode_unique')
+            .on(t.projectId, t.barcode)
+            .where(and(isNotNull(t.barcode), isNull(t.deletedAt))!),
         index('products_project_idx').on(t.projectId),
         index('products_category_idx').on(t.categoryId),
         index('products_status_idx').on(t.status),
@@ -93,6 +98,10 @@ export const products = pgTable(
         index('products_deleted_idx').on(t.deletedAt),
         index('products_featured_idx').on(t.isFeatured),
         check('products_stock_non_negative', nullOrNonNegative(t.stock)),
+        check(
+            'products_cost_amount_non_negative',
+            nullOrNonNegative(t.costAmount),
+        ),
         check(
             'products_stock_not_for_service',
             sql`${t.type} <> 'service' or ${t.stock} is null`,
@@ -118,6 +127,7 @@ export const productVariants = pgTable(
             .$type<Record<string, string>>(),
 
         sku: varchar('sku', { length: 64 }),
+        barcode: varchar('barcode', { length: 64 }),
         price: bigint('price', { mode: 'number' }),
         stock: integer('stock'),
         isActive: boolean('is_active').notNull().default(true),
@@ -138,6 +148,9 @@ export const productVariants = pgTable(
         uniqueIndex('product_variants_project_sku_unique')
             .on(t.projectId, t.sku)
             .where(isNotNull(t.sku)),
+        uniqueIndex('product_variants_project_barcode_unique')
+            .on(t.projectId, t.barcode)
+            .where(isNotNull(t.barcode)),
         index('product_variants_product_idx').on(t.productId),
         check(
             'product_variants_price_non_negative',

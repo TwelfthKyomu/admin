@@ -75,6 +75,17 @@ export const ProductForm = ({ projectId, mode }: ProductFormProps) => {
                     label="Валюта"
                     options={CURRENCY_OPTIONS}
                 />
+                <Money
+                    name="costAmount"
+                    label="Закупочная цена"
+                    placeholder="Для расчёта маржи"
+                />
+                <Input
+                    name="barcode"
+                    label="Штрихкод"
+                    placeholder="Сканируйте или введите"
+                    autoComplete="off"
+                />
                 {!isService && mode === 'create' && (
                     <Input
                         name="stock"

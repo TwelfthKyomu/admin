@@ -211,6 +211,10 @@ export function paidShareOf(
     return (item.totalAmount * paid) / order.subtotalAmount;
 }
 
+export interface ResolvedOrderItem extends OrderItemInput {
+    unitCostAmount: number | null;
+}
+
 export function orderItemTotal(
     item: Pick<OrderItemInput, 'unitPriceAmount' | 'quantity'>,
 ): number {

@@ -4,7 +4,8 @@ import { useProject } from '@/app/providers';
 import { type StatItem, usePeriodParam } from '@/shared/components/common';
 import { fmtMoney } from '@/shared/format/money';
 import { useCourierStats } from '@/contexts/delivery';
-import { useEmployeeRevenue } from '@/contexts/order';
+import { useEmployeeRevenue, useMargin } from '@/contexts/order';
+import { marginHint } from '../lib/margin';
 
 export function useRevenuePage() {
     const { projectId, currency } = useProject();
@@ -12,6 +13,7 @@ export function useRevenuePage() {
     const { from, to } = period.range;
     const sellersQuery = useEmployeeRevenue({ projectId, from, to });
     const couriersQuery = useCourierStats({ projectId, from, to });
+    const marginQuery = useMargin({ projectId, from, to });
 
     const sellers = sellersQuery.data ?? [];
     const couriers = couriersQuery.data ?? [];
@@ -31,6 +33,11 @@ export function useRevenuePage() {
             label: 'Выручка продавцов',
             value: fmtMoney(sellersTotal, currency),
             hint: `${sellers.length} в списке`,
+        },
+        {
+            label: 'Маржа',
+            value: fmtMoney(marginQuery.data?.marginAmount ?? 0, currency),
+            hint: marginHint(marginQuery.data, currency),
         },
         {
             label: 'Доставлено',

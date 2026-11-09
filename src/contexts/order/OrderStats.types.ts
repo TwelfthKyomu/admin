@@ -149,3 +149,37 @@ export function summarizeSales(
         siteEarned: commissionOf(siteRevenue, rates.siteCommissionRate),
     };
 }
+
+export interface MarginItem {
+    totalAmount: number;
+    quantity: number;
+    unitCostAmount: number | null;
+}
+
+export interface MarginView {
+    revenueAmount: number;
+    costAmount: number;
+    marginAmount: number;
+    itemsWithoutCost: number;
+}
+
+export function summarizeMargin(items: MarginItem[]): MarginView {
+    const withCost = items.filter((item) => item.unitCostAmount !== null);
+
+    const revenueAmount = withCost.reduce(
+        (total, item) => total + item.totalAmount,
+        0,
+    );
+
+    const costAmount = withCost.reduce(
+        (total, item) => total + (item.unitCostAmount ?? 0) * item.quantity,
+        0,
+    );
+
+    return {
+        revenueAmount,
+        costAmount,
+        marginAmount: revenueAmount - costAmount,
+        itemsWithoutCost: items.length - withCost.length,
+    };
+}

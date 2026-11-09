@@ -203,6 +203,7 @@ export function buildVariantRecords(
             projectId: product.projectId,
             optionValues,
             sku: input.sku ?? null,
+            barcode: input.barcode || null,
             price: input.price ?? null,
             stock: input.stock ?? null,
             isActive: input.isActive ?? true,

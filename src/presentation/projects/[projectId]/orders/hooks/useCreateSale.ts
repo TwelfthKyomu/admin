@@ -33,6 +33,7 @@ interface Sellable {
     price: number;
     currency: ProductView['currency'];
     sku?: string;
+    barcode?: string;
 }
 
 function sellablesOf(product: ProductView): Sellable[] {
@@ -48,6 +49,7 @@ function sellablesOf(product: ProductView): Sellable[] {
                 price: product.price,
                 currency: product.currency,
                 sku: product.sku,
+                barcode: product.barcode,
             },
         ];
     }
@@ -61,6 +63,7 @@ function sellablesOf(product: ProductView): Sellable[] {
         price: variant.price ?? product.price,
         currency: product.currency,
         sku: variant.sku ?? product.sku,
+        barcode: variant.barcode ?? product.barcode,
     }));
 }
 
@@ -103,7 +106,7 @@ export function useCreateSale(projectId: string) {
     const productOptions = sellables.map((item) => ({
         value: item.key,
         label: `${item.name} · ${fmtMoney(item.price, item.currency)}`,
-        keywords: item.sku ? [item.sku] : undefined,
+        keywords: [item.sku, item.barcode].filter((code) => code !== undefined),
     }));
 
     const warehouseOptions = (warehousesQuery.data ?? []).map((warehouse) => ({

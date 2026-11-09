@@ -1,6 +1,9 @@
 'use server';
 
-import { organizationMemberAction } from '@/shared/api/action-client';
+import {
+    organizationMemberAction,
+    projectReadAction,
+} from '@/shared/api/action-client';
 import { listProjectPermissions } from '@/shared/api/permission';
 import { listCourierDeliveriesInWork } from '@/contexts/delivery/DeliveryCourier.lib';
 import { findActiveAssignmentsOfEmployee } from '@/contexts/employeeAssignment/EmployeeAssignment.lib';
@@ -10,16 +13,28 @@ import { listOrganizationProjects } from '@/contexts/project/Project.lib';
 import { listAssignedTasks } from '@/contexts/task/Task.lib';
 import { Permission } from '@/contexts/user/User.types';
 import {
+    EmployeeRevenueActionInputSchema,
     MyDayActionInputSchema,
     MySalesActionInputSchema,
 } from './Order.schema';
-import { aggregateSellerRevenue, loadDashboardStats } from './OrderStats.lib';
+import {
+    aggregateSellerRevenue,
+    loadDashboardStats,
+    loadMarginItems,
+} from './OrderStats.lib';
 import {
     type DashboardView,
     type MyDayView,
     type MySalesView,
+    summarizeMargin,
     summarizeSales,
 } from './OrderStats.types';
+
+export const marginAction = projectReadAction(Permission.VIEW_FINANCES)
+    .inputSchema(EmployeeRevenueActionInputSchema)
+    .action(async ({ parsedInput: { projectId, from, to } }) =>
+        summarizeMargin(await loadMarginItems(projectId, from, to)),
+    );
 
 export const dashboardAction = organizationMemberAction().action(
     async ({ ctx: { userId, organizationId } }): Promise<DashboardView> => {

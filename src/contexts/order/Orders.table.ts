@@ -137,6 +137,7 @@ export const orderItems = pgTable(
         unitPriceAmount: bigint('unit_price_amount', {
             mode: 'number',
         }).notNull(),
+        unitCostAmount: bigint('unit_cost_amount', { mode: 'number' }),
         quantity: integer('quantity').notNull().default(1),
         totalAmount: bigint('total_amount', { mode: 'number' }).notNull(),
         createdAt: timestamp('created_at').notNull().defaultNow(),

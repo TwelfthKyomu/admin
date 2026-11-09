@@ -12,13 +12,13 @@ import { hasOpenDelivery } from '@/contexts/delivery/Delivery.lib';
 import { applyStockSale } from '@/contexts/stockMovement/StockMovement.lib';
 import { reserveOrderStock } from '@/contexts/stockMovement/StockReservation.lib';
 import { and, desc, eq, inArray } from 'drizzle-orm';
-import type { OrderItemInput } from './Order.schema';
 import {
     getNextOrderStatuses,
     isOrderTerminal,
     OrderEventType,
     OrderStatus,
     orderItemTotal,
+    type ResolvedOrderItem,
     recomputePaymentStatus,
     stockLinesFromOrderItems,
 } from './Order.types';
@@ -96,7 +96,7 @@ export async function recordOrderEvents(
 export async function createOrderWithItems(
     tx: Tx,
     values: NewOrderRecord,
-    items: OrderItemInput[],
+    items: ResolvedOrderItem[],
     event: Pick<OrderEventDraft, 'byUserId' | 'payload'>,
     reservation: { warehouseIds: string[]; expiresAt: Date | null },
 ): Promise<{ order: OrderRecord; items: OrderItemRecord[] }> {
@@ -119,6 +119,7 @@ export async function createOrderWithItems(
                           name: item.name.trim(),
                           type: item.type,
                           unitPriceAmount: item.unitPriceAmount,
+                          unitCostAmount: item.unitCostAmount,
                           quantity: item.quantity,
                           totalAmount: orderItemTotal(item),
                       })),

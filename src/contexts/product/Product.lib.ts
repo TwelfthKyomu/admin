@@ -15,6 +15,7 @@ import {
     eq,
     inArray,
     isNull,
+    ne,
     notInArray,
     sum,
 } from 'drizzle-orm';
@@ -24,7 +25,12 @@ import {
     type ProductRef,
     type ProductType,
 } from './Product.types';
-import { type ProductView, productBadges, products } from './Products.table';
+import {
+    type ProductView,
+    productBadges,
+    products,
+    productVariants,
+} from './Products.table';
 import { loadVariants } from './ProductVariant.lib';
 
 type ProductRelations = Pick<ProductView, 'variants' | 'badges' | 'soldCount'>;
@@ -101,6 +107,58 @@ export async function assertProductCodesFree(
                 conflict: `Товар с SKU «${codes.sku}» уже существует`,
             }),
     ]);
+}
+
+export async function assertBarcodesFree(
+    projectId: string,
+    barcodes: (string | null | undefined)[],
+    excludeProductId?: string,
+): Promise<void> {
+    const codes = barcodes.filter((code): code is string => Boolean(code));
+    const repeated = codes.find((code, index) => codes.indexOf(code) !== index);
+
+    if (repeated) {
+        throw new ApplicationError(`Штрихкод «${repeated}» указан дважды`);
+    }
+    if (codes.length === 0) return;
+
+    const [[product], [variant]] = await Promise.all([
+        db
+            .select({ barcode: products.barcode })
+            .from(products)
+            .where(
+                and(
+                    eq(products.projectId, projectId),
+                    inArray(products.barcode, codes),
+                    isNull(products.deletedAt),
+                    excludeProductId
+                        ? ne(products.id, excludeProductId)
+                        : undefined,
+                ),
+            )
+            .limit(1),
+        db
+            .select({ barcode: productVariants.barcode })
+            .from(productVariants)
+            .where(
+                and(
+                    eq(productVariants.projectId, projectId),
+                    inArray(productVariants.barcode, codes),
+                    excludeProductId
+                        ? ne(productVariants.productId, excludeProductId)
+                        : undefined,
+                ),
+            )
+            .limit(1),
+    ]);
+
+    const taken = product?.barcode ?? variant?.barcode;
+
+    if (taken) {
+        throw new ApplicationError(
+            `Штрихкод «${taken}» уже есть у другого товара`,
+        );
+    }
 }
 
 export async function resolveBadgeIds(

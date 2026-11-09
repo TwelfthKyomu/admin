@@ -7,6 +7,7 @@ import { ProductType } from '@/contexts/product/Product.types';
 import { products, productVariants } from '@/contexts/product/Products.table';
 import { and, eq, inArray, isNull } from 'drizzle-orm';
 import type { OrderItemInput } from './Order.schema';
+import type { ResolvedOrderItem } from './Order.types';
 import { type OrderItemRecord, orderItems } from './Orders.table';
 
 export function loadOrderItems(
@@ -23,7 +24,7 @@ export async function resolveOrderItems(
     projectId: string,
     items: OrderItemInput[],
     currency: Currency,
-): Promise<OrderItemInput[]> {
+): Promise<ResolvedOrderItem[]> {
     const productIds = [
         ...new Set(items.flatMap((item) => item.productId ?? [])),
     ];
@@ -34,6 +35,7 @@ export async function resolveOrderItems(
                 id: products.id,
                 type: products.type,
                 currency: products.currency,
+                costAmount: products.costAmount,
             })
             .from(products)
             .where(
@@ -74,7 +76,7 @@ export async function resolveOrderItems(
                 );
             }
 
-            return item;
+            return { ...item, unitCostAmount: null };
         }
 
         const product = productById.get(item.productId);
@@ -107,6 +109,10 @@ export async function resolveOrderItems(
             );
         }
 
-        return { ...item, type: product.type };
+        return {
+            ...item,
+            type: product.type,
+            unitCostAmount: product.costAmount,
+        };
     });
 }

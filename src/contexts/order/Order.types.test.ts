@@ -26,6 +26,7 @@ import {
     type ProjectRevenueView,
     rollUpRevenueByCurrency,
     salesTotal,
+    summarizeMargin,
     summarizeSales,
 } from './OrderStats.types';
 
@@ -480,6 +481,22 @@ describe('summarizeSales', () => {
             siteRevenue: 1_001,
             storeEarned: 1_000,
             siteEarned: 500,
+        });
+    });
+});
+
+describe('summarizeMargin', () => {
+    it('считает маржу только по позициям с закупочной ценой', () => {
+        expect(
+            summarizeMargin([
+                { totalAmount: 3000, quantity: 2, unitCostAmount: 1000 },
+                { totalAmount: 500, quantity: 1, unitCostAmount: null },
+            ]),
+        ).toEqual({
+            revenueAmount: 3000,
+            costAmount: 2000,
+            marginAmount: 1000,
+            itemsWithoutCost: 1,
         });
     });
 });

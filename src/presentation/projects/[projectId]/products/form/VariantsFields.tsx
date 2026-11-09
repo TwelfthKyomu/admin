@@ -97,7 +97,7 @@ export const VariantsFields = () => {
             {variants.map((variant, index) => (
                 <div
                     key={variantComboKey(variant.optionValues)}
-                    className="grid grid-cols-[minmax(0,1fr)_1fr_1fr_auto] items-end gap-2 rounded-md border border-border p-2"
+                    className="grid grid-cols-2 items-end gap-2 rounded-md border border-border p-2 sm:grid-cols-[minmax(0,1fr)_1fr_1fr_1fr_auto]"
                 >
                     <span className="self-center truncate text-sm">
                         {variantComboLabel(variant.optionValues)}
@@ -112,6 +112,11 @@ export const VariantsFields = () => {
                         name={`variants.${index}.price`}
                         label="Цена"
                         placeholder="Как у товара"
+                    />
+                    <Input
+                        name={`variants.${index}.barcode`}
+                        label="Штрихкод"
+                        autoComplete="off"
                     />
                     <Checkbox
                         name={`variants.${index}.isActive`}

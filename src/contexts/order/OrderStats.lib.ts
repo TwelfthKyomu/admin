@@ -7,6 +7,7 @@ import { and, count, desc, eq, gt, gte, inArray, lt, sum } from 'drizzle-orm';
 import { OrderStatus, orderRevenueShare, paidShareOf } from './Order.types';
 import {
     type DashboardStatsView,
+    type MarginItem,
     type ProjectRevenueView,
     type RecentOrderView,
     rollUpRevenueByCurrency,
@@ -198,6 +199,30 @@ function listRecentOrders(projectIds: string[]): Promise<RecentOrderView[]> {
         .where(inArray(orders.projectId, projectIds))
         .orderBy(desc(orders.createdAt))
         .limit(PAGE_SIZE_SMALL);
+}
+
+export function loadMarginItems(
+    projectId: string,
+    from: Date,
+    to: Date,
+): Promise<MarginItem[]> {
+    return db
+        .select({
+            totalAmount: orderItems.totalAmount,
+            quantity: orderItems.quantity,
+            unitCostAmount: orderItems.unitCostAmount,
+        })
+        .from(orderItems)
+        .innerJoin(orders, eq(orders.id, orderItems.orderId))
+        .where(
+            and(
+                eq(orders.projectId, projectId),
+                eq(orders.status, OrderStatus.COMPLETED),
+                gt(orders.paidAmount, 0),
+                gte(orders.completedAt, from),
+                lt(orders.completedAt, to),
+            ),
+        );
 }
 
 export async function loadDashboardStats(

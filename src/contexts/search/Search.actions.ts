@@ -125,6 +125,7 @@ export const searchAction = organizationMemberAction()
                                   ...searchFilters(query, [
                                       products.name,
                                       products.sku,
+                                      products.barcode,
                                   ]),
                               ),
                           )
