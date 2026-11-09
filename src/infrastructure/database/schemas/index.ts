@@ -25,5 +25,6 @@ export * from '@/contexts/stockMovement/StockMovements.table';
 export * from '@/contexts/subscription/BillingPayments.table';
 export * from '@/contexts/task/Tasks.table';
 export * from '@/contexts/user/Users.table';
+export * from '@/contexts/warehouse/Warehouses.table';
 export * from './enums';
 export * from './relations';

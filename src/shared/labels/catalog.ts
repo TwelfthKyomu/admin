@@ -83,4 +83,6 @@ export const STOCK_MOVEMENT_REASON_LABEL: Record<StockMovementReason, string> =
         [StockMovementReason.RETURN]: 'Возврат',
         [StockMovementReason.MANUAL]: 'Корректировка',
         [StockMovementReason.WRITE_OFF]: 'Списание',
+        [StockMovementReason.RECEIPT]: 'Приёмка',
+        [StockMovementReason.TRANSFER]: 'Перемещение',
     };

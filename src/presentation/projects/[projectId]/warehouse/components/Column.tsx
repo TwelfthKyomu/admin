@@ -1,28 +1,43 @@
-import { fmtDateTime } from '@/shared/format/date';
-import { PRODUCT_TYPE_LABEL, STOCK_MOVEMENT_REASON_LABEL } from '@/shared/labels/catalog';
-import { ProductType } from '@/contexts/product';
-import type { StockLevelView, StockMovementView } from '@/contexts/stockMovement';
-import { Badge, Button } from '@/ui/Base';
+import { PRODUCT_TYPE_LABEL } from '@/shared/labels/catalog';
+import type { StockLevelView } from '@/contexts/stockMovement';
+import type { WarehouseView } from '@/contexts/warehouse';
+import { ActionTableButton, Badge } from '@/ui/Base';
 import { createColumnHelper } from '@tanstack/react-table';
+import { stockActionItems } from '../lib/stockActions';
+import type { StockOperationType } from '../lib/stockOperation';
 
-const overview = createColumnHelper<StockLevelView>();
+const { accessor, display } = createColumnHelper<StockLevelView>();
 
 interface OverviewColumnsProps {
-    onAdjust: (row: StockLevelView) => void;
+    warehouses: WarehouseView[];
+    onOperation: (type: StockOperationType, row: StockLevelView) => void;
+    onTransfer: (row: StockLevelView) => void;
 }
 
-export const OVERVIEW_COLUMNS = ({ onAdjust }: OverviewColumnsProps) => [
-    overview.accessor('name', { header: 'Товар' }),
-    overview.accessor('sku', {
-        header: 'SKU',
+export const OVERVIEW_COLUMNS = ({ warehouses, ...handlers }: OverviewColumnsProps) => [
+    accessor('name', { header: 'Товар' }),
+    accessor('sku', {
+        header: 'Артикул',
         cell: ({ getValue }) => <code>{getValue()}</code>,
     }),
-    overview.accessor('type', {
+    accessor('type', {
         header: 'Тип',
         cell: ({ getValue }) => PRODUCT_TYPE_LABEL[getValue()],
     }),
-    overview.accessor('stock', {
-        header: 'Остаток',
+    ...(warehouses.length > 1
+        ? warehouses.map((warehouse) =>
+              display({
+                  id: warehouse.id,
+                  header: warehouse.name,
+                  cell: ({ row: { original } }) =>
+                      original.stock === undefined
+                          ? '—'
+                          : (original.byWarehouse[warehouse.id] ?? 0),
+              }),
+          )
+        : []),
+    accessor('stock', {
+        header: 'Всего',
         cell: ({ getValue }) => {
             const stock = getValue();
 
@@ -31,44 +46,12 @@ export const OVERVIEW_COLUMNS = ({ onAdjust }: OverviewColumnsProps) => [
             return <Badge variant={stock === 0 ? 'destructive' : 'secondary'}>{stock}</Badge>;
         },
     }),
-    overview.display({
+    display({
         id: 'actions',
         header: '',
-        cell: ({ row: { original } }) => {
-            if (original.type === ProductType.SERVICE) {
-                return null;
-            }
-
-            return (
-                <Button
-                    size="sm"
-                    variant="outline"
-                    onClick={() => onAdjust(original)}
-                >
-                    Корректировать
-                </Button>
-            );
-        },
-    }),
-];
-
-const movement = createColumnHelper<StockMovementView>();
-
-export const MOVEMENT_COLUMNS = [
-    movement.accessor('occurredAt', {
-        header: 'Когда',
-        cell: ({ getValue }) => fmtDateTime(getValue()),
-    }),
-    movement.accessor('reason', {
-        header: 'Причина',
-        cell: ({ getValue }) => STOCK_MOVEMENT_REASON_LABEL[getValue()],
-    }),
-    movement.accessor('quantityDelta', {
-        header: 'Изменение',
-        cell: ({ getValue }) => (getValue() > 0 ? `+${getValue()}` : getValue()),
-    }),
-    movement.accessor('note', {
-        header: 'Комментарий',
-        cell: ({ getValue }) => getValue() ?? '—',
+        size: 5,
+        cell: ({ row: { original } }) => (
+            <ActionTableButton items={stockActionItems(original, warehouses.length, handlers)} />
+        ),
     }),
 ];

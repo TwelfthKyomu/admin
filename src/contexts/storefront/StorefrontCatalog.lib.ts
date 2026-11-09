@@ -14,8 +14,11 @@ import { productBadges, products } from '@/contexts/product/Products.table';
 import { loadVariants } from '@/contexts/product/ProductVariant.lib';
 import { projectBadges } from '@/contexts/projectBadge/ProjectBadges.table';
 import { projectCategories } from '@/contexts/projectCategory/ProjectCategories.table';
-import { loadReservedStock } from '@/contexts/stockMovement/StockMovement.lib';
-import { freeStock } from '@/contexts/stockMovement/StockMovement.types';
+import {
+    siteStock,
+    stockKey,
+} from '@/contexts/stockMovement/StockMovement.types';
+import { loadSiteFreeStock } from '@/contexts/stockMovement/StockReservation.lib';
 import {
     and,
     asc,
@@ -146,10 +149,10 @@ export async function loadStorefrontCatalog(
 
     const productIds = productRows.map((row) => row.id);
 
-    const [soldCounts, variantsByProduct, reserved] = await Promise.all([
+    const [soldCounts, variantsByProduct, siteFree] = await Promise.all([
         loadSoldCounts(productIds),
         loadVariants(productIds),
-        loadReservedStock(productIds),
+        loadSiteFreeStock(productIds),
     ]);
 
     const badgesByProduct = Map.groupBy(badgeRows, (row) => row.productId);
@@ -180,8 +183,15 @@ export async function loadStorefrontCatalog(
                     ({ productId: _, ...badge }) => badge,
                 ),
                 stock:
-                    freeStock(product.stock, reserved.get(product.id)) ??
-                    undefined,
+                    siteStock(
+                        product.stock,
+                        siteFree.get(
+                            stockKey({
+                                productId: product.id,
+                                variantId: null,
+                            }),
+                        ),
+                    ) ?? undefined,
                 editionSize,
                 soldCount:
                     editionSize === undefined
@@ -195,9 +205,14 @@ export async function loadStorefrontCatalog(
                         optionValues: variant.optionValues,
                         price: toMajorUnits(variant.price ?? product.price),
                         stock:
-                            freeStock(
+                            siteStock(
                                 variant.stock,
-                                reserved.get(variant.id),
+                                siteFree.get(
+                                    stockKey({
+                                        productId: product.id,
+                                        variantId: variant.id,
+                                    }),
+                                ),
                             ) ?? undefined,
                     })),
                 isFeatured: product.isFeatured,

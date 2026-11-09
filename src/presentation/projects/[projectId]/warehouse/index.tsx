@@ -1,42 +1,87 @@
 'use client';
 
-import { QueryBoundary } from '@/shared/components/common';
+import { CreateButton, QueryBoundary } from '@/shared/components/common';
 import { Table } from '@/ui/Base';
-import { MOVEMENT_COLUMNS, OVERVIEW_COLUMNS } from './components/Column';
+import { OVERVIEW_COLUMNS } from './components/Column';
+import { MOVEMENT_COLUMNS } from './components/MovementColumn';
+import { WAREHOUSE_COLUMNS } from './components/WarehouseColumn';
 import { useWarehousePage } from './hooks/useWarehousePage';
+import { productNames, warehouseNames } from './lib/names';
 
 export const WarehousePage = () => {
-    const { overviewQuery, movementsQuery, onAdjust } = useWarehousePage();
+    const {
+        warehousesQuery,
+        overviewQuery,
+        movementsQuery,
+        isDeleting,
+        onOperation,
+        onTransfer,
+        onCreateWarehouse,
+        onEditWarehouse,
+        onDeleteWarehouse,
+    } = useWarehousePage();
 
     return (
-        <>
-            <QueryBoundary
-                query={overviewQuery}
-                errorTitle="Не удалось загрузить остатки"
-            >
-                {(rows) => (
+        <QueryBoundary
+            query={warehousesQuery}
+            errorTitle="Не удалось загрузить склады"
+        >
+            {(warehouses) => (
+                <>
                     <Table
-                        columns={OVERVIEW_COLUMNS({ onAdjust })}
-                        data={rows}
-                        emptyMessage="В проекте пока нет товаров."
-                        getRowId={(row) => row.id}
+                        columns={WAREHOUSE_COLUMNS({
+                            onEdit: onEditWarehouse,
+                            onDelete: onDeleteWarehouse,
+                            isDeleting,
+                        })}
+                        showToolbar
+                        customActions={
+                            <CreateButton
+                                label="Склад"
+                                onClick={onCreateWarehouse}
+                            />
+                        }
+                        data={warehouses}
+                        getRowId={(warehouse) => warehouse.id}
                     />
-                )}
-            </QueryBoundary>
-            <h3>История движений</h3>
-            <QueryBoundary
-                query={movementsQuery}
-                errorTitle="Не удалось загрузить историю движений"
-            >
-                {(movements) => (
-                    <Table
-                        columns={MOVEMENT_COLUMNS}
-                        data={movements}
-                        emptyMessage="Движений по складу пока нет."
-                        getRowId={(movement) => movement.id}
-                    />
-                )}
-            </QueryBoundary>
-        </>
+                    <QueryBoundary
+                        query={overviewQuery}
+                        errorTitle="Не удалось загрузить остатки"
+                    >
+                        {(rows) => (
+                            <>
+                                <Table
+                                    columns={OVERVIEW_COLUMNS({
+                                        warehouses,
+                                        onOperation,
+                                        onTransfer,
+                                    })}
+                                    data={rows}
+                                    emptyMessage="В проекте пока нет товаров."
+                                    getRowId={(row) => row.id}
+                                />
+                                <h3>История движений</h3>
+                                <QueryBoundary
+                                    query={movementsQuery}
+                                    errorTitle="Не удалось загрузить историю движений"
+                                >
+                                    {(movements) => (
+                                        <Table
+                                            columns={MOVEMENT_COLUMNS({
+                                                productNames: productNames(rows),
+                                                warehouseNames: warehouseNames(warehouses),
+                                            })}
+                                            data={movements}
+                                            emptyMessage="Движений по складу пока нет."
+                                            getRowId={(movement) => movement.id}
+                                        />
+                                    )}
+                                </QueryBoundary>
+                            </>
+                        )}
+                    </QueryBoundary>
+                </>
+            )}
+        </QueryBoundary>
     );
 };

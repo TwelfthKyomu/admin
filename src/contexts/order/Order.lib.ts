@@ -9,10 +9,8 @@ import {
 } from '@/shared/api/repository';
 import { addClientSpending } from '@/contexts/client/Client.lib';
 import { hasOpenDelivery } from '@/contexts/delivery/Delivery.lib';
-import {
-    applyStockSale,
-    reserveOrderStock,
-} from '@/contexts/stockMovement/StockMovement.lib';
+import { applyStockSale } from '@/contexts/stockMovement/StockMovement.lib';
+import { reserveOrderStock } from '@/contexts/stockMovement/StockReservation.lib';
 import { and, desc, eq, inArray } from 'drizzle-orm';
 import type { OrderItemInput } from './Order.schema';
 import {
@@ -100,7 +98,7 @@ export async function createOrderWithItems(
     values: NewOrderRecord,
     items: OrderItemInput[],
     event: Pick<OrderEventDraft, 'byUserId' | 'payload'>,
-    reservedUntil: Date | null = null,
+    reservation: { warehouseIds: string[]; expiresAt: Date | null },
 ): Promise<{ order: OrderRecord; items: OrderItemRecord[] }> {
     const order = await insertOne(
         orders,
@@ -132,7 +130,7 @@ export async function createOrderWithItems(
         orderId: order.id,
         projectId: order.projectId,
         lines: stockLinesFromOrderItems(savedItems),
-        expiresAt: reservedUntil,
+        ...reservation,
     });
 
     await recordOrderEvents(tx, [

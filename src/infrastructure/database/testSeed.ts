@@ -2,6 +2,7 @@ import { insertOne } from '@/shared/api/repository';
 import { organizations } from '@/contexts/organization/Organizations.table';
 import { projects } from '@/contexts/project/Projects.table';
 import { users } from '@/contexts/user/Users.table';
+import { warehouses } from '@/contexts/warehouse/Warehouses.table';
 
 export async function seedProject() {
     const user = await insertOne(
@@ -27,5 +28,11 @@ export async function seedProject() {
         'Не удалось создать проект',
     );
 
-    return { user, organization, project };
+    const warehouse = await insertOne(
+        warehouses,
+        { projectId: project.id, name: 'Основной склад' },
+        'Не удалось создать склад',
+    );
+
+    return { user, organization, project, warehouse };
 }

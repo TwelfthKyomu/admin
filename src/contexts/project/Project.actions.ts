@@ -19,6 +19,7 @@ import { projectInvites } from '@/contexts/projectInvite/ProjectInvites.table';
 import { projectMembers } from '@/contexts/projectMember/ProjectMembers.table';
 import { assertPlanLimit } from '@/contexts/subscription/Subscription.lib';
 import { Permission } from '@/contexts/user/User.types';
+import { createPrimaryWarehouse } from '@/contexts/warehouse/Warehouse.lib';
 import { and, eq, isNull } from 'drizzle-orm';
 import { revalidatePath } from 'next/cache';
 import {
@@ -80,6 +81,8 @@ export const createProjectAction = organizationMutationAction(
                 projectId: project.id,
                 role: ProjectRole.MANAGER,
             });
+
+            await createPrimaryWarehouse(tx, project.id);
 
             return project;
         });

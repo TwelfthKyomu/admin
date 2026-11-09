@@ -26,6 +26,7 @@ export const CreateSaleFormSchema = z.object({
     notes: z.optional(z.string().check(z.maxLength(DESCRIPTION_LONG_MAX))),
     readyDate: z.optional(z.date()),
     readyTime: z.string(),
+    warehouseId: z.string(),
 });
 
 export type CreateSaleFormValues = z.input<typeof CreateSaleFormSchema>;

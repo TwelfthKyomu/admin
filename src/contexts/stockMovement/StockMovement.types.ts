@@ -7,6 +7,8 @@ export const StockMovementReason = {
     RETURN: 'return',
     MANUAL: 'manual',
     WRITE_OFF: 'write_off',
+    RECEIPT: 'receipt',
+    TRANSFER: 'transfer',
 } as const;
 
 export type StockMovementReason =
@@ -33,11 +35,16 @@ export interface ManualStockChange
     createdBy: string;
 }
 
+export interface ReservedLine extends StockLine {
+    warehouseId: string;
+}
+
 export interface StockLevelView
     extends Pick<ProductRecord, 'name' | 'sku' | 'type' | 'stock'> {
     id: string;
     productId: string;
     variantId: string | null;
+    byWarehouse: Record<string, number>;
 }
 
 export function stockKey(
@@ -46,8 +53,41 @@ export function stockKey(
     return target.variantId ?? target.productId;
 }
 
-export function freeStock(stock: number | null, reserved = 0): number | null {
-    return stock === null ? null : Math.max(0, stock - reserved);
+export function siteStock(
+    stock: number | null,
+    siteFree: number | undefined,
+): number | null {
+    return stock === null ? null : (siteFree ?? 0);
+}
+
+export function saleAllocations(
+    line: StockLine,
+    reservations: ReservedLine[],
+    fallbackWarehouseId: string,
+): ReservedLine[] {
+    const key = stockKey(line);
+    const allocations: ReservedLine[] = [];
+    let left = line.quantity;
+
+    for (const reservation of reservations) {
+        if (left === 0) break;
+        if (stockKey(reservation) !== key) continue;
+
+        const quantity = Math.min(left, reservation.quantity);
+
+        allocations.push({ ...reservation, quantity });
+        left -= quantity;
+    }
+
+    if (left > 0) {
+        allocations.push({
+            ...line,
+            warehouseId: fallbackWarehouseId,
+            quantity: left,
+        });
+    }
+
+    return allocations;
 }
 
 export function mergeStockLines(lines: StockLine[]): StockLine[] {

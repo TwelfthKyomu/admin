@@ -57,6 +57,13 @@
       "when": 1792420247701,
       "tag": "0007_order_ready",
       "breakpoints": true
+    },
+    {
+      "idx": 8,
+      "version": "7",
+      "when": 1794193363324,
+      "tag": "0008_warehouses",
+      "breakpoints": true
     }
   ]
 }

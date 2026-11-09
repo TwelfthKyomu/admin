@@ -5,6 +5,7 @@ import type { StockMovementView as ServerStockMovementView } from './StockMoveme
 export * from './StockMovement.actions';
 export * from './StockMovement.schema';
 export * from './StockMovement.types';
+export * from './StockOperation.actions';
 export * from './useStockMovements';
 
 export type StockLevelView = NullToOptional<ServerStockLevelView>;

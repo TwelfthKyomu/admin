@@ -1,25 +1,28 @@
 import 'server-only';
 
-import { db, type Tx } from '@/infrastructure/database/client';
-import { ApplicationError } from '@/shared/api/errors';
-import { ProductType } from '@/contexts/product/Product.types';
-import { products, productVariants } from '@/contexts/product/Products.table';
-import { and, eq, gt, inArray, isNull, or, sum } from 'drizzle-orm';
+import type { Tx } from '@/infrastructure/database/client';
 import {
-    freeStock,
+    changeWarehouseQuantity,
+    clearWarehouseQuantities,
+    primaryWarehouseId,
+    warehouseQuantity,
+} from '@/contexts/warehouse/Warehouse.lib';
+import { and, eq } from 'drizzle-orm';
+import { lockStock, setStock } from './StockLevel.lib';
+import {
     type ManualStockChange,
     mergeStockLines,
     type StockLine,
     StockMovementReason,
     type StockTarget,
+    saleAllocations,
     stockKey,
 } from './StockMovement.types';
 import {
     type NewStockMovementRecord,
-    type NewStockReservationRecord,
     stockMovements,
-    stockReservations,
 } from './StockMovements.table';
+import { orderReservations, releaseOrderStock } from './StockReservation.lib';
 
 interface OrderStockInput {
     orderId: string;
@@ -27,218 +30,112 @@ interface OrderStockInput {
     createdBy: string | null;
 }
 
-async function lockStock(
-    tx: Tx,
-    target: StockTarget,
-): Promise<
-    { stock: number | null; type: ProductType; name: string } | undefined
-> {
-    if (target.variantId) {
-        const [variant] = await tx
-            .select({
-                stock: productVariants.stock,
-                type: products.type,
-                name: products.name,
-            })
-            .from(productVariants)
-            .innerJoin(products, eq(products.id, productVariants.productId))
-            .where(
-                and(
-                    eq(productVariants.id, target.variantId),
-                    eq(productVariants.productId, target.productId),
-                    eq(productVariants.projectId, target.projectId),
-                ),
-            )
-            .limit(1)
-            .for('update', { of: productVariants });
-
-        return variant;
-    }
-
-    const [product] = await tx
-        .select({
-            stock: products.stock,
-            type: products.type,
-            name: products.name,
-        })
-        .from(products)
-        .where(
-            and(
-                eq(products.id, target.productId),
-                eq(products.projectId, target.projectId),
-                isNull(products.deletedAt),
-            ),
-        )
-        .limit(1)
-        .for('update');
-
-    return product;
+export interface StockMove
+    extends StockTarget,
+        Pick<
+            NewStockMovementRecord,
+            'warehouseId' | 'quantityDelta' | 'reason' | 'note' | 'orderId'
+        > {
+    createdBy: string | null;
+    startsTracking?: boolean;
 }
 
-async function setStock(
-    tx: Tx,
-    target: StockTarget,
-    stock: number | null,
-): Promise<void> {
-    if (target.variantId) {
-        await tx
-            .update(productVariants)
-            .set({ stock })
-            .where(eq(productVariants.id, target.variantId));
+export async function moveStock(tx: Tx, move: StockMove): Promise<void> {
+    if (move.quantityDelta === 0) return;
 
-        return;
-    }
+    const current = await lockStock(tx, move);
 
-    await tx
-        .update(products)
-        .set({ stock })
-        .where(eq(products.id, target.productId));
-}
-
-async function writeOrderMovement(
-    tx: Tx,
-    input: OrderStockInput,
-    line: StockTarget & Pick<NewStockMovementRecord, 'quantityDelta' | 'note'>,
-    reason: StockMovementReason,
-    stock: number | null,
-): Promise<void> {
-    if (line.quantityDelta === 0) return;
+    if (!current) return;
 
     const inserted = await tx
         .insert(stockMovements)
         .values({
-            ...line,
-            reason,
-            orderId: input.orderId,
-            createdBy: input.createdBy,
+            projectId: move.projectId,
+            productId: move.productId,
+            variantId: move.variantId,
+            warehouseId: move.warehouseId,
+            quantityDelta: move.quantityDelta,
+            reason: move.reason,
+            note: move.note,
+            orderId: move.orderId,
+            createdBy: move.createdBy,
         })
         .onConflictDoNothing()
         .returning({ id: stockMovements.id });
 
-    if (inserted.length === 0 || stock === null) return;
+    if (inserted.length === 0) return;
+    if (current.stock === null && !move.startsTracking) return;
 
-    await setStock(tx, line, stock + line.quantityDelta);
-}
-
-function activeReservation(now: Date) {
-    return or(
-        isNull(stockReservations.expiresAt),
-        gt(stockReservations.expiresAt, now),
+    await changeWarehouseQuantity(
+        tx,
+        move.warehouseId,
+        move,
+        move.quantityDelta,
     );
+
+    await setStock(tx, move, (current.stock ?? 0) + move.quantityDelta);
 }
 
-async function reservedQuantity(tx: Tx, target: StockTarget): Promise<number> {
-    const [row] = await tx
-        .select({ reserved: sum(stockReservations.quantity).mapWith(Number) })
-        .from(stockReservations)
-        .where(
-            and(
-                eq(stockReservations.productId, target.productId),
-                target.variantId
-                    ? eq(stockReservations.variantId, target.variantId)
-                    : isNull(stockReservations.variantId),
-                activeReservation(new Date()),
-            ),
-        );
-
-    return row?.reserved ?? 0;
-}
-
-async function releaseOrderStock(tx: Tx, orderId: string): Promise<void> {
-    await tx
-        .delete(stockReservations)
-        .where(eq(stockReservations.orderId, orderId));
-}
-
-export async function reserveOrderStock(
-    tx: Tx,
-    input: Omit<OrderStockInput, 'createdBy'> & {
-        lines: StockLine[];
-        expiresAt: Date | null;
-    },
-): Promise<void> {
-    const rows: NewStockReservationRecord[] = [];
-
-    for (const line of mergeStockLines(input.lines)) {
-        const target = { ...line, projectId: input.projectId };
-        const current = await lockStock(tx, target);
-
-        const free = freeStock(
-            current?.stock ?? null,
-            await reservedQuantity(tx, target),
-        );
-
-        if (!current || free === null) continue;
-
-        if (free < line.quantity) {
-            throw new ApplicationError(
-                `Недостаточно «${current.name}» на складе: свободно ${free}`,
-            );
-        }
-
-        rows.push({
-            ...target,
-            orderId: input.orderId,
-            quantity: line.quantity,
-            expiresAt: input.expiresAt,
-        });
-    }
-
-    if (rows.length === 0) return;
-
-    await tx.insert(stockReservations).values(rows);
-}
-
-export async function loadReservedStock(
-    productIds: string[],
-): Promise<Map<string, number>> {
-    const rows = await db
+async function soldKeys(tx: Tx, orderId: string): Promise<Set<string>> {
+    const rows = await tx
         .select({
-            productId: stockReservations.productId,
-            variantId: stockReservations.variantId,
-            reserved: sum(stockReservations.quantity).mapWith(Number),
+            productId: stockMovements.productId,
+            variantId: stockMovements.variantId,
         })
-        .from(stockReservations)
+        .from(stockMovements)
         .where(
             and(
-                inArray(stockReservations.productId, productIds),
-                activeReservation(new Date()),
+                eq(stockMovements.orderId, orderId),
+                eq(stockMovements.reason, StockMovementReason.SALE),
             ),
-        )
-        .groupBy(stockReservations.productId, stockReservations.variantId);
+        );
 
-    return new Map(rows.map((row) => [stockKey(row), row.reserved]));
+    return new Set(rows.map(stockKey));
 }
 
 export async function applyStockSale(
     tx: Tx,
     input: OrderStockInput & { lines: StockLine[] },
 ): Promise<void> {
+    const [sold, reservations, fallbackWarehouseId] = await Promise.all([
+        soldKeys(tx, input.orderId),
+        orderReservations(tx, input.orderId),
+        primaryWarehouseId(input.projectId, tx),
+    ]);
+
     for (const line of mergeStockLines(input.lines)) {
+        if (sold.has(stockKey(line))) continue;
+
         const target = { ...line, projectId: input.projectId };
         const current = await lockStock(tx, target);
 
         if (!current) continue;
 
-        const sold =
-            current.stock === null
-                ? line.quantity
-                : Math.min(line.quantity, current.stock);
+        for (const allocation of saleAllocations(
+            line,
+            reservations,
+            fallbackWarehouseId,
+        )) {
+            const onHand =
+                current.stock === null
+                    ? allocation.quantity
+                    : await warehouseQuantity(tx, allocation.warehouseId, line);
 
-        await writeOrderMovement(
-            tx,
-            input,
-            {
+            const quantity = Math.min(allocation.quantity, onHand);
+
+            await moveStock(tx, {
                 ...target,
-                quantityDelta: -sold,
+                warehouseId: allocation.warehouseId,
+                quantityDelta: -quantity,
+                reason: StockMovementReason.SALE,
+                orderId: input.orderId,
+                createdBy: input.createdBy,
                 note:
-                    sold < line.quantity
-                        ? `Продано ${line.quantity}, на складе было ${current.stock}`
+                    quantity < allocation.quantity
+                        ? `Продано ${allocation.quantity}, на складе было ${onHand}`
                         : null,
-            },
-            StockMovementReason.SALE,
-            current.stock,
-        );
+            });
+        }
     }
 
     await releaseOrderStock(tx, input.orderId);
@@ -252,6 +149,7 @@ export async function applyStockReturn(
         .select({
             productId: stockMovements.productId,
             variantId: stockMovements.variantId,
+            warehouseId: stockMovements.warehouseId,
             quantityDelta: stockMovements.quantityDelta,
         })
         .from(stockMovements)
@@ -263,75 +161,57 @@ export async function applyStockReturn(
         );
 
     for (const sale of sales) {
-        const target = {
+        await moveStock(tx, {
+            ...sale,
             projectId: input.projectId,
-            productId: sale.productId,
-            variantId: sale.variantId,
-        };
-
-        const current = await lockStock(tx, target);
-
-        if (!current) continue;
-
-        await writeOrderMovement(
-            tx,
-            input,
-            { ...target, quantityDelta: -sale.quantityDelta, note: null },
-            StockMovementReason.RETURN,
-            current.stock,
-        );
+            quantityDelta: -sale.quantityDelta,
+            reason: StockMovementReason.RETURN,
+            orderId: input.orderId,
+            createdBy: input.createdBy,
+            note: null,
+        });
     }
 
     await releaseOrderStock(tx, input.orderId);
 }
 
-export async function recordManualStockChanges(
+export async function applyCatalogStockChanges(
     tx: Tx,
     changes: ManualStockChange[],
 ): Promise<void> {
-    const rows = changes.flatMap((change) => {
+    const changed = changes.filter(
+        (change) => (change.after ?? 0) !== (change.before ?? 0),
+    );
+
+    const [first] = changed;
+
+    if (!first) return;
+
+    const warehouseId = await primaryWarehouseId(first.projectId, tx);
+
+    for (const change of changed) {
         const quantityDelta = (change.after ?? 0) - (change.before ?? 0);
 
-        if (quantityDelta === 0) return [];
-
-        return [
-            {
-                projectId: change.projectId,
-                productId: change.productId,
-                variantId: change.variantId,
+        if (change.after === null) {
+            await clearWarehouseQuantities(tx, change);
+        } else {
+            await changeWarehouseQuantity(
+                tx,
+                warehouseId,
+                change,
                 quantityDelta,
-                reason: StockMovementReason.MANUAL,
-                note: change.note,
-                createdBy: change.createdBy,
-            },
-        ];
-    });
+            );
+        }
 
-    if (rows.length === 0) return;
-
-    await tx.insert(stockMovements).values(rows);
-}
-
-export async function adjustStock(
-    tx: Tx,
-    change: Omit<ManualStockChange, 'before' | 'after'> & {
-        stock: number | null;
-    },
-): Promise<void> {
-    const current = await lockStock(tx, change);
-
-    if (!current) {
-        throw new ApplicationError(
-            change.variantId ? 'Вариант товара не найден' : 'Товар не найден',
-        );
+        await tx.insert(stockMovements).values({
+            projectId: change.projectId,
+            productId: change.productId,
+            variantId: change.variantId,
+            warehouseId,
+            quantityDelta,
+            reason: StockMovementReason.MANUAL,
+            note: change.note,
+            createdBy: change.createdBy,
+        });
     }
-    if (change.stock !== null && current.type === ProductType.SERVICE) {
-        throw new ApplicationError('Остаток неприменим к услугам');
-    }
-
-    await setStock(tx, change, change.stock);
-
-    await recordManualStockChanges(tx, [
-        { ...change, before: current.stock, after: change.stock },
-    ]);
 }

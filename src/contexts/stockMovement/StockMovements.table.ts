@@ -5,6 +5,7 @@ import { orders } from '@/contexts/order/Orders.table';
 import { products, productVariants } from '@/contexts/product/Products.table';
 import { projects } from '@/contexts/project/Projects.table';
 import { users } from '@/contexts/user/Users.table';
+import { warehouses } from '@/contexts/warehouse/Warehouses.table';
 import { isNotNull, sql } from 'drizzle-orm';
 import {
     check,
@@ -30,6 +31,7 @@ export const stockMovements = pgTable(
         variantId: text('variant_id').references(() => productVariants.id, {
             onDelete: 'set null',
         }),
+        warehouseId: text('warehouse_id').notNull(),
         quantityDelta: integer('quantity_delta').notNull(),
         reason: stockMovementReasonEnum('reason').notNull(),
         orderId: text('order_id').references(() => orders.id, {
@@ -52,6 +54,11 @@ export const stockMovements = pgTable(
             foreignColumns: [orders.id, orders.projectId],
             name: 'stock_movements_order_project_fk',
         }),
+        foreignKey({
+            columns: [t.warehouseId, t.projectId],
+            foreignColumns: [warehouses.id, warehouses.projectId],
+            name: 'stock_movements_warehouse_project_fk',
+        }).onDelete('cascade'),
 
         index('stock_movements_project_idx').on(t.projectId),
         index('stock_movements_product_idx').on(t.productId, t.occurredAt),
@@ -61,6 +68,7 @@ export const stockMovements = pgTable(
                 t.orderId,
                 t.productId,
                 sql`coalesce(${t.variantId}, '')`,
+                t.warehouseId,
                 t.reason,
             )
             .where(isNotNull(t.orderId)),
@@ -88,6 +96,7 @@ export const stockReservations = pgTable(
         variantId: text('variant_id').references(() => productVariants.id, {
             onDelete: 'cascade',
         }),
+        warehouseId: text('warehouse_id').notNull(),
         quantity: integer('quantity').notNull(),
         expiresAt: timestamp('expires_at'),
         createdAt,
@@ -98,6 +107,11 @@ export const stockReservations = pgTable(
             foreignColumns: [orders.id, orders.projectId],
             name: 'stock_reservations_order_project_fk',
         }),
+        foreignKey({
+            columns: [t.warehouseId, t.projectId],
+            foreignColumns: [warehouses.id, warehouses.projectId],
+            name: 'stock_reservations_warehouse_project_fk',
+        }).onDelete('cascade'),
 
         index('stock_reservations_product_idx').on(t.productId, t.variantId),
 
@@ -105,6 +119,7 @@ export const stockReservations = pgTable(
             t.orderId,
             t.productId,
             sql`coalesce(${t.variantId}, '')`,
+            t.warehouseId,
         ),
 
         check('stock_reservations_quantity_positive', positive(t.quantity)),
@@ -113,6 +128,7 @@ export const stockReservations = pgTable(
 
 export type StockMovementRecord = typeof stockMovements.$inferSelect;
 export type NewStockMovementRecord = typeof stockMovements.$inferInsert;
+export type StockReservationRecord = typeof stockReservations.$inferSelect;
 export type NewStockReservationRecord = typeof stockReservations.$inferInsert;
 
 export type StockMovementView = StockMovementRecord;

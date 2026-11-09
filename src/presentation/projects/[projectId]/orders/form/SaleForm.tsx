@@ -12,6 +12,7 @@ import {
     InputGroup,
     Money,
     requiredIntTransform,
+    Select,
     Textarea,
     TimePicker,
 } from '@/ui/Controlled';
@@ -22,6 +23,7 @@ interface SaleFormProps {
     currency: Currency;
     clientOptions: Option[];
     productOptions: Option[];
+    warehouseOptions: Option[];
     itemFields: FieldArrayWithId<CreateSaleFormValues, 'items'>[];
     totalAmount: number;
     hasService: boolean;
@@ -35,6 +37,7 @@ export const SaleForm = ({
     currency,
     clientOptions,
     productOptions,
+    warehouseOptions,
     itemFields,
     totalAmount,
     hasService,
@@ -131,6 +134,15 @@ export const SaleForm = ({
                     label="Время"
                 />
             </div>
+        )}
+
+        {warehouseOptions.length > 1 && (
+            <Select
+                name="warehouseId"
+                label="Склад"
+                options={warehouseOptions}
+                placeholder={warehouseOptions[0]?.label}
+            />
         )}
 
         <Textarea

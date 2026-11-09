@@ -41,6 +41,7 @@ import {
 import { products } from '@/contexts/product/Products.table';
 import { loadVariants } from '@/contexts/product/ProductVariant.lib';
 import { STOCK_RESERVATION_MINUTES } from '@/contexts/stockMovement/StockMovement.types';
+import { siteWarehouseIds } from '@/contexts/warehouse/Warehouse.lib';
 import { addMinutes } from 'date-fns';
 import { and, eq, inArray, isNull } from 'drizzle-orm';
 import { after } from 'next/server';
@@ -192,7 +193,10 @@ export async function createStorefrontOrder(
                     integrationId: access.integrationId,
                 },
             },
-            payUntil,
+            {
+                warehouseIds: await siteWarehouseIds(access.projectId, tx),
+                expiresAt: payUntil,
+            },
         );
 
         if (!input.couponCode) return created;

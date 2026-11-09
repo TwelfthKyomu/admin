@@ -16,6 +16,10 @@ import {
 } from '@/contexts/organizationMember/OrganizationMember.lib';
 import { projectDefaultCurrency } from '@/contexts/project/Project.lib';
 import { ORDER_READ_PERMISSIONS, Permission } from '@/contexts/user/User.types';
+import {
+    findWarehouseInProject,
+    primaryWarehouseId,
+} from '@/contexts/warehouse/Warehouse.lib';
 import { and, asc, desc, eq, gte, inArray, lt, sum } from 'drizzle-orm';
 import { createOrderWithItems, findOrderInProject } from './Order.lib';
 import {
@@ -162,9 +166,15 @@ export const createOrderAction = projectMutationAction(Permission.MANAGE_ORDERS)
         const { projectId } = parsedInput;
         const inputItems = parsedInput.items ?? [];
 
-        const [currency, sellerId] = await Promise.all([
+        const [currency, sellerId, warehouseId] = await Promise.all([
             parsedInput.currency ?? projectDefaultCurrency(projectId),
             findMemberIdByUserId(organizationId, userId),
+            parsedInput.warehouseId
+                ? findWarehouseInProject(
+                      parsedInput.warehouseId,
+                      projectId,
+                  ).then((warehouse) => warehouse.id)
+                : primaryWarehouseId(projectId),
             parsedInput.clientId
                 ? findClientInProject(parsedInput.clientId, projectId)
                 : null,
@@ -202,6 +212,7 @@ export const createOrderAction = projectMutationAction(Permission.MANAGE_ORDERS)
                 },
                 items,
                 { byUserId: userId },
+                { warehouseIds: [warehouseId], expiresAt: null },
             );
 
             return order;

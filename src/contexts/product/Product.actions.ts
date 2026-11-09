@@ -19,7 +19,7 @@ import { mapDefined } from '@/shared/lib/utils';
 import { SLUG_PATTERN } from '@/shared/validation';
 import { projectDefaultCurrency } from '@/contexts/project/Project.lib';
 import { cleanupProjectFiles } from '@/contexts/projectFile/ProjectFile.lib';
-import { recordManualStockChanges } from '@/contexts/stockMovement/StockMovement.lib';
+import { applyCatalogStockChanges } from '@/contexts/stockMovement/StockMovement.lib';
 import {
     CATALOG_READ_PERMISSIONS,
     Permission,
@@ -164,7 +164,7 @@ export const createProductAction = projectMutationAction(
                 userId,
             );
 
-            await recordManualStockChanges(tx, [
+            await applyCatalogStockChanges(tx, [
                 {
                     projectId: product.projectId,
                     productId: product.id,
@@ -305,7 +305,7 @@ export const updateProductAction = projectMutationAction(
                   )
                 : [];
 
-            await recordManualStockChanges(tx, [
+            await applyCatalogStockChanges(tx, [
                 {
                     projectId: product.projectId,
                     productId: product.id,

@@ -14,6 +14,7 @@ import {
     useProductsList,
     variantComboLabel,
 } from '@/contexts/product';
+import { useWarehousesList } from '@/contexts/warehouse';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useRouter } from 'next/navigation';
 import { useClientPicker } from '../../hooks/useClientPicker';
@@ -68,6 +69,7 @@ export function useCreateSale(projectId: string) {
     const router = useRouter();
     const { mutateAsync, isPending } = useCreateOrder();
     const productsQuery = useProductsList({ projectId });
+    const warehousesQuery = useWarehousesList(projectId);
 
     const form = useForm<CreateSaleFormValues>({
         defaultValues: {
@@ -78,6 +80,7 @@ export function useCreateSale(projectId: string) {
             notes: '',
             readyDate: undefined,
             readyTime: READY_TIME_DEFAULT,
+            warehouseId: '',
         },
         resolver: zodResolver(CreateSaleFormSchema),
         mode: 'onChange',
@@ -101,6 +104,11 @@ export function useCreateSale(projectId: string) {
         value: item.key,
         label: `${item.name} · ${fmtMoney(item.price, item.currency)}`,
         keywords: item.sku ? [item.sku] : undefined,
+    }));
+
+    const warehouseOptions = (warehousesQuery.data ?? []).map((warehouse) => ({
+        value: warehouse.id,
+        label: warehouse.name,
     }));
 
     const hasService = items.some(
@@ -134,6 +142,7 @@ export function useCreateSale(projectId: string) {
                 customerName: values.customerName?.trim() || undefined,
                 customerPhone: values.customerPhone?.trim() || undefined,
                 notes: values.notes?.trim() || undefined,
+                warehouseId: values.warehouseId || undefined,
                 readyBy: hasService
                     ? readyByOf(values.readyDate, values.readyTime)
                     : undefined,
@@ -168,6 +177,7 @@ export function useCreateSale(projectId: string) {
         isPending,
         clientOptions,
         productOptions,
+        warehouseOptions,
         itemFields: itemsArray.fields,
         removeItem: itemsArray.remove,
         addItem,

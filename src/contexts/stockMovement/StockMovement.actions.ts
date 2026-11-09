@@ -1,26 +1,19 @@
 'use server';
 
 import { db } from '@/infrastructure/database/client';
-import {
-    projectMutationAction,
-    projectReadAction,
-} from '@/shared/api/action-client';
+import { projectReadAction } from '@/shared/api/action-client';
 import { PAGE_SIZE_LARGE } from '@/shared/constants/default';
 import { variantComboLabel } from '@/contexts/product/Product.types';
 import { products } from '@/contexts/product/Products.table';
 import { loadVariants } from '@/contexts/product/ProductVariant.lib';
-import {
-    CATALOG_READ_PERMISSIONS,
-    Permission,
-} from '@/contexts/user/User.types';
+import { CATALOG_READ_PERMISSIONS } from '@/contexts/user/User.types';
+import { loadWarehouseQuantities } from '@/contexts/warehouse/Warehouse.lib';
 import { and, asc, desc, eq, isNull } from 'drizzle-orm';
-import { adjustStock } from './StockMovement.lib';
 import {
-    AdjustStockActionInputSchema,
     StockMovementsActionInputSchema,
     StockOverviewActionInputSchema,
 } from './StockMovement.schema';
-import type { StockLevelView } from './StockMovement.types';
+import { type StockLevelView, stockKey } from './StockMovement.types';
 import { stockMovements } from './StockMovements.table';
 
 export const stockOverviewAction = projectReadAction(CATALOG_READ_PERMISSIONS)
@@ -43,13 +36,34 @@ export const stockOverviewAction = projectReadAction(CATALOG_READ_PERMISSIONS)
             )
             .orderBy(asc(products.name));
 
-        const variantsByProduct = await loadVariants(rows.map((row) => row.id));
+        const [variantsByProduct, quantities] = await Promise.all([
+            loadVariants(rows.map((row) => row.id)),
+            loadWarehouseQuantities(projectId),
+        ]);
+
+        const byWarehouse = new Map<string, Record<string, number>>();
+
+        for (const row of quantities) {
+            const key = stockKey(row);
+
+            byWarehouse.set(key, {
+                ...byWarehouse.get(key),
+                [row.warehouseId]: row.quantity,
+            });
+        }
 
         return rows.flatMap<StockLevelView>((row) => {
             const variants = variantsByProduct.get(row.id) ?? [];
 
             if (variants.length === 0) {
-                return [{ ...row, productId: row.id, variantId: null }];
+                return [
+                    {
+                        ...row,
+                        productId: row.id,
+                        variantId: null,
+                        byWarehouse: byWarehouse.get(row.id) ?? {},
+                    },
+                ];
             }
 
             return variants.map((variant) => ({
@@ -60,6 +74,7 @@ export const stockOverviewAction = projectReadAction(CATALOG_READ_PERMISSIONS)
                 sku: variant.sku ?? row.sku,
                 type: row.type,
                 stock: variant.stock,
+                byWarehouse: byWarehouse.get(variant.id) ?? {},
             }));
         });
     });
@@ -78,27 +93,3 @@ export const stockMovementsAction = projectReadAction(CATALOG_READ_PERMISSIONS)
             .orderBy(desc(stockMovements.occurredAt))
             .limit(PAGE_SIZE_LARGE);
     });
-
-export const adjustStockAction = projectMutationAction(
-    Permission.MANAGE_CATALOG,
-)
-    .inputSchema(AdjustStockActionInputSchema)
-    .action(
-        async ({
-            parsedInput: { projectId, productId, variantId, stock, note },
-            ctx: { userId },
-        }) => {
-            await db.transaction((tx) =>
-                adjustStock(tx, {
-                    projectId,
-                    productId,
-                    variantId: variantId ?? null,
-                    stock,
-                    note: note?.trim() || null,
-                    createdBy: userId,
-                }),
-            );
-
-            return { ok: true };
-        },
-    );
