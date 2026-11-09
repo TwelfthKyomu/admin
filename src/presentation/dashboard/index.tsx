@@ -8,13 +8,16 @@ import { MyDeliveries } from './components/MyDeliveries';
 import { MySales } from './components/MySales';
 import { MyTasks } from './components/MyTasks';
 import { RecentOrders } from './components/RecentOrders';
+import { SetupChecklist } from './components/SetupChecklist';
 import { Summary } from './components/Summary';
 import { TopItems } from './components/TopItems';
 import { useDashboardPage } from './hooks/useDashboardPage';
+import { useSetupChecklist } from './hooks/useSetupChecklist';
 import { agendaItems } from './lib/myDay';
 
 export const DashboardPage = () => {
     const { today, projectById, myDay, mySales, finance } = useDashboardPage();
+    const { setups, hide } = useSetupChecklist();
 
     return (
         <QueryBoundary
@@ -31,6 +34,14 @@ export const DashboardPage = () => {
                             {fmtDateRu(today)}
                         </WidgetHeader>
                     </Widget>
+                    {setups.map((setup) => (
+                        <SetupChecklist
+                            key={setup.projectId}
+                            setup={setup}
+                            project={projectById.get(setup.projectId)}
+                            onHide={hide}
+                        />
+                    ))}
                     <div className="grid gap-3 lg:grid-cols-2">
                         <Agenda
                             items={agendaItems(day)}

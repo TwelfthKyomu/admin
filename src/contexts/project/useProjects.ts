@@ -9,6 +9,7 @@ import {
     projectsAction,
     updateProjectAction,
 } from './Project.actions';
+import { projectSetupAction } from './ProjectSetup.actions';
 
 const projectQueries = {
     all: ['projects'] as const,
@@ -22,6 +23,10 @@ const projectQueries = {
 
 export function useProjectsList(organizationId: string) {
     return useQuery(projectQueries.list(organizationId));
+}
+
+export function useProjectSetup() {
+    return useQuery(listQuery(['project-setup'], projectSetupAction));
 }
 
 export const useCreateProject = makeMutation(createProjectAction);
