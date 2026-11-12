@@ -1,0 +1,9 @@
+#!/bin/sh
+set -e
+
+echo "pre-push: typecheck, lint, test, deadcode"
+
+bun run typecheck
+bun run lint:check
+bun run test
+bun run deadcode

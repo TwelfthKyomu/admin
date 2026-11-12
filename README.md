@@ -64,9 +64,13 @@ realtime-канал (SSE), вебхуки платежей и тарифов, AP
 
 ```bash
 bun install
+git config core.hooksPath .githooks
 bun run db:migrate
 bun dev
 ```
+
+`git config core.hooksPath .githooks` включает проверку перед пушем: типы,
+Biome и ESLint, тесты и knip. С ошибками `git push` не пройдёт.
 
 `.env.local` (схема — `src/env.ts`):
 
@@ -108,7 +112,10 @@ Branches → Create branch, затем Connect).
 | `bun run db:migrate` | применить миграции |
 | `bun run build` / `start` | продакшн-сборка и запуск |
 
-CI проверяет типы, Biome и ESLint, тесты, миграции на чистой базе и сборку.
+Перед пушем хук `.githooks/pre-push` проверяет типы, Biome и ESLint, тесты и
+knip. CI в GitHub (типы, линт, тесты, миграции на чистой базе, сборка)
+запускается вручную: Actions → CI → Run workflow — GitHub не запускает
+задачи на аккаунте с российскими платёжными данными.
 
 ## Продакшн
 
