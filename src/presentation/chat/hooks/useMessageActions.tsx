@@ -2,8 +2,8 @@
 
 import { useStaticData } from '@/app/providers';
 import { runAction } from '@/shared/lib/action-result';
+import { copyToClipboard } from '@/shared/lib/clipboard';
 import { confirmDestructive, modal } from '@/shared/lib/modal';
-import { toast } from '@/shared/lib/toast';
 import {
     type ChatMessageView,
     type ChatReaction,
@@ -15,26 +15,18 @@ import {
 import { TASK_WRITE_PERMISSIONS } from '@/contexts/user';
 import dynamic from 'next/dynamic';
 import { serializeChatTarget } from '../lib/chatUrl';
+import { copyMessage } from '../lib/messageCopy';
 
 const TaskFromMessageModal = dynamic(() =>
     import('../modal/TaskFromMessageModal').then((m) => m.TaskFromMessageModal),
 );
-
-async function copyToClipboard(text: string, success: string) {
-    try {
-        await navigator.clipboard.writeText(text);
-        toast.success(success);
-    } catch {
-        toast.error('Буфер обмена недоступен');
-    }
-}
 
 interface UseMessageActionsOptions {
     target: ChatTarget;
     scope: string;
 }
 
-export function useMessageActions({ target, scope }: UseMessageActionsOptions) {
+export const useMessageActions = ({ target, scope }: UseMessageActionsOptions) => {
     const { projects, projectPermissions } = useStaticData();
     const remove = useDeleteChatMessage();
     const react = useSetChatReaction(scope);
@@ -59,10 +51,6 @@ export function useMessageActions({ target, scope }: UseMessageActionsOptions) {
         void runAction(pin.mutateAsync({ messageId: message.id, pinned }), {
             success: pinned ? 'Сообщение закреплено' : 'Сообщение откреплено',
         });
-    };
-
-    const copyMessage = (body: string) => {
-        void copyToClipboard(body, 'Сообщение скопировано');
     };
 
     const copyMessageLink = (messageId: string) => {
@@ -104,4 +92,4 @@ export function useMessageActions({ target, scope }: UseMessageActionsOptions) {
         copyMessage,
         copyMessageLink,
     };
-}
+};

@@ -6,7 +6,7 @@ import {
 import { csvAmount, downloadCsv } from '@/shared/lib/csv';
 import { type OrderView, orderNumber } from '@/contexts/order';
 
-export function exportOrders(orders: OrderView[]): void {
+export const exportOrders = (orders: OrderView[]): void => {
     downloadCsv(
         `orders-${new Date().toISOString().slice(0, 10)}.csv`,
         [
@@ -34,4 +34,4 @@ export function exportOrders(orders: OrderView[]): void {
             order.currency,
         ]),
     );
-}
+};

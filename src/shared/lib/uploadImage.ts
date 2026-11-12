@@ -3,10 +3,10 @@ interface UploadResponse {
     error?: string;
 }
 
-export async function uploadImage(
+export const uploadImage = async (
     projectId: string,
     file: File,
-): Promise<string> {
+): Promise<string> => {
     const body = new FormData();
 
     body.append('projectId', projectId);
@@ -24,4 +24,4 @@ export async function uploadImage(
     }
 
     return json.url;
-}
+};

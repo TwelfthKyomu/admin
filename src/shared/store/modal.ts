@@ -11,9 +11,9 @@ let state: ModalEntry[] = [];
 let listeners: Listener[] = [];
 let counter = 0;
 
-function emit(): void {
+const emit = (): void => {
     for (const listener of listeners) listener(state);
-}
+};
 
 export const modalStore = {
     subscribe(listener: Listener): () => void {

@@ -11,15 +11,15 @@ export interface ActionResponse<TData = unknown> {
 
 const FORM_VALIDATION_FAILED_MESSAGE = 'Проверьте поля формы';
 
-function redirectToLogin(): void {
+const redirectToLogin = (): void => {
     if (typeof window === 'undefined') return;
 
     const { pathname, search } = window.location;
 
     window.location.assign(staleSessionRoute(pathname + search));
-}
+};
 
-export function extractActionError(response: unknown): string | undefined {
+export const extractActionError = (response: unknown): string | undefined => {
     if (typeof response !== 'object' || response === null) return undefined;
 
     const { serverError, validationErrors } = response as ActionResponse;
@@ -29,4 +29,4 @@ export function extractActionError(response: unknown): string | undefined {
     if (validationErrors) return FORM_VALIDATION_FAILED_MESSAGE;
 
     return undefined;
-}
+};

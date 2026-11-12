@@ -12,10 +12,10 @@ interface RunActionResult<R> {
     response: R | undefined;
 }
 
-export async function runAction<R extends ActionResponse>(
+export const runAction = async <R extends ActionResponse>(
     action: Promise<R | undefined>,
     options?: RunActionOptions,
-): Promise<RunActionResult<R>> {
+): Promise<RunActionResult<R>> => {
     const response = await action;
     const error = extractActionError(response);
 
@@ -30,4 +30,4 @@ export async function runAction<R extends ActionResponse>(
     }
 
     return { success: true, response };
-}
+};

@@ -38,7 +38,8 @@ export const COURIER_COLUMNS = ({ currency, canAccept, onAccept }: CourierColumn
         id: 'actions',
         header: '',
         cell: ({ row: { original } }) =>
-            canAccept && original.onHand > 0 ? (
+            canAccept &&
+            original.onHand > 0 && (
                 <Button
                     size="sm"
                     variant="outline"
@@ -46,6 +47,6 @@ export const COURIER_COLUMNS = ({ currency, canAccept, onAccept }: CourierColumn
                 >
                     Принять
                 </Button>
-            ) : null,
+            ),
     }),
 ];

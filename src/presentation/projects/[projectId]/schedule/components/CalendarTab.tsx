@@ -1,32 +1,23 @@
 'use client';
 
 import { ScheduleFooter } from '../components/ScheduleFooter';
-import { buildMonthGrid, monthSales, salesAmount } from '../lib/monthGrid';
+import { useCalendarTab } from '../hooks/useCalendarTab';
+import { salesAmount } from '../lib/monthGrid';
 import { MonthCalendar } from './MonthCalendar';
-import { useScheduleContext } from './ScheduleProvider';
 
 export const CalendarTab = () => {
-    const { date, setDate, setMode, setTab, data, builder, workingEmployees, currency } =
-        useScheduleContext();
-
-    const days = buildMonthGrid({
+    const {
         date,
-        sales: data.sales,
-        shifts: data.shifts,
-    });
-
-    const sales = monthSales(days);
-
-    const shiftsInMonth = days.reduce(
-        (acc, d) => acc + (d.isInCurrentMonth ? d.shifts.length : 0),
-        0,
-    );
-
-    const handlePickDay = (d: Date) => {
-        setDate(d);
-        setMode('day');
-        setTab('scheduler');
-    };
+        setDate,
+        data,
+        builder,
+        workingEmployees,
+        currency,
+        days,
+        sales,
+        shiftsInMonth,
+        handlePickDay,
+    } = useCalendarTab();
 
     return (
         <>

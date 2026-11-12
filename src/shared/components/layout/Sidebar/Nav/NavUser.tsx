@@ -1,9 +1,7 @@
 'use client';
 
-import { useStaticData } from '@/app/providers';
 import { UserAvatar } from '@/shared/components/common';
 import { ROUTES } from '@/shared/constants';
-import { signOut } from '@/shared/lib/auth-client';
 import {
     DropdownMenu,
     DropdownMenuContent,
@@ -14,19 +12,11 @@ import {
 } from '@/ui/Base';
 import { ChevronsUpDown, LogOut, UserRound } from 'lucide-react';
 import Link from 'next/link';
-import { useRouter } from 'next/navigation';
-import { SidebarMenu, SidebarMenuButton, SidebarMenuItem, useSidebar } from '../primitives/Sidebar';
+import { SidebarMenu, SidebarMenuButton, SidebarMenuItem } from '../primitives/Sidebar';
+import { useNavUser } from './hooks/useNavUser';
 
 export const NavUser = () => {
-    const { isMobile } = useSidebar();
-    const router = useRouter();
-    const { user, organization } = useStaticData();
-
-    const handleSignOut = async () => {
-        await signOut();
-        router.push(ROUTES.auth);
-        router.refresh();
-    };
+    const { isMobile, user, organization, handleSignOut } = useNavUser();
 
     return (
         <SidebarMenu>

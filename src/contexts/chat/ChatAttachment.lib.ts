@@ -1,12 +1,18 @@
 import 'server-only';
 
 import { db, type Tx } from '@/infrastructure/database/client';
+import { chatFileResponse } from '@/infrastructure/storage/uploads';
 import { chatUploadUrl } from '@/infrastructure/storage/uploadUrls';
 import { ApplicationError } from '@/shared/api/errors';
+import { requireUserOrganization } from '@/shared/api/permission';
 import { insertOne } from '@/shared/api/repository';
+import { forbiddenResponse, notFoundResponse } from '@/shared/api/response';
 import { PAGE_SIZE_HUGE } from '@/shared/constants/default';
 import { users } from '@/contexts/user/Users.table';
 import { and, desc, eq, inArray, isNull } from 'drizzle-orm';
+import * as z from 'zod/mini';
+import { assertChannelAccess } from './Chat.lib';
+import { ChatTargetSchema } from './Chat.schema';
 import type { ChannelAttachmentView, ChatAttachmentView } from './Chat.types';
 import {
     type ChatAttachmentRecord,
@@ -21,7 +27,7 @@ type AttachmentRow = Pick<
     'id' | 'channelId' | 'filename' | 'name' | 'contentType' | 'sizeBytes'
 >;
 
-function toAttachmentView(row: AttachmentRow): ChatAttachmentView {
+const toAttachmentView = (row: AttachmentRow): ChatAttachmentView => {
     return {
         id: row.id,
         name: row.name,
@@ -29,7 +35,7 @@ function toAttachmentView(row: AttachmentRow): ChatAttachmentView {
         sizeBytes: row.sizeBytes,
         url: chatUploadUrl(row.channelId, row.filename),
     };
-}
+};
 
 const attachmentColumns = {
     id: chatAttachments.id,
@@ -40,9 +46,9 @@ const attachmentColumns = {
     sizeBytes: chatAttachments.sizeBytes,
 };
 
-export async function loadAttachments(
+export const loadAttachments = async (
     messageIds: string[],
-): Promise<Map<string, ChatAttachmentView[]>> {
+): Promise<Map<string, ChatAttachmentView[]>> => {
     if (messageIds.length === 0) return new Map();
 
     const rows = await db
@@ -59,11 +65,11 @@ export async function loadAttachments(
             list.map(toAttachmentView),
         ]),
     );
-}
+};
 
-export async function listChannelAttachments(
+export const listChannelAttachments = async (
     channelId: string,
-): Promise<ChannelAttachmentView[]> {
+): Promise<ChannelAttachmentView[]> => {
     const rows = await db
         .select({
             ...attachmentColumns,
@@ -89,16 +95,16 @@ export async function listChannelAttachments(
         authorName: row.authorName,
         createdAt: row.createdAt,
     }));
-}
+};
 
-export async function createChatAttachment(input: {
+export const createChatAttachment = async (input: {
     channelId: string;
     uploadedBy: string;
     filename: string;
     name: string;
     contentType: string;
     sizeBytes: number;
-}): Promise<ChatAttachmentView> {
+}): Promise<ChatAttachmentView> => {
     const record = await insertOne(
         chatAttachments,
         input,
@@ -106,9 +112,9 @@ export async function createChatAttachment(input: {
     );
 
     return toAttachmentView(record);
-}
+};
 
-export async function attachToMessage(
+export const attachToMessage = async (
     tx: Pick<Tx, 'update'>,
     input: {
         messageId: string;
@@ -116,7 +122,7 @@ export async function attachToMessage(
         userId: string;
         attachmentIds: string[];
     },
-): Promise<void> {
+): Promise<void> => {
     const ids = [...new Set(input.attachmentIds)];
 
     if (ids.length === 0) return;
@@ -137,11 +143,11 @@ export async function attachToMessage(
     if (attached.length !== ids.length) {
         throw new ApplicationError('Вложение недоступно');
     }
-}
+};
 
-export async function messageHasAttachments(
+export const messageHasAttachments = async (
     messageId: string,
-): Promise<boolean> {
+): Promise<boolean> => {
     const [row] = await db
         .select({ id: chatAttachments.id })
         .from(chatAttachments)
@@ -149,16 +155,16 @@ export async function messageHasAttachments(
         .limit(1);
 
     return row !== undefined;
-}
+};
 
-export async function findChatAttachmentByFile(
+const findChatAttachmentByFile = async (
     channelId: string,
     filename: string,
 ): Promise<{
     attachment: ChatAttachmentRecord;
     channel: ChatChannelRecord;
     messageDeleted: boolean;
-} | null> {
+} | null> => {
     const [row] = await db
         .select({
             attachment: chatAttachments,
@@ -183,4 +189,53 @@ export async function findChatAttachmentByFile(
         channel: row.channel,
         messageDeleted: row.messageDeletedAt !== null,
     };
-}
+};
+
+export const parseChatTarget = (raw: FormDataEntryValue | null | undefined) => {
+    if (typeof raw !== 'string') return null;
+
+    try {
+        const parsed = z.safeParse(ChatTargetSchema, JSON.parse(raw));
+
+        return parsed.success ? parsed.data : null;
+    } catch {
+        return null;
+    }
+};
+
+export const serveChatFile = async (
+    userId: string,
+    channelId: string,
+    filename: string,
+): Promise<Response> => {
+    const found = await findChatAttachmentByFile(channelId, filename);
+
+    if (!found || found.messageDeleted) return notFoundResponse();
+
+    const { attachment, channel } = found;
+
+    if (attachment.messageId === null && attachment.uploadedBy !== userId) {
+        return notFoundResponse();
+    }
+
+    let organizationId: string;
+
+    try {
+        ({ id: organizationId } = await requireUserOrganization(userId));
+        await assertChannelAccess(userId, organizationId, channel);
+    } catch {
+        return forbiddenResponse();
+    }
+
+    const disposition = attachment.contentType.startsWith('image/')
+        ? 'inline'
+        : `attachment; filename*=UTF-8''${encodeURIComponent(attachment.name)}`;
+
+    return chatFileResponse(
+        organizationId,
+        channelId,
+        filename,
+        attachment.contentType,
+        disposition,
+    );
+};

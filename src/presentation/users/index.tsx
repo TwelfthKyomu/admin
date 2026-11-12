@@ -2,12 +2,12 @@
 
 import { QueryBoundary } from '@/shared/components/common';
 import { Table } from '@/ui/Base';
-import { getColumns } from './components/Column';
+import { COLUMNS } from './components/Column';
 import { useUsersPage } from './hooks/useUsersPage';
 
 export const UsersPage = () => {
     const data = useUsersPage();
-    const columns = getColumns(data);
+    const columns = COLUMNS(data);
 
     return (
         <QueryBoundary

@@ -19,10 +19,10 @@ interface UseScheduleBuilderOptions {
     defaultEmployeeId: string;
 }
 
-export function useScheduleBuilder({
+export const useScheduleBuilder = ({
     projectId,
     defaultEmployeeId,
-}: UseScheduleBuilderOptions) {
+}: UseScheduleBuilderOptions) => {
     const bulk = useBulkCreateShifts();
 
     const [active, setActive] = useState(false);
@@ -101,4 +101,4 @@ export function useScheduleBuilder({
         isPending: bulk.isPending,
         submit,
     };
-}
+};

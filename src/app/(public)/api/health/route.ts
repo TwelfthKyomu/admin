@@ -3,7 +3,7 @@ import { HTTP } from '@/shared/constants/http';
 import { sql } from 'drizzle-orm';
 import { connection } from 'next/server';
 
-export async function GET() {
+export const GET = async () => {
     await connection();
 
     try {
@@ -16,4 +16,4 @@ export async function GET() {
             { status: HTTP.SERVICE_UNAVAILABLE },
         );
     }
-}
+};

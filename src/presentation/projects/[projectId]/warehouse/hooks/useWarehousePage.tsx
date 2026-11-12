@@ -1,9 +1,15 @@
 'use client';
 
 import { useProject } from '@/app/providers';
+import { runAction } from '@/shared/lib/action-result';
 import { confirmDestructive, modal } from '@/shared/lib/modal';
 import { type StockLevelView, useStockMovements, useStockOverview } from '@/contexts/stockMovement';
-import { useDeleteWarehouse, useWarehousesList, type WarehouseView } from '@/contexts/warehouse';
+import {
+    useDeleteWarehouse,
+    useMakePrimaryWarehouse,
+    useWarehousesList,
+    type WarehouseView,
+} from '@/contexts/warehouse';
 import dynamic from 'next/dynamic';
 import type { StockOperationType } from '../lib/stockOperation';
 
@@ -23,12 +29,13 @@ const WarehouseEditSheet = dynamic(() =>
     import('../modal/WarehouseEditSheet').then((m) => m.WarehouseEditSheet),
 );
 
-export function useWarehousePage() {
+export const useWarehousePage = () => {
     const { projectId } = useProject();
     const warehousesQuery = useWarehousesList(projectId);
     const overviewQuery = useStockOverview(projectId);
     const movementsQuery = useStockMovements({ projectId });
     const { mutateAsync: deleteWarehouse, isPending: isDeleting } = useDeleteWarehouse();
+    const { mutateAsync: makePrimary } = useMakePrimaryWarehouse();
     const warehouses = warehousesQuery.data ?? [];
 
     const onOperation = (type: StockOperationType, row: StockLevelView) =>
@@ -60,6 +67,11 @@ export function useWarehousePage() {
             />,
         );
 
+    const onMakePrimary = (warehouse: WarehouseView) =>
+        runAction(makePrimary({ id: warehouse.id, projectId }), {
+            success: `Склад «${warehouse.name}» теперь основной`,
+        });
+
     const onDeleteWarehouse = (warehouse: WarehouseView) =>
         confirmDestructive({
             title: 'Удалить склад?',
@@ -74,6 +86,7 @@ export function useWarehousePage() {
         });
 
     return {
+        projectId,
         warehousesQuery,
         overviewQuery,
         movementsQuery,
@@ -82,6 +95,7 @@ export function useWarehousePage() {
         onTransfer,
         onCreateWarehouse,
         onEditWarehouse,
+        onMakePrimary,
         onDeleteWarehouse,
     };
-}
+};

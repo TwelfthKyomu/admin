@@ -10,28 +10,28 @@ import { evaluateCoupon } from './Coupon.lib';
 import { normalizeCouponCode } from './Coupon.types';
 import { type CouponRecord, couponRedemptions, coupons } from './Coupons.table';
 
-async function lockCoupons(
+const lockCoupons = async (
     tx: Tx,
     where: ReturnType<typeof and>,
-): Promise<CouponRecord[]> {
+): Promise<CouponRecord[]> => {
     return tx.select().from(coupons).where(where).for('update');
-}
+};
 
-async function setCouponUses(
+const setCouponUses = async (
     tx: Tx,
     coupon: Pick<CouponRecord, 'id'>,
     usesCount: number,
-): Promise<void> {
+): Promise<void> => {
     await tx
         .update(coupons)
         .set({ usesCount: Math.max(usesCount, 0) })
         .where(eq(coupons.id, coupon.id));
-}
+};
 
-export async function reverseCouponRedemptionsForOrder(
+export const reverseCouponRedemptionsForOrder = async (
     tx: Tx,
     orderId: string,
-): Promise<void> {
+): Promise<void> => {
     const deleted = await tx
         .delete(couponRedemptions)
         .where(eq(couponRedemptions.orderId, orderId))
@@ -50,11 +50,11 @@ export async function reverseCouponRedemptionsForOrder(
     for (const coupon of locked) {
         await setCouponUses(tx, coupon, coupon.usesCount - 1);
     }
-}
+};
 
-export async function findOrderCouponCode(
+export const findOrderCouponCode = async (
     orderId: string,
-): Promise<string | null> {
+): Promise<string | null> => {
     const [row] = await db
         .select({ code: coupons.code })
         .from(couponRedemptions)
@@ -63,14 +63,14 @@ export async function findOrderCouponCode(
         .limit(1);
 
     return row?.code ?? null;
-}
+};
 
-export async function redeemCoupon(
+export const redeemCoupon = async (
     tx: Tx,
     order: OrderRecord,
     rawCode: string,
     byUserId: string | null,
-): Promise<{ order: OrderRecord; discountAmount: number }> {
+): Promise<{ order: OrderRecord; discountAmount: number }> => {
     if (order.paidAmount > 0) {
         throw new ApplicationError(
             'Промокод применяется только до оплаты заказа',
@@ -123,4 +123,4 @@ export async function redeemCoupon(
         order: await addOrderDiscount(tx, order, discountAmount, byUserId),
         discountAmount,
     };
-}
+};

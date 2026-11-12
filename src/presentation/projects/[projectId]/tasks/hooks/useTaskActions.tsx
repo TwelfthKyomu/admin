@@ -20,7 +20,7 @@ const TaskCreateModal = dynamic(() =>
 
 const TaskEditSheet = dynamic(() => import('../modal/TaskEditSheet').then((m) => m.TaskEditSheet));
 
-export function useTaskActions(assigneeOptions: Option[]) {
+export const useTaskActions = (assigneeOptions: Option[]) => {
     const { projectId } = useProject();
     const create = useCreateTask();
     const update = useUpdateTask();
@@ -79,6 +79,6 @@ export function useTaskActions(assigneeOptions: Option[]) {
         });
 
     return { onCreate, onEdit, onQuickAdd, onMove, onToggleDone, onDuplicate, onDelete };
-}
+};
 
 export type TaskActions = ReturnType<typeof useTaskActions>;

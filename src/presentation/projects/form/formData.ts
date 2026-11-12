@@ -26,11 +26,11 @@ export const PROJECT_DEFAULT = {
     defaultCurrency: DEFAULT_CURRENCY,
 };
 
-export function deriveProjectKey(name: string): string {
+export const deriveProjectKey = (name: string): string => {
     const key = slugify(name)
         .replace(/[^a-z]/g, '')
         .toUpperCase()
         .slice(0, KEY_MAX);
 
     return key.length >= KEY_MIN ? key : '';
-}
+};

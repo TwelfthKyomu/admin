@@ -1,5 +1,6 @@
 import { cn } from '@/shared/lib/utils';
 import { GANTT_TIME_H } from '../../constants';
+import { hourLabelOffsetClass } from '../../lib/time';
 
 export const GanttTimeHeader = () => {
     return (
@@ -23,16 +24,7 @@ export const GanttTimeHeader = () => {
                         gridColumnStart: h + 1,
                     }}
                 >
-                    <span
-                        className={cn(
-                            'absolute transform',
-                            h === 24
-                                ? '-translate-x-full'
-                                : h === 0
-                                  ? 'translate-x-0'
-                                  : '-translate-x-1/2',
-                        )}
-                    >
+                    <span className={cn('absolute transform', hourLabelOffsetClass(h))}>
                         {String(h === 24 ? 24 : h).padStart(2, '0')}
                     </span>
                 </div>

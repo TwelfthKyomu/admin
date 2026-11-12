@@ -2,7 +2,7 @@ import { fmtDate } from '@/shared/format/date';
 import { csvAmount, downloadCsv } from '@/shared/lib/csv';
 import type { ClientView } from '@/contexts/client';
 
-export function exportClients(clients: ClientView[]): void {
+export const exportClients = (clients: ClientView[]): void => {
     downloadCsv(
         `clients-${new Date().toISOString().slice(0, 10)}.csv`,
         [
@@ -28,4 +28,4 @@ export function exportClients(clients: ClientView[]): void {
             fmtDate(client.createdAt),
         ]),
     );
-}
+};

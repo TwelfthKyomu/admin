@@ -11,7 +11,7 @@ import { useProjectBadgesList } from '@/contexts/projectBadge';
 import { useCategoriesList } from '@/contexts/projectCategory';
 import type { CreateProductFormValues } from '../form/formData';
 
-export function useProductForm(projectId: string) {
+export const useProductForm = (projectId: string) => {
     const { control, getValues, setValue } =
         useFormContext<CreateProductFormValues>();
 
@@ -69,4 +69,4 @@ export function useProductForm(projectId: string) {
         badgeOptions,
         onTypeChange,
     };
-}
+};

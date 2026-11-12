@@ -1,6 +1,6 @@
+import { DetailRow } from '@/shared/components/common';
 import { DELIVERY_CARRIER_LABEL } from '@/shared/labels/delivery';
 import { type DeliveryView, deliveryTrackUrl } from '@/contexts/delivery';
-import { DetailRow } from '../DetailRow';
 
 export const CarrierDetails = ({ delivery }: { delivery: DeliveryView }) => (
     <>

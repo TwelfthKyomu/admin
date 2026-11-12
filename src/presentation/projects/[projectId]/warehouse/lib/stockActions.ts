@@ -8,11 +8,11 @@ interface StockActionHandlers {
     onTransfer: (row: StockLevelView) => void;
 }
 
-export function stockActionItems(
+export const stockActionItems = (
     row: StockLevelView,
     warehousesCount: number,
     { onOperation, onTransfer }: StockActionHandlers,
-): TableActionItem[] {
+): TableActionItem[] => {
     if (row.type === ProductType.SERVICE) return [];
 
     const tracked = row.stock !== undefined;
@@ -37,4 +37,4 @@ export function stockActionItems(
             : []),
         operation(StockOperationType.COUNT),
     ];
-}
+};

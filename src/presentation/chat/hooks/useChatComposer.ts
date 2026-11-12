@@ -37,7 +37,7 @@ interface UseChatComposerOptions {
     onSent?: () => void;
 }
 
-export function useChatComposer({
+export const useChatComposer = ({
     organizationId,
     target,
     scope,
@@ -45,7 +45,7 @@ export function useChatComposer({
     viewer,
     messages,
     onSent,
-}: UseChatComposerOptions) {
+}: UseChatComposerOptions) => {
     const draftKey = `${viewer.id}:${threadRootId ? `${scope}#${threadRootId}` : scope}`;
 
     const [draft, setDraft] = useState(() => readDraft(draftKey));
@@ -217,6 +217,6 @@ export function useChatComposer({
         cancelEdit: leaveEdit,
         editLastOwnMessage,
     };
-}
+};
 
 export type ChatComposer = ReturnType<typeof useChatComposer>;

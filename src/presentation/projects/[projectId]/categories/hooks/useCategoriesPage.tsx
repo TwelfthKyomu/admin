@@ -17,7 +17,7 @@ const CategoryEditSheet = dynamic(() =>
     import('../modal/CategoryEditSheet').then((m) => m.CategoryEditSheet),
 );
 
-export function useCategoriesPage() {
+export const useCategoriesPage = () => {
     const { projectId } = useProject();
     const query = useCategoriesList({ projectId, includeInactive: true });
     const { mutateAsync, isPending } = useDeleteCategory();
@@ -46,4 +46,4 @@ export function useCategoriesPage() {
         });
 
     return { query, onCreate, onEdit, onDelete, isDeleting: isPending };
-}
+};

@@ -13,7 +13,7 @@ export interface ScheduleSale extends ScheduleItem {
     order: OrderListView;
 }
 
-export function toScheduleSales(orders: OrderListView[]): ScheduleSale[] {
+export const toScheduleSales = (orders: OrderListView[]): ScheduleSale[] => {
     return orders.flatMap((order) =>
         isScheduledSale(order) && order.sellerId && order.soldAt
             ? [
@@ -27,31 +27,31 @@ export function toScheduleSales(orders: OrderListView[]): ScheduleSale[] {
               ]
             : [],
     );
-}
+};
 
-export function saleMatches(sale: ScheduleSale, query: string): boolean {
+export const saleMatches = (sale: ScheduleSale, query: string): boolean => {
     const { customerName, customerPhone, notes } = sale.order;
 
     return matchesSearch(query, customerName, customerPhone, notes);
-}
+};
 
-export function pickShiftWindow(
+export const pickShiftWindow = (
     shifts: EmployeeShiftView[],
     employeeId: string,
     date: Date,
-): [number, number] | undefined {
+): [number, number] | undefined => {
     const shift = pickShift(shifts, employeeId, date);
 
     if (!shift) return undefined;
 
     return [minutesIntoDay(shift.startsAt), minutesIntoDay(shift.endsAt)];
-}
+};
 
-export function pickTeamWindow(
+export const pickTeamWindow = (
     shifts: EmployeeShiftView[],
     employeeIds: string[],
     date: Date,
-): [number, number] | undefined {
+): [number, number] | undefined => {
     const windows: [number, number][] = [];
 
     for (const employeeId of employeeIds) {
@@ -66,17 +66,17 @@ export function pickTeamWindow(
         Math.min(...windows.map(([start]) => start)),
         Math.max(...windows.map(([, end]) => end)),
     ];
-}
+};
 
-export function shiftWindowLabel([start, end]: [number, number]): string {
+export const shiftWindowLabel = ([start, end]: [number, number]): string => {
     return `${fmtMinutesOfDay(start)}–${fmtMinutesOfDay(end)}`;
-}
+};
 
-export function pickShift(
+export const pickShift = (
     shifts: EmployeeShiftView[],
     employeeId: string,
     date: Date,
-): EmployeeShiftView | undefined {
+): EmployeeShiftView | undefined => {
     for (const shift of shifts) {
         if (shift.employeeId !== employeeId) continue;
 
@@ -93,17 +93,17 @@ export function pickShift(
     }
 
     return undefined;
-}
+};
 
-export function pickCancelledShift(
+export const pickCancelledShift = (
     shifts: EmployeeShiftView[],
     employeeId: string,
     date: Date,
-): EmployeeShiftView | undefined {
+): EmployeeShiftView | undefined => {
     return shifts.find(
         (shift) =>
             shift.employeeId === employeeId &&
             shift.status === ShiftStatus.CANCELLED &&
             isSameDay(shift.startsAt, date),
     );
-}
+};

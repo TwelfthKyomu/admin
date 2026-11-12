@@ -1,14 +1,9 @@
 'use client';
 
-import { type SubmitHandler, useForm } from 'react-hook-form';
 import { FormDialog } from '@/shared/components/common';
-import { clientLabel } from '@/shared/format/name';
-import { runAction } from '@/shared/lib/action-result';
-import { useModalClose } from '@/shared/lib/modal';
-import { type ClientView, UpdateClientActionInputSchema, useUpdateClient } from '@/contexts/client';
-import { zodResolver } from '@hookform/resolvers/zod';
+import type { ClientView } from '@/contexts/client';
 import { ClientForm } from '../form/ClientForm';
-import type { UpdateClientFormValues } from '../form/formData';
+import { useClientEditSheet } from '../hooks/useClientEditSheet';
 
 interface ClientEditSheetProps {
     projectId: string;
@@ -16,30 +11,7 @@ interface ClientEditSheetProps {
 }
 
 export const ClientEditSheet = ({ projectId, client }: ClientEditSheetProps) => {
-    const close = useModalClose();
-    const { mutateAsync, isPending } = useUpdateClient();
-
-    const form = useForm<UpdateClientFormValues>({
-        resolver: zodResolver(UpdateClientActionInputSchema),
-        values: {
-            id: client.id,
-            projectId,
-            firstName: client.firstName,
-            lastName: client.lastName ?? '',
-            middleName: client.middleName ?? '',
-            email: client.email ?? '',
-            phone: client.phone ?? '',
-        },
-        mode: 'onChange',
-    });
-
-    const onSubmit: SubmitHandler<UpdateClientFormValues> = async (values) => {
-        const { success } = await runAction(mutateAsync(values), {
-            success: `Клиент ${clientLabel(client)} обновлён`,
-        });
-
-        if (success) close();
-    };
+    const { isPending, form, onSubmit } = useClientEditSheet(projectId, client);
 
     return (
         <FormDialog

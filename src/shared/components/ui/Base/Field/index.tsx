@@ -5,39 +5,6 @@ import { cn } from '@/shared/lib/utils';
 import { cva, type VariantProps } from 'class-variance-authority';
 import { Label } from '../Label';
 
-const FieldSet = ({ className, ...props }: ComponentProps<'fieldset'>) => {
-    return (
-        <fieldset
-            data-slot="field-set"
-            className={cn(
-                'flex flex-col gap-6 has-[>[data-slot=checkbox-group]]:gap-3 has-[>[data-slot=radio-group]]:gap-3',
-                className,
-            )}
-            {...props}
-        />
-    );
-};
-
-const FieldLegend = ({
-    className,
-    variant = 'legend',
-    ...props
-}: ComponentProps<'legend'> & {
-    variant?: 'legend' | 'label';
-}) => {
-    return (
-        <legend
-            data-slot="field-legend"
-            data-variant={variant}
-            className={cn(
-                'mb-3 font-medium data-[variant=label]:text-sm data-[variant=legend]:text-base',
-                className,
-            )}
-            {...props}
-        />
-    );
-};
-
 const FieldGroup = ({ className, ...props }: ComponentProps<'div'>) => {
     return (
         <div
@@ -171,13 +138,4 @@ const FieldError = ({
     );
 };
 
-export {
-    Field,
-    FieldContent,
-    FieldDescription,
-    FieldError,
-    FieldGroup,
-    FieldLabel,
-    FieldLegend,
-    FieldSet,
-};
+export { Field, FieldContent, FieldDescription, FieldError, FieldGroup, FieldLabel };

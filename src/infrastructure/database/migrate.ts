@@ -21,7 +21,7 @@ const migrationsFolder = path.join(
     'migrations',
 );
 
-async function main(): Promise<void> {
+const main = async (): Promise<void> => {
     const pool = new Pool({ connectionString, max: 1 });
 
     try {
@@ -32,7 +32,7 @@ async function main(): Promise<void> {
     } finally {
         await pool.end();
     }
-}
+};
 
 main().catch((error) => {
     console.error('✗ Ошибка миграции:', error);

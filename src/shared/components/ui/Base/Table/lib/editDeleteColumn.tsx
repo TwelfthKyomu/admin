@@ -11,12 +11,12 @@ interface EditDeleteColumnOptions<T> {
     renderInstead?: (row: T) => ReactNode;
 }
 
-export function editDeleteColumn<T>({
+export const editDeleteColumn = <T,>({
     onEdit,
     onDelete,
     isDeleting,
     renderInstead,
-}: EditDeleteColumnOptions<T>) {
+}: EditDeleteColumnOptions<T>) => {
     return createColumnHelper<T>().display({
         id: 'actions',
         header: '',
@@ -48,4 +48,4 @@ export function editDeleteColumn<T>({
             );
         },
     });
-}
+};

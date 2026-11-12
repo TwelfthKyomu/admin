@@ -6,7 +6,7 @@ import { toast } from '@/shared/lib/toast';
 import { uploadImage } from '@/shared/lib/uploadImage';
 import type { CreateProductFormValues } from '../form/formData';
 
-export function useImagesField(projectId: string) {
+export const useImagesField = (projectId: string) => {
     const [url, setUrl] = useState('');
     const [isUploading, setIsUploading] = useState(false);
     const { control } = useFormContext<CreateProductFormValues>();
@@ -51,4 +51,4 @@ export function useImagesField(projectId: string) {
         field.onChange(images.filter((_, current) => current !== index));
 
     return { images, url, setUrl, isUploading, addUrl, addFiles, removeAt };
-}
+};

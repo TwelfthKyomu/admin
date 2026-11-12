@@ -20,13 +20,13 @@ const inviteQueries = {
         ),
 };
 
-export function useProjectInvitesList(projectId: string) {
+export const useProjectInvitesList = (projectId: string) => {
     return useQuery(inviteQueries.list(projectId));
-}
+};
 
 export const useCreateProjectInvite = makeMutation(createProjectInviteAction);
 export const useRevokeProjectInvite = makeMutation(revokeProjectInviteAction);
 
-export function useAcceptProjectInvite() {
+export const useAcceptProjectInvite = () => {
     return useMutation({ mutationFn: acceptProjectInviteAction });
-}
+};

@@ -1,7 +1,7 @@
-import { type KeyboardEvent, useState } from 'react';
-import { type FieldPath, type FieldValues, useController, useFormContext } from 'react-hook-form';
+import type { FieldPath, FieldValues } from 'react-hook-form';
 import { Badge, Input as BaseInput, Button } from '@/ui/Base';
 import { ControlledField } from '../Field';
+import { useTagsField } from './hooks/useTagsField';
 
 interface TagsInputControlledProps<
     TFieldValues extends FieldValues,
@@ -22,40 +22,10 @@ const TagsInput = <
     description,
     placeholder = 'Добавить и нажать Enter',
 }: TagsInputControlledProps<TFieldValues, TName>) => {
-    const { control } = useFormContext<TFieldValues>();
-
-    const {
-        field,
-        fieldState: { error, invalid },
-    } = useController({ name, control });
-
-    const [draft, setDraft] = useState('');
-    const tags = (field.value as string[] | undefined) ?? [];
-
-    const addTag = () => {
-        const value = draft.trim();
-
-        if (value && !tags.includes(value)) {
-            field.onChange([...tags, value]);
-        }
-
-        setDraft('');
-    };
-
-    const removeTag = (value: string) => {
-        field.onChange(tags.filter((tag) => tag !== value));
-    };
-
-    const onKeyDown = (event: KeyboardEvent<HTMLInputElement>) => {
-        if (event.key === 'Enter' || event.key === ',') {
-            event.preventDefault();
-            addTag();
-        } else if (event.key === 'Backspace' && draft === '' && tags.length > 0) {
-            const last = tags[tags.length - 1];
-
-            if (last !== undefined) removeTag(last);
-        }
-    };
+    const { tags, draft, setDraft, addTag, removeTag, onKeyDown, error, invalid } = useTagsField<
+        TFieldValues,
+        TName
+    >(name);
 
     return (
         <ControlledField

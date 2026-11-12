@@ -1,11 +1,5 @@
 'use client';
 
-import { type SubmitHandler, useForm } from 'react-hook-form';
-import { runAction } from '@/shared/lib/action-result';
-import {
-    CreateOrganizationActionInputSchema,
-    useCreateOrganization,
-} from '@/contexts/organization';
 import {
     Button,
     Card,
@@ -16,33 +10,14 @@ import {
     FieldGroup,
 } from '@/ui/Base';
 import { Form, Input } from '@/ui/Controlled';
-import { zodResolver } from '@hookform/resolvers/zod';
-import { useRouter } from 'next/navigation';
-import type { CreateOrganizationFormValues } from './form/formData';
+import { useCreateOrganizationPage } from './hooks/useCreateOrganizationPage';
 
 export const CreateOrganizationPage = () => {
-    const { push } = useRouter();
-    const { mutateAsync, isPending } = useCreateOrganization();
-
-    const form = useForm<CreateOrganizationFormValues>({
-        resolver: zodResolver(CreateOrganizationActionInputSchema),
-        defaultValues: { name: '' },
-        mode: 'onBlur',
-    });
-
-    const onSubmit: SubmitHandler<CreateOrganizationFormValues> = async (values) => {
-        const { success } = await runAction(mutateAsync(values), {
-            success: 'Организация создана',
-        });
-
-        if (!success) return;
-
-        push('/');
-    };
+    const { isPending, form, onSubmit } = useCreateOrganizationPage();
 
     return (
         <div className="m-auto flex min-h-dvh min-w-[20vw] items-center justify-center p-6">
-            <Card className="w-1/4 p-4">
+            <Card className="w-full max-w-sm p-4">
                 <CardHeader>
                     <CardTitle>Создайте организацию</CardTitle>
                     <CardDescription>
@@ -59,7 +34,7 @@ export const CreateOrganizationPage = () => {
                             <Input
                                 name="name"
                                 label="Название"
-                                placeholder="Введите названия организации"
+                                placeholder="Введите название организации"
                                 autoComplete="off"
                             />
                             <Button

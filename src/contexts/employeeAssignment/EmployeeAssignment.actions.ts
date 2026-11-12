@@ -23,10 +23,10 @@ import {
     employeeAssignments,
 } from './EmployeeAssignments.table';
 
-async function findEditableAssignment(
+const findEditableAssignment = async (
     id: string,
     projectId: string,
-): Promise<EmployeeAssignmentRecord> {
+): Promise<EmployeeAssignmentRecord> => {
     const assignment = await findInProject(
         employeeAssignments,
         id,
@@ -39,7 +39,7 @@ async function findEditableAssignment(
     }
 
     return assignment;
-}
+};
 
 export const projectEmployeesAction = projectReadAction(
     PROJECT_EMPLOYEES_READ_PERMISSIONS,

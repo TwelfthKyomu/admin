@@ -21,9 +21,9 @@ const couponQueries = {
         ),
 };
 
-export function useCouponsList(projectId: string) {
+export const useCouponsList = (projectId: string) => {
     return useQuery(couponQueries.list(projectId));
-}
+};
 
 export const useCreateCoupon = makeMutation(createCouponAction);
 export const useUpdateCoupon = makeMutation(updateCouponAction);

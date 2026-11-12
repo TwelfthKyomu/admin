@@ -19,13 +19,13 @@ interface UseChatThreadPanelOptions {
     viewer: ChatUserView;
 }
 
-export function useChatThreadPanel({
+export const useChatThreadPanel = ({
     organizationId,
     target,
     scope,
     rootMessageId,
     viewer,
-}: UseChatThreadPanelOptions) {
+}: UseChatThreadPanelOptions) => {
     const threadQuery = useChatThreadQuery(scope, rootMessageId);
     const thread = threadQuery.data;
     const replies = thread?.replies ?? [];
@@ -62,4 +62,4 @@ export function useChatThreadPanel({
         composer,
         actions,
     };
-}
+};

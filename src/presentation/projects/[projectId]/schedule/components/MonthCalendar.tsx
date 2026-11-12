@@ -31,8 +31,6 @@ export const MonthCalendar = ({
     selectedKeys,
     onToggleDay,
 }: MonthCalendarProps) => {
-    const shiftMonth = (delta: number) => onDateChange(addMonths(date, delta));
-
     return (
         <div className={cn('flex flex-col bg-background', className)}>
             <div className="flex items-center gap-2 px-4 h-12 border-b border-border">
@@ -44,7 +42,7 @@ export const MonthCalendar = ({
                         variant="ghost"
                         size="icon"
                         aria-label="Предыдущий месяц"
-                        onClick={() => shiftMonth(-1)}
+                        onClick={() => onDateChange(addMonths(date, -1))}
                     >
                         <ChevronLeft className="h-4 w-4" />
                     </Button>
@@ -59,7 +57,7 @@ export const MonthCalendar = ({
                         variant="ghost"
                         size="icon"
                         aria-label="Следующий месяц"
-                        onClick={() => shiftMonth(1)}
+                        onClick={() => onDateChange(addMonths(date, 1))}
                     >
                         <ChevronRight className="h-4 w-4" />
                     </Button>

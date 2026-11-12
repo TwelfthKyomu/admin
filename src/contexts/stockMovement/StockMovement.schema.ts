@@ -1,6 +1,7 @@
 import { NOTE_MAX } from '@/shared/constants/default';
 import { idSchema } from '@/shared/validation';
 import {
+    moneyAmountSchema,
     nonNegativeIntSchema,
     positiveIntSchema,
     projectScopeSchema,
@@ -20,6 +21,12 @@ export const StockOperationActionInputSchema = z.object({
     quantity: positiveIntSchema,
 });
 
+export const ReceiveStockActionInputSchema = z.object({
+    ...stockOperationFields,
+    quantity: positiveIntSchema,
+    costAmount: z.nullish(moneyAmountSchema),
+});
+
 export const CountStockActionInputSchema = z.object({
     ...stockOperationFields,
     quantity: nonNegativeIntSchema,
@@ -37,3 +44,8 @@ export const StockMovementsActionInputSchema = z.object({
 });
 
 export const StockOverviewActionInputSchema = projectScopeSchema;
+
+export const OrderStockActionInputSchema = z.object({
+    projectId: idSchema,
+    orderId: idSchema,
+});

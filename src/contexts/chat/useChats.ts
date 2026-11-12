@@ -45,28 +45,28 @@ export const chatQueries = {
 
 const SCOPE_INDEX = 2;
 
-export function useChatChannels(organizationId: string) {
+export const useChatChannels = (organizationId: string) => {
     return useQuery(
         itemQuery(chatQueries.channels(organizationId), chatChannelsAction, {
             staleTime: 15_000,
         }),
     );
-}
+};
 
-export function useChatContacts(organizationId: string, enabled: boolean) {
+export const useChatContacts = (organizationId: string, enabled: boolean) => {
     return useQuery(
         listQuery(chatQueries.contacts(organizationId), chatContactsAction, {
             enabled,
             staleTime: 60_000,
         }),
     );
-}
+};
 
-export function useChatMessages(
+export const useChatMessages = (
     scope: string,
     target: ChatTarget,
     limit: number,
-) {
+) => {
     return useQuery({
         ...listQuery(
             [...chatQueries.messages(scope), limit],
@@ -78,9 +78,9 @@ export function useChatMessages(
                 ? previous
                 : undefined,
     });
-}
+};
 
-export function useChatThread(scope: string, messageId: string) {
+export const useChatThread = (scope: string, messageId: string) => {
     return useQuery(
         itemQuery(
             [...chatQueries.thread(scope), messageId],
@@ -88,31 +88,31 @@ export function useChatThread(scope: string, messageId: string) {
             { staleTime: 5_000 },
         ),
     );
-}
+};
 
-export function useChatPinned(scope: string, target: ChatTarget) {
+export const useChatPinned = (scope: string, target: ChatTarget) => {
     return useQuery(
         listQuery(chatQueries.pinned(scope), () =>
             chatPinnedAction({ target }),
         ),
     );
-}
+};
 
-export function useChatLinks(scope: string, target: ChatTarget) {
+export const useChatLinks = (scope: string, target: ChatTarget) => {
     return useQuery(
         listQuery(chatQueries.links(scope), () => chatLinksAction({ target })),
     );
-}
+};
 
-export function useChatAttachments(scope: string, target: ChatTarget) {
+export const useChatAttachments = (scope: string, target: ChatTarget) => {
     return useQuery(
         listQuery(chatQueries.attachments(scope), () =>
             chatAttachmentsAction({ target }),
         ),
     );
-}
+};
 
-export function useChatMessageSearch(organizationId: string, query: string) {
+export const useChatMessageSearch = (organizationId: string, query: string) => {
     const trimmed = query.trim();
 
     return useQuery(
@@ -125,7 +125,7 @@ export function useChatMessageSearch(organizationId: string, query: string) {
             },
         ),
     );
-}
+};
 
 export const useEditChatMessage = makeMutation(editChatMessageAction);
 

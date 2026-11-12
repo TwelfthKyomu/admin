@@ -1,5 +1,5 @@
+import { DetailRow } from '@/shared/components/common';
 import { Button } from '@/ui/Base';
-import { DetailRow } from './DetailRow';
 import { Section } from './Section';
 
 interface SellerSectionProps {

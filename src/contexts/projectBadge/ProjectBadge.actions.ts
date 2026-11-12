@@ -31,12 +31,12 @@ import {
 } from './ProjectBadge.types';
 import { type ProjectBadgeRecord, projectBadges } from './ProjectBadges.table';
 
-function findBadgeInProject(
+const findBadgeInProject = (
     id: string,
     projectId: string,
-): Promise<ProjectBadgeRecord> {
+): Promise<ProjectBadgeRecord> => {
     return findInProject(projectBadges, id, projectId, 'Бейдж не найден');
-}
+};
 
 export const projectBadgesAction = projectReadAction(CATALOG_READ_PERMISSIONS)
     .inputSchema(ProjectBadgesActionInputSchema)

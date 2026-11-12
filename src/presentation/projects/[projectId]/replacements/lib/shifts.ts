@@ -11,22 +11,22 @@ const DELIVERIES: [string, string, string] = [
     'доставок',
 ];
 
-export function shiftLoadLabel(
+export const shiftLoadLabel = (
     shift: ReplacementShiftView,
-): string | undefined {
+): string | undefined => {
     if (shift.kind !== EmployeeKind.COURIER) return undefined;
 
     return shift.deliveriesCount > 0
         ? `${shift.deliveriesCount} ${pluralRu(shift.deliveriesCount, DELIVERIES)} в окне`
         : 'доставок пока нет';
-}
+};
 
-export function overlaps(
+export const overlaps = (
     a: Pick<EmployeeShiftView, 'startsAt' | 'endsAt'>,
     b: Pick<EmployeeShiftView, 'startsAt' | 'endsAt'>,
-): boolean {
+): boolean => {
     return (
         new Date(a.startsAt) < new Date(b.endsAt) &&
         new Date(b.startsAt) < new Date(a.endsAt)
     );
-}
+};

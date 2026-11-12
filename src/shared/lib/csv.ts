@@ -2,15 +2,15 @@ import { unparse } from 'papaparse';
 
 type CsvCell = string | number | null | undefined;
 
-export function csvAmount(minorUnits: number): string {
+export const csvAmount = (minorUnits: number): string => {
     return (minorUnits / 100).toFixed(2).replace('.', ',');
-}
+};
 
-export function downloadCsv(
+export const downloadCsv = (
     filename: string,
     header: string[],
     rows: CsvCell[][],
-): void {
+): void => {
     const text = unparse(
         { fields: header, data: rows },
         { delimiter: ';', newline: '\r\n' },
@@ -27,4 +27,4 @@ export function downloadCsv(
     link.download = filename;
     link.click();
     URL.revokeObjectURL(url);
-}
+};

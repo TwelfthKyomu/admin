@@ -4,7 +4,7 @@ import { useFormContext, useWatch } from 'react-hook-form';
 import { EDITION_SIZE_DEFAULT } from '@/contexts/product';
 import type { CreateProductFormValues } from '../form/formData';
 
-export function useEditionField() {
+export const useEditionField = () => {
     const { control, setValue } = useFormContext<CreateProductFormValues>();
     const editionSize = useWatch({ control, name: 'attributes.editionSize' });
 
@@ -19,4 +19,4 @@ export function useEditionField() {
     };
 
     return { isLimited, onLimitedChange };
-}
+};

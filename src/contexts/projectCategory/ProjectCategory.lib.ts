@@ -5,9 +5,9 @@ import { ApplicationError } from '@/shared/api/errors';
 import { and, count, eq, inArray, isNull, ne } from 'drizzle-orm';
 import { projectCategories } from './ProjectCategories.table';
 
-export async function findCategoryDescendantIds(
+export const findCategoryDescendantIds = async (
     rootIds: string[],
-): Promise<string[]> {
+): Promise<string[]> => {
     const seen = new Set<string>(rootIds);
     let frontier = [...seen];
 
@@ -30,14 +30,14 @@ export async function findCategoryDescendantIds(
     for (const id of rootIds) seen.delete(id);
 
     return [...seen];
-}
+};
 
-export async function assertCategorySlugFree(input: {
+export const assertCategorySlugFree = async (input: {
     projectId: string;
     parentId: string | null;
     slug: string;
     excludeId?: string;
-}): Promise<void> {
+}): Promise<void> => {
     const [taken] = await db
         .select({ id: projectCategories.id })
         .from(projectCategories)
@@ -61,12 +61,12 @@ export async function assertCategorySlugFree(input: {
             `Категория со slug «${input.slug}» уже есть на этом уровне`,
         );
     }
-}
+};
 
-export async function nextCategoryPosition(
+export const nextCategoryPosition = async (
     projectId: string,
     parentId: string | null,
-): Promise<number> {
+): Promise<number> => {
     const [row] = await db
         .select({ value: count() })
         .from(projectCategories)
@@ -81,4 +81,4 @@ export async function nextCategoryPosition(
         );
 
     return row?.value ?? 0;
-}
+};

@@ -91,19 +91,19 @@ export const COLUMNS = ({
         id: 'rates',
         header: 'Ставки',
         cell: ({ row: { original } }) =>
-            original.employee ? (
+            original.employee && (
                 <RatesCell
                     kind={original.employee.kind}
                     rates={original.employee.rates}
                     currency={currency}
                 />
-            ) : null,
+            ),
     }),
     display({
         id: 'today',
         header: 'Сегодня',
         cell: ({ row: { original } }) =>
-            original.employee ? <EmployeeToday employee={original.employee} /> : null,
+            original.employee && <EmployeeToday employee={original.employee} />,
     }),
     display({
         id: 'actions',

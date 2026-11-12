@@ -20,9 +20,9 @@ const projectMemberQueries = {
         ),
 };
 
-export function useProjectMembersList(projectId: string) {
+export const useProjectMembersList = (projectId: string) => {
     return useQuery(projectMemberQueries.list(projectId));
-}
+};
 
 export const useDetachProjectMember = makeMutation(detachProjectMemberAction);
 export const useChangeProjectMemberRole = makeMutation(

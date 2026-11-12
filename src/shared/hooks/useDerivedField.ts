@@ -18,16 +18,23 @@ type UseDerivedFieldOptions<
     derive: (source: PathValue<TValues, TFrom>) => PathValue<TValues, TTo>;
 };
 
-export function useDerivedField<
+export const useDerivedField = <
     TValues extends FieldValues,
     TFrom extends Path<TValues>,
     TTo extends Path<TValues>,
->({ form, from, to, derive }: UseDerivedFieldOptions<TValues, TFrom, TTo>) {
+>({
+    form,
+    from,
+    to,
+    derive,
+}: UseDerivedFieldOptions<TValues, TFrom, TTo>) => {
     const sourceValue = useWatch({ control: form.control, name: from });
 
     useEffect(() => {
         if (form.getFieldState(to).isTouched) return;
 
-        form.setValue(to, derive(sourceValue));
+        form.setValue(to, derive(sourceValue), {
+            shouldValidate: Boolean(sourceValue),
+        });
     }, [sourceValue]);
-}
+};

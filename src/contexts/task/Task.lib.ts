@@ -7,10 +7,10 @@ import { and, asc, desc, eq, inArray, ne } from 'drizzle-orm';
 import { type MyTaskView, TaskStatus } from './Task.types';
 import { tasks } from './Tasks.table';
 
-export async function listAssignedTasks(
+export const listAssignedTasks = async (
     userId: string,
     projectIds: string[],
-): Promise<MyTaskView[]> {
+): Promise<MyTaskView[]> => {
     if (projectIds.length === 0) return [];
 
     return db
@@ -35,4 +35,4 @@ export async function listAssignedTasks(
         )
         .orderBy(asc(tasks.dueAt), desc(tasks.number))
         .limit(PAGE_SIZE_SMALL);
-}
+};

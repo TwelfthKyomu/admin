@@ -1,7 +1,7 @@
-export function matchesSearch(
+export const matchesSearch = (
     search: string,
     ...values: (string | number | undefined)[]
-): boolean {
+): boolean => {
     const query = search.trim().toLowerCase();
 
     if (!query) return true;
@@ -11,4 +11,4 @@ export function matchesSearch(
             .toLowerCase()
             .includes(query),
     );
-}
+};

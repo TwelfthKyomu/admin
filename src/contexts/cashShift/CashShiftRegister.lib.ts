@@ -27,9 +27,9 @@ import {
     courierHandovers,
 } from './CashShifts.table';
 
-async function summarizeCashShifts(
+const summarizeCashShifts = async (
     shifts: CashShiftRecord[],
-): Promise<Map<string, CashShiftTotalsView>> {
+): Promise<Map<string, CashShiftTotalsView>> => {
     if (shifts.length === 0) return new Map();
 
     const ids = shifts.map((shift) => shift.id);
@@ -88,11 +88,11 @@ async function summarizeCashShifts(
             ];
         }),
     );
-}
+};
 
-async function paymentsBreakdown(
+const paymentsBreakdown = async (
     shift: CashShiftRecord,
-): Promise<PaymentMethodTotalView[]> {
+): Promise<PaymentMethodTotalView[]> => {
     const rows = await db
         .select({
             method: payments.method,
@@ -137,11 +137,11 @@ async function paymentsBreakdown(
     }
 
     return [...byKey.values()];
-}
+};
 
-async function shiftMovements(
+const shiftMovements = async (
     shift: CashShiftRecord,
-): Promise<CashMovementView[]> {
+): Promise<CashMovementView[]> => {
     const [handovers, collections, refunds] = await Promise.all([
         db
             .select({
@@ -207,11 +207,11 @@ async function shiftMovements(
     ];
 
     return movements.sort((a, b) => a.at.getTime() - b.at.getTime());
-}
+};
 
-async function closedShiftsHistory(
+const closedShiftsHistory = async (
     projectId: string,
-): Promise<ClosedCashShiftView[]> {
+): Promise<ClosedCashShiftView[]> => {
     const rows = await db
         .select({ shift: cashShifts, cashierName: users.name })
         .from(cashShifts)
@@ -240,11 +240,11 @@ async function closedShiftsHistory(
             note: shift.closingNote,
         };
     });
-}
+};
 
-export async function loadCashRegister(
+export const loadCashRegister = async (
     projectId: string,
-): Promise<CashRegisterView> {
+): Promise<CashRegisterView> => {
     const [shift, couriers, history] = await Promise.all([
         findOpenCashShift(projectId),
         listCourierBalances(projectId),
@@ -285,4 +285,4 @@ export async function loadCashRegister(
         couriers,
         history,
     };
-}
+};

@@ -31,18 +31,18 @@ import {
 import { redeemCoupon } from './CouponRedemption.lib';
 import { type CouponRecord, coupons } from './Coupons.table';
 
-function findCouponInProject(
+const findCouponInProject = (
     id: string,
     projectId: string,
-): Promise<CouponRecord> {
+): Promise<CouponRecord> => {
     return findInProject(coupons, id, projectId, 'Купон не найден');
-}
+};
 
-function assertCouponCodeFree(
+const assertCouponCodeFree = (
     projectId: string,
     code: string,
     exceptId?: string,
-) {
+) => {
     return assertUniqueInProject({
         table: coupons,
         column: coupons.code,
@@ -51,7 +51,7 @@ function assertCouponCodeFree(
         excludeId: exceptId,
         conflict: `Купон с кодом «${code}» уже существует`,
     });
-}
+};
 
 export const couponsAction = projectReadAction(Permission.MANAGE_CATALOG)
     .inputSchema(CouponsActionInputSchema)

@@ -29,10 +29,10 @@ import {
 } from './ChatChannels.table';
 import { requireChatMessage } from './ChatMessage.lib';
 
-export async function listChatProjects(
+export const listChatProjects = async (
     userId: string,
     organizationId: string,
-): Promise<ChatProjectChannelView[]> {
+): Promise<ChatProjectChannelView[]> => {
     const [all, permissions] = await Promise.all([
         listOrganizationProjects(organizationId),
         listProjectPermissions(userId),
@@ -42,11 +42,11 @@ export async function listChatProjects(
         .filter((project) => permissions[project.id])
         .map(({ id, name, color }) => ({ id, name, color }))
         .sort((a, b) => a.name.localeCompare(b.name));
-}
+};
 
-export async function findChatChannelById(
+export const findChatChannelById = async (
     channelId: string,
-): Promise<ChatChannelRecord | null> {
+): Promise<ChatChannelRecord | null> => {
     const [row] = await db
         .select()
         .from(chatChannels)
@@ -54,13 +54,13 @@ export async function findChatChannelById(
         .limit(1);
 
     return row ?? null;
-}
+};
 
-export async function assertChannelAccess(
+export const assertChannelAccess = async (
     userId: string,
     organizationId: string,
     channel: ChatChannelRecord,
-): Promise<void> {
+): Promise<void> => {
     if (channel.organizationId !== organizationId) {
         throw new ApplicationError('Канал недоступен');
     }
@@ -82,25 +82,25 @@ export async function assertChannelAccess(
             throw new ApplicationError('Вы не привязаны к этому проекту');
         }
     }
-}
+};
 
-export async function requireAccessibleMessage(
+export const requireAccessibleMessage = async (
     userId: string,
     organizationId: string,
     messageId: string,
-): Promise<{ message: ChatMessageRecord; channel: ChatChannelRecord }> {
+): Promise<{ message: ChatMessageRecord; channel: ChatChannelRecord }> => {
     const found = await requireChatMessage(messageId, organizationId);
 
     await assertChannelAccess(userId, organizationId, found.channel);
 
     return found;
-}
+};
 
-export async function findChannel(
+export const findChannel = async (
     userId: string,
     organizationId: string,
     target: ChatTarget,
-): Promise<ChatChannelRecord | null> {
+): Promise<ChatChannelRecord | null> => {
     if (target.kind === 'direct') {
         const channel = await findChatChannelById(target.channelId);
 
@@ -138,13 +138,13 @@ export async function findChannel(
         .limit(1);
 
     return channel ?? null;
-}
+};
 
-export async function getOrCreateChannel(
+export const getOrCreateChannel = async (
     userId: string,
     organizationId: string,
     target: ChatTarget,
-): Promise<ChatChannelRecord> {
+): Promise<ChatChannelRecord> => {
     const existing = await findChannel(userId, organizationId, target);
 
     if (existing) return existing;
@@ -169,13 +169,13 @@ export async function getOrCreateChannel(
     if (!channel) throw new ApplicationError('Не удалось создать канал чата');
 
     return channel;
-}
+};
 
-export async function startDirectChannel(
+export const startDirectChannel = async (
     userId: string,
     organizationId: string,
     otherUserId: string,
-): Promise<string> {
+): Promise<string> => {
     if (otherUserId === userId) {
         throw new ApplicationError('Нельзя открыть личный чат с самим собой');
     }
@@ -216,12 +216,12 @@ export async function startDirectChannel(
     if (!existing) throw new ApplicationError('Не удалось создать личный чат');
 
     return existing.id;
-}
+};
 
-export async function listDirectChannels(
+export const listDirectChannels = async (
     organizationId: string,
     userId: string,
-): Promise<DirectChannelView[]> {
+): Promise<DirectChannelView[]> => {
     const rows = await db
         .select({
             id: chatChannels.id,
@@ -262,12 +262,12 @@ export async function listDirectChannels(
         },
         createdAt: row.createdAt,
     }));
-}
+};
 
-export function listChatContacts(
+export const listChatContacts = (
     organizationId: string,
     userId: string,
-): Promise<ChatContactView[]> {
+): Promise<ChatContactView[]> => {
     return db
         .select({
             id: users.id,
@@ -287,27 +287,27 @@ export function listChatContacts(
         )
         .orderBy(desc(organizationMembers.joinedAt))
         .limit(PAGE_SIZE_HUGE);
-}
+};
 
-export function publishChannelChange(
+export const publishChannelChange = (
     organizationId: string,
     channel: Pick<ChatChannelRecord, 'id' | 'type' | 'projectId'>,
     userId: string,
-): void {
+): void => {
     publishScopeEvent(chatScopeKey(organizationId, channelTarget(channel)), {
         type: 'sync',
         userId,
     });
 
     publishChannelsChange(organizationId, userId);
-}
+};
 
-export function publishChannelsChange(
+export const publishChannelsChange = (
     organizationId: string,
     userId: string,
-): void {
+): void => {
     publishScopeEvent(chatChannelsScope(organizationId), {
         type: 'sync',
         userId,
     });
-}
+};

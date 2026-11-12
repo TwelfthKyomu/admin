@@ -5,7 +5,7 @@ import {
 import { loadStorefrontLooks } from '@/contexts/storefront/StorefrontLook.lib';
 import { connection } from 'next/server';
 
-export async function GET(request: Request) {
+export const GET = async (request: Request) => {
     await connection();
 
     return storefrontResponse(async () =>
@@ -13,4 +13,4 @@ export async function GET(request: Request) {
             await authenticateStorefront(request, 'storefront:read'),
         ),
     );
-}
+};

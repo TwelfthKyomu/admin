@@ -7,14 +7,10 @@ import {
     PAYMENT_INTENT_STATUS_VARIANT,
     PAYMENT_PROVIDER_LABEL,
 } from '@/shared/labels/payment';
-import { confirmDestructive } from '@/shared/lib/modal';
-import {
-    PaymentIntentStatus,
-    type PaymentIntentView,
-    useRefundUnappliedIntent,
-} from '@/contexts/paymentIntent';
+import { PaymentIntentStatus, type PaymentIntentView } from '@/contexts/paymentIntent';
 import { Badge, Button } from '@/ui/Base';
 import { ExternalLink } from 'lucide-react';
+import { usePaymentIntentsList } from '../../hooks/usePaymentIntentsList';
 
 interface PaymentIntentsListProps {
     projectId: string;
@@ -23,16 +19,7 @@ interface PaymentIntentsListProps {
 }
 
 export const PaymentIntentsList = ({ projectId, intents, canManage }: PaymentIntentsListProps) => {
-    const refund = useRefundUnappliedIntent();
-
-    const onRefund = (intent: PaymentIntentView) =>
-        confirmDestructive({
-            title: 'Вернуть деньги клиенту?',
-            description: `Провайдер вернёт ${fmtMoney(intent.amount, intent.currency)} на карту клиента. На заказ эта оплата не зачислялась.`,
-            confirmLabel: 'Вернуть',
-            success: 'Возврат отправлен провайдеру',
-            onConfirm: () => refund.mutateAsync({ id: intent.id, projectId }),
-        });
+    const { refund, onRefund } = usePaymentIntentsList(projectId);
 
     return (
         <div className="border-t border-border">

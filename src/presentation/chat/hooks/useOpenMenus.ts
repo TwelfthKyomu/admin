@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 
-export function useOpenMenus() {
+export const useOpenMenus = () => {
     const [openMenus, setOpenMenus] = useState(0);
 
     return {
@@ -10,4 +10,4 @@ export function useOpenMenus() {
         track: (open: boolean) =>
             setOpenMenus((count) => Math.max(0, count + (open ? 1 : -1))),
     };
-}
+};

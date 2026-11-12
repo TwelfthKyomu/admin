@@ -26,6 +26,7 @@ export const LooksPage = () => {
                     data={looks}
                     emptyMessage="Образов пока нет. Загрузите фото, отметьте на нём товары — на сайте их можно будет купить одним нажатием."
                     getRowId={(look) => look.id}
+                    onRowClick={(row) => onEdit(row.original)}
                 />
             )}
         </QueryBoundary>

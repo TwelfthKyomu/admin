@@ -1,5 +1,8 @@
 import { LABEL_MAX, TITLE_MAX, TOKEN_MAX } from '@/shared/constants/default';
-import { CreateIntegrationActionInputSchema } from '@/contexts/integration';
+import {
+    type ConnectStorageActionInputSchema,
+    CreateIntegrationActionInputSchema,
+} from '@/contexts/integration';
 import { PaymentProvider } from '@/contexts/paymentIntent';
 import * as z from 'zod/mini';
 
@@ -56,3 +59,7 @@ export const CONNECT_PROVIDER_DEFAULT: ConnectPaymentProviderFormValues = {
     secretKey: '',
     webhookSecret: '',
 };
+
+export type ConnectStorageFormValues = z.input<
+    typeof ConnectStorageActionInputSchema
+>;

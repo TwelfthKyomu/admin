@@ -13,9 +13,9 @@ import { and, asc, count, eq, isNull } from 'drizzle-orm';
 import type { ProjectAccess } from './Project.types';
 import { type ProjectRecord, projects } from './Projects.table';
 
-export async function projectDefaultCurrency(
+export const projectDefaultCurrency = async (
     projectId: string,
-): Promise<Currency> {
+): Promise<Currency> => {
     const [project] = await db
         .select({ defaultCurrency: projects.defaultCurrency })
         .from(projects)
@@ -25,11 +25,11 @@ export async function projectDefaultCurrency(
     if (!project) throw new ApplicationError('Проект не найден');
 
     return project.defaultCurrency;
-}
+};
 
-export async function getProject(
+export const getProject = async (
     projectId: string,
-): Promise<ProjectRecord | null> {
+): Promise<ProjectRecord | null> => {
     const [project] = await db
         .select()
         .from(projects)
@@ -37,11 +37,11 @@ export async function getProject(
         .limit(1);
 
     return project ?? null;
-}
+};
 
-export async function countOrganizationProjects(
+export const countOrganizationProjects = async (
     organizationId: string,
-): Promise<number> {
+): Promise<number> => {
     const [row] = await db
         .select({ value: count() })
         .from(projects)
@@ -53,13 +53,13 @@ export async function countOrganizationProjects(
         );
 
     return row?.value ?? 0;
-}
+};
 
-export async function switchProjectCurrency(
+export const switchProjectCurrency = async (
     tx: Tx,
     projectId: string,
     currency: Currency,
-): Promise<void> {
+): Promise<void> => {
     const [row] = await tx
         .select({ value: count() })
         .from(orders)
@@ -75,12 +75,12 @@ export async function switchProjectCurrency(
         .update(products)
         .set({ currency })
         .where(eq(products.projectId, projectId));
-}
+};
 
-export async function findProjectAccess(
+export const findProjectAccess = async (
     userId: string,
     projectId: string,
-): Promise<ProjectAccess | null> {
+): Promise<ProjectAccess | null> => {
     const [access] = await db
         .select({
             organizationId: organizations.id,
@@ -110,12 +110,12 @@ export async function findProjectAccess(
         .limit(1);
 
     return access ?? null;
-}
+};
 
-export async function nextTaskNumber(
+export const nextTaskNumber = async (
     tx: Tx,
     projectId: string,
-): Promise<number> {
+): Promise<number> => {
     const [project] = await tx
         .select({ taskCounter: projects.taskCounter })
         .from(projects)
@@ -133,7 +133,7 @@ export async function nextTaskNumber(
         .where(eq(projects.id, projectId));
 
     return number;
-}
+};
 
 export const listOrganizationProjects = cache(async (organizationId: string) =>
     db

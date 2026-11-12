@@ -5,7 +5,7 @@ import { useStaticData } from '@/app/providers';
 import { useDashboard, useMyDay, useMySales } from '@/contexts/order';
 import { addDays, startOfDay, startOfMonth } from 'date-fns';
 
-export function useDashboardPage() {
+export const useDashboardPage = () => {
     const { projects = [] } = useStaticData();
 
     const [range] = useState(() => {
@@ -36,4 +36,4 @@ export function useDashboardPage() {
         mySales: mySales.data ?? [],
         finance,
     };
-}
+};

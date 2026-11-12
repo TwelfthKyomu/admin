@@ -9,10 +9,10 @@ export const ScheduleProvider = ({ children }: { children: ReactNode }) => (
     <ScheduleContext.Provider value={useScheduleState()}>{children}</ScheduleContext.Provider>
 );
 
-export function useScheduleContext(): ScheduleState {
+export const useScheduleContext = (): ScheduleState => {
     const context = useContext(ScheduleContext);
 
     if (!context) throw new Error('useScheduleContext must be used inside <ScheduleProvider>');
 
     return context;
-}
+};

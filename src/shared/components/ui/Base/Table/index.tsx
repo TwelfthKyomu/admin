@@ -2,14 +2,7 @@
 
 'use no memo';
 
-import {
-    type ReactElement,
-    type ReactNode,
-    type RefObject,
-    useEffect,
-    useMemo,
-    useState,
-} from 'react';
+import { type ReactElement, type ReactNode, type RefObject, useEffect, useMemo } from 'react';
 import { matchesSearch } from '@/shared/lib/search';
 import { cn } from '@/shared/lib/utils';
 import { TableBody, TableFooter, TableHeader, TablePagination, TableToolbar } from '@/ui/Base';
@@ -34,21 +27,17 @@ import {
     type RowSelectionState,
     type SortingState,
     type Table as TanstackTable,
-    type Updater,
     useReactTable,
     type VisibilityState,
 } from '@tanstack/react-table';
-import { RotateCcw, TriangleAlert } from 'lucide-react';
 import { Button } from '../Button';
+import { TableError } from './components/TableError';
+import { TableSkeleton } from './components/TableSkeleton';
 import { DataTableContext } from './context';
+import { useNotifiedState } from './hooks/useNotifiedState';
 import { resolveTableColumns } from './lib/columns';
-import {
-    Table as BaseTable,
-    TableBody as BaseTableBody,
-    TableCaption,
-    TableCell,
-    TableRow,
-} from './primitives';
+import { searchableValues } from './lib/search';
+import { Table as BaseTable, TableCaption } from './primitives';
 
 export interface DataTableProps<TData> {
     columns: ColumnDef<TData, any>[];
@@ -119,27 +108,6 @@ export interface DataTableProps<TData> {
     onRowDoubleClick?: (row: Row<TData>) => void;
     tableRef?: RefObject<TanstackTable<TData> | null>;
     customActions?: ReactNode;
-}
-
-function useNotifiedState<T>(initial: T, notify?: (next: T) => void) {
-    const [state, setState] = useState<T>(initial);
-
-    const onChange = (updater: Updater<T>) => {
-        const next = typeof updater === 'function' ? (updater as (old: T) => T)(state) : updater;
-
-        setState(next);
-        notify?.(next);
-    };
-
-    return [state, onChange, setState] as const;
-}
-
-function searchableValues(original: unknown): (string | number)[] {
-    if (!original || typeof original !== 'object') return [];
-
-    return Object.values(original).filter(
-        (value): value is string | number => typeof value === 'string' || typeof value === 'number',
-    );
 }
 
 export const Table = <TData,>({
@@ -345,60 +313,28 @@ export const Table = <TData,>({
         }
     }, [table, tableRef]);
 
-    const renderSkeleton = () => (
-        <div className={cn('overflow-hidden rounded-md border', className)}>
-            <BaseTable className={tableClassName}>
-                <DataTableContext.Provider value={table}>
-                    <TableHeader
-                        stickyHeader={stickyHeader}
-                        className={headerClassName}
-                    />
-                </DataTableContext.Provider>
-                <BaseTableBody className={bodyClassName}>
-                    {Array.from({
-                        length: loadingRows,
-                    }).map((_, index) => (
-                        <TableRow key={index}>
-                            {table.getAllColumns().map((column) => (
-                                <TableCell
-                                    key={column.id}
-                                    className={cellClassName}
-                                >
-                                    <div className="h-4 w-full animate-pulse rounded bg-muted" />
-                                </TableCell>
-                            ))}
-                        </TableRow>
-                    ))}
-                </BaseTableBody>
-            </BaseTable>
-        </div>
-    );
-
-    if (isLoading) return renderSkeleton();
+    if (isLoading) {
+        return (
+            <TableSkeleton
+                table={table}
+                rows={loadingRows}
+                stickyHeader={stickyHeader}
+                className={className}
+                tableClassName={tableClassName}
+                headerClassName={headerClassName}
+                bodyClassName={bodyClassName}
+                cellClassName={cellClassName}
+            />
+        );
+    }
 
     if (isError) {
         return (
-            <div
-                className={cn(
-                    'flex flex-col items-center justify-center gap-3 rounded-md border px-6 py-12 text-center',
-                    className,
-                )}
-            >
-                <div className="flex size-11 items-center justify-center rounded-full bg-destructive/10 text-destructive">
-                    <TriangleAlert className="size-5" />
-                </div>
-                <p className="font-medium text-sm">{errorMessage}</p>
-                {onRetry && (
-                    <Button
-                        onClick={onRetry}
-                        variant="outline"
-                        size="sm"
-                    >
-                        <RotateCcw className="size-4" />
-                        Повторить
-                    </Button>
-                )}
-            </div>
+            <TableError
+                message={errorMessage}
+                onRetry={onRetry}
+                className={className}
+            />
         );
     }
 

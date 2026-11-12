@@ -1,5 +1,5 @@
+import { DetailRow } from '@/shared/components/common';
 import type { OrderView } from '@/contexts/order';
-import { DetailRow } from './DetailRow';
 import { Section } from './Section';
 
 export const CustomerSection = ({ order }: { order: OrderView }) => (

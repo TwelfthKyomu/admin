@@ -4,19 +4,19 @@ const listeners = new Set<() => void>();
 
 let version = 0;
 
-function storageKey(key: string): string {
+const storageKey = (key: string): string => {
     return `${DRAFT_PREFIX}${key}`;
-}
+};
 
-export function readDraft(key: string): string {
+export const readDraft = (key: string): string => {
     try {
         return window.localStorage.getItem(storageKey(key)) ?? '';
     } catch {
         return '';
     }
-}
+};
 
-export function writeDraft(key: string, value: string): void {
+export const writeDraft = (key: string, value: string): void => {
     try {
         if (value.trim()) window.localStorage.setItem(storageKey(key), value);
         else window.localStorage.removeItem(storageKey(key));
@@ -27,9 +27,9 @@ export function writeDraft(key: string, value: string): void {
     version += 1;
 
     for (const listener of listeners) listener();
-}
+};
 
-export function subscribeDrafts(listener: () => void): () => void {
+export const subscribeDrafts = (listener: () => void): (() => void) => {
     const onStorage = (event: StorageEvent) => {
         if (!event.key?.startsWith(DRAFT_PREFIX)) return;
 
@@ -44,12 +44,12 @@ export function subscribeDrafts(listener: () => void): () => void {
         listeners.delete(listener);
         window.removeEventListener('storage', onStorage);
     };
-}
+};
 
-export function draftsVersion(): number {
+export const draftsVersion = (): number => {
     return version;
-}
+};
 
-export function serverDraftsVersion(): number {
+export const serverDraftsVersion = (): number => {
     return 0;
-}
+};

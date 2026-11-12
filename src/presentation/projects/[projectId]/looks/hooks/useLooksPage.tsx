@@ -11,7 +11,7 @@ const LookCreateModal = dynamic(() =>
 
 const LookEditSheet = dynamic(() => import('../modal/LookEditSheet').then((m) => m.LookEditSheet));
 
-export function useLooksPage() {
+export const useLooksPage = () => {
     const { projectId } = useProject();
     const query = useLooksList(projectId);
     const { mutateAsync, isPending } = useDeleteLook();
@@ -40,4 +40,4 @@ export function useLooksPage() {
         });
 
     return { query, onCreate, onEdit, onDelete, isDeleting: isPending };
-}
+};

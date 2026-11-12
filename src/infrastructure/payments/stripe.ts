@@ -15,7 +15,7 @@ import Stripe from 'stripe';
 
 const CHECKOUT_MIN_LIFETIME_MINUTES = 31;
 
-export async function withStripeErrors<T>(request: Promise<T>): Promise<T> {
+export const withStripeErrors = async <T>(request: Promise<T>): Promise<T> => {
     try {
         return await request;
     } catch (error) {
@@ -25,13 +25,13 @@ export async function withStripeErrors<T>(request: Promise<T>): Promise<T> {
 
         throw error;
     }
-}
+};
 
-function sessionEvent(
+const sessionEvent = (
     event: Stripe.Event,
     session: Stripe.Checkout.Session,
     status: PaymentIntentStatus,
-): PaymentWebhookEvent {
+): PaymentWebhookEvent => {
     return {
         providerPaymentId: session.id,
         amount: session.amount_total ?? undefined,
@@ -39,9 +39,9 @@ function sessionEvent(
         status,
         raw: { eventId: event.id, eventType: event.type },
     };
-}
+};
 
-export function toWebhookEvent(event: Stripe.Event): PaymentWebhookEvent {
+export const toWebhookEvent = (event: Stripe.Event): PaymentWebhookEvent => {
     switch (event.type) {
         case 'checkout.session.completed':
         case 'checkout.session.async_payment_succeeded':
@@ -65,18 +65,20 @@ export function toWebhookEvent(event: Stripe.Event): PaymentWebhookEvent {
                 status: PaymentIntentStatus.PENDING,
             };
     }
-}
+};
 
-function checkoutExpiresAt(expiresAt: Date): number {
+const checkoutExpiresAt = (expiresAt: Date): number => {
     return getUnixTime(
         max([expiresAt, addMinutes(new Date(), CHECKOUT_MIN_LIFETIME_MINUTES)]),
     );
-}
+};
 
-function clientFor(credentials: PaymentProviderCredentials): {
+const clientFor = (
+    credentials: PaymentProviderCredentials,
+): {
     stripe: Stripe;
     webhookSecret?: string;
-} {
+} => {
     const { secretKey, webhookSecret } = credentials.payload;
 
     if (typeof secretKey !== 'string' || !secretKey) {
@@ -90,12 +92,12 @@ function clientFor(credentials: PaymentProviderCredentials): {
                 ? webhookSecret
                 : undefined,
     };
-}
+};
 
-export async function createStripePayment(
+export const createStripePayment = async (
     credentials: PaymentProviderCredentials,
     input: CreatePaymentInput,
-): Promise<CreatePaymentOutput> {
+): Promise<CreatePaymentOutput> => {
     const { stripe } = clientFor(credentials);
     const { intent } = input;
 
@@ -136,12 +138,12 @@ export async function createStripePayment(
                 ? { stripePaymentIntentId: session.payment_intent }
                 : undefined,
     };
-}
+};
 
-export async function parseStripeWebhook(
+export const parseStripeWebhook = async (
     credentials: PaymentProviderCredentials,
     request: { rawBody: string; headers: Record<string, string> },
-): Promise<PaymentWebhookEvent> {
+): Promise<PaymentWebhookEvent> => {
     const { stripe, webhookSecret } = clientFor(credentials);
 
     if (webhookSecret) {
@@ -161,12 +163,12 @@ export async function parseStripeWebhook(
     }
 
     return toWebhookEvent(await withStripeErrors(stripe.events.retrieve(id)));
-}
+};
 
-export async function refundStripePayment(
+export const refundStripePayment = async (
     credentials: PaymentProviderCredentials,
     input: RefundInput,
-): Promise<RefundOutput> {
+): Promise<RefundOutput> => {
     const { stripe } = clientFor(credentials);
     const sessionId = input.intent.providerPaymentId;
 
@@ -208,4 +210,4 @@ export async function refundStripePayment(
     );
 
     return { providerRefundId: refund.id };
-}
+};

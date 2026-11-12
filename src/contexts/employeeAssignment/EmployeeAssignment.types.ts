@@ -16,9 +16,9 @@ const SHIFTLESS_PROJECT_ROLES: ReadonlySet<ProjectRole> = new Set([
     ProjectRole.ACCOUNTANT,
 ]);
 
-export function worksShifts(role: ProjectRole | null | undefined): boolean {
+export const worksShifts = (role: ProjectRole | null | undefined): boolean => {
     return !role || !SHIFTLESS_PROJECT_ROLES.has(role);
-}
+};
 
 export interface ProjectEmployeeRatesView {
     shiftRateAmount: number | null;

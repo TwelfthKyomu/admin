@@ -6,11 +6,11 @@ import {
 import { StorefrontLoginInputSchema } from '@/contexts/storefront/Storefront.schema';
 import { loginStorefrontClient } from '@/contexts/storefront/StorefrontClient.lib';
 
-export function POST(request: Request) {
+export const POST = (request: Request) => {
     return storefrontResponse(async () =>
         loginStorefrontClient(
             await authenticateStorefront(request, 'storefront:read'),
             await parseStorefrontBody(request, StorefrontLoginInputSchema),
         ),
     );
-}
+};

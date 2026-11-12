@@ -1,20 +1,18 @@
 'use client';
 
 import { PageHeader, QueryBoundary, StatsRow } from '@/shared/components/common';
-import { fmtTime } from '@/shared/format/date';
-import { fmtMoney } from '@/shared/format/money';
-import { Badge, Button } from '@/ui/Base';
 import { CourierCash } from './components/CourierCash';
 import { History } from './components/History';
 import { MethodBars } from './components/MethodBars';
 import { Movements } from './components/Movements';
+import { ShiftActions } from './components/ShiftActions';
+import { ShiftBadge } from './components/ShiftBadge';
 import { useCashPage } from './hooks/useCashPage';
+import { cashStats } from './lib/cashStats';
 
 export const CashPage = () => {
     const { query, currency, canManage, onOpenShift, onCollect, onCloseShift, onAccept } =
         useCashPage();
-
-    const money = (amount: number) => fmtMoney(amount, currency);
 
     return (
         <QueryBoundary
@@ -26,61 +24,25 @@ export const CashPage = () => {
                     <PageHeader
                         title="Касса"
                         badge={
-                            shift ? (
-                                <Badge className="bg-green-100 text-green-800">
-                                    Смена открыта с {fmtTime(new Date(shift.createdAt))}
-                                    {openedByName && ` · ${openedByName}`}
-                                </Badge>
-                            ) : (
-                                <Badge variant="outline">Смена закрыта</Badge>
-                            )
+                            <ShiftBadge
+                                openedAt={shift ? new Date(shift.createdAt) : undefined}
+                                openedByName={openedByName}
+                            />
                         }
                         description="Наличные курьеров числятся за ними, пока вы не примете их в кассу."
                         actions={
-                            !canManage ? null : shift ? (
-                                <>
-                                    <Button
-                                        size="sm"
-                                        variant="outline"
-                                        onClick={onCollect}
-                                    >
-                                        Инкассация
-                                    </Button>
-                                    <Button
-                                        size="sm"
-                                        onClick={() => onCloseShift(totals?.expectedCash ?? 0)}
-                                    >
-                                        Закрыть смену
-                                    </Button>
-                                </>
-                            ) : (
-                                <Button
-                                    size="sm"
-                                    onClick={onOpenShift}
-                                >
-                                    Открыть смену
-                                </Button>
+                            canManage && (
+                                <ShiftActions
+                                    isOpen={Boolean(shift)}
+                                    onOpen={onOpenShift}
+                                    onCollect={onCollect}
+                                    onClose={() => onCloseShift(totals?.expectedCash ?? 0)}
+                                />
                             )
                         }
                     />
 
-                    {totals && (
-                        <StatsRow
-                            items={[
-                                { label: 'Начальная сумма', value: money(totals.openingAmount) },
-                                {
-                                    label: 'Наличные в кассе',
-                                    value: `+${money(totals.registerCharges)}`,
-                                },
-                                { label: 'Сдано курьерами', value: `+${money(totals.handovers)}` },
-                                {
-                                    label: 'Инкассации и возвраты',
-                                    value: `−${money(totals.collections + totals.registerRefunds)}`,
-                                },
-                                { label: 'Ожидается в кассе', value: money(totals.expectedCash) },
-                            ]}
-                        />
-                    )}
+                    {totals && <StatsRow items={cashStats(totals, currency)} />}
 
                     <div className="grid items-start gap-4 lg:grid-cols-[minmax(0,1fr)_22rem]">
                         <div className="grid gap-4">

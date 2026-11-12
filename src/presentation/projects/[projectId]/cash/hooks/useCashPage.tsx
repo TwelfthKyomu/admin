@@ -22,7 +22,7 @@ const CourierCashAcceptSheet = dynamic(() =>
     import('../modal/CourierCashAcceptSheet').then((m) => m.CourierCashAcceptSheet),
 );
 
-export function useCashPage() {
+export const useCashPage = () => {
     const { projectId, currency, can } = useProject();
     const query = useCashSummary(projectId);
 
@@ -56,4 +56,4 @@ export function useCashPage() {
         onCloseShift,
         onAccept,
     };
-}
+};

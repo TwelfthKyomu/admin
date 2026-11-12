@@ -25,12 +25,12 @@ const paidOrderColumns = {
     refundedAmount: orders.refundedAmount,
 };
 
-export async function aggregateSellerRevenue(
+export const aggregateSellerRevenue = async (
     projectId: string,
     from: Date,
     to: Date,
     sellerId?: string,
-): Promise<SellerRevenueRow[]> {
+): Promise<SellerRevenueRow[]> => {
     const rows = await db
         .select({
             sellerId: orders.sellerId,
@@ -69,11 +69,11 @@ export async function aggregateSellerRevenue(
     return [...bySeller.values()].sort(
         (a, b) => b.revenueAmount - a.revenueAmount,
     );
-}
+};
 
-async function aggregateRevenueByProject(
+const aggregateRevenueByProject = async (
     projects: DashboardProject[],
-): Promise<ProjectRevenueView[]> {
+): Promise<ProjectRevenueView[]> => {
     const inProjects = inArray(
         orders.projectId,
         projects.map((project) => project.id),
@@ -132,11 +132,11 @@ async function aggregateRevenueByProject(
                 )?.paidOrdersCount ?? 0,
         }));
     });
-}
+};
 
-async function aggregateTopOrderItems(
+const aggregateTopOrderItems = async (
     projectIds: string[],
-): Promise<TopOrderItemView[]> {
+): Promise<TopOrderItemView[]> => {
     const rows = await db
         .select({
             item: {
@@ -182,9 +182,9 @@ async function aggregateTopOrderItems(
         }))
         .sort((a, b) => b.revenueAmount - a.revenueAmount)
         .slice(0, PAGE_SIZE_SMALL);
-}
+};
 
-function listRecentOrders(projectIds: string[]): Promise<RecentOrderView[]> {
+const listRecentOrders = (projectIds: string[]): Promise<RecentOrderView[]> => {
     return db
         .select({
             id: orders.id,
@@ -199,13 +199,13 @@ function listRecentOrders(projectIds: string[]): Promise<RecentOrderView[]> {
         .where(inArray(orders.projectId, projectIds))
         .orderBy(desc(orders.createdAt))
         .limit(PAGE_SIZE_SMALL);
-}
+};
 
-export function loadMarginItems(
+export const loadMarginItems = (
     projectId: string,
     from: Date,
     to: Date,
-): Promise<MarginItem[]> {
+): Promise<MarginItem[]> => {
     return db
         .select({
             totalAmount: orderItems.totalAmount,
@@ -223,11 +223,11 @@ export function loadMarginItems(
                 lt(orders.completedAt, to),
             ),
         );
-}
+};
 
-export async function loadDashboardStats(
+export const loadDashboardStats = async (
     projects: DashboardProject[],
-): Promise<DashboardStatsView> {
+): Promise<DashboardStatsView> => {
     const projectIds = projects.map((project) => project.id);
 
     if (projectIds.length === 0) {
@@ -246,4 +246,4 @@ export async function loadDashboardStats(
         topItems,
         recentOrders,
     };
-}
+};

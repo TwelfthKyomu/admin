@@ -52,12 +52,12 @@ import {
 import { type ProductRecord, products } from './Products.table';
 import { loadVariants, saveProductVariants } from './ProductVariant.lib';
 
-function findProductInProject(
+const findProductInProject = (
     id: string,
     projectId: string,
-): Promise<ProductRecord> {
+): Promise<ProductRecord> => {
     return findInProject(products, id, projectId, 'Товар не найден');
-}
+};
 
 export const productsAction = projectReadAction(CATALOG_READ_PERMISSIONS)
     .inputSchema(ProductsActionInputSchema)

@@ -13,7 +13,7 @@ const CouponEditSheet = dynamic(() =>
     import('../modal/CouponEditSheet').then((m) => m.CouponEditSheet),
 );
 
-export function useCouponsPage() {
+export const useCouponsPage = () => {
     const { projectId, currency } = useProject();
     const query = useCouponsList(projectId);
     const { mutateAsync, isPending } = useDeleteCoupon();
@@ -42,4 +42,4 @@ export function useCouponsPage() {
         });
 
     return { query, currency, onCreate, onEdit, onDelete, isDeleting: isPending };
-}
+};

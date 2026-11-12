@@ -5,6 +5,7 @@ import { cn } from '@/shared/lib/utils';
 import { Button, Calendar } from '@/ui/Base';
 import { CalendarIcon } from 'lucide-react';
 import { Popover as PopoverPrimitive } from 'radix-ui';
+import { formatDate, isValidDate } from './lib/date';
 
 type DatePickerVariant = NonNullable<ComponentProps<typeof Button>['variant']>;
 
@@ -96,17 +97,5 @@ const DatePicker = ({
         </PopoverPrimitive.Root>
     );
 };
-
-function isValidDate(value?: Date): value is Date {
-    return value instanceof Date && !Number.isNaN(value.getTime());
-}
-
-function formatDate(date: Date, locale: string): string {
-    return new Intl.DateTimeFormat(locale, {
-        day: '2-digit',
-        month: 'short',
-        year: 'numeric',
-    }).format(date);
-}
 
 export { DatePicker };

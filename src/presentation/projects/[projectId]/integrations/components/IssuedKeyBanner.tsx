@@ -1,6 +1,5 @@
 'use client';
 
-import { useState } from 'react';
 import {
     Button,
     Card,
@@ -12,6 +11,7 @@ import {
     Input,
 } from '@/ui/Base';
 import { Check, Copy } from 'lucide-react';
+import { useIssuedKeyBanner } from '../hooks/useIssuedKeyBanner';
 
 interface IssuedKeyBannerProps {
     token: string;
@@ -19,13 +19,7 @@ interface IssuedKeyBannerProps {
 }
 
 export const IssuedKeyBanner = ({ token, onDismiss }: IssuedKeyBannerProps) => {
-    const [copied, setCopied] = useState(false);
-
-    const copy = async () => {
-        await navigator.clipboard.writeText(token);
-        setCopied(true);
-        window.setTimeout(() => setCopied(false), 1500);
-    };
+    const { copied, copy } = useIssuedKeyBanner(token);
 
     return (
         <Card

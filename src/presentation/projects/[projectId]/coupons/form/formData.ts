@@ -13,16 +13,16 @@ export const COUPON_DEFAULT = {
     status: CouponStatus.ACTIVE,
 };
 
-function percentCap(data: {
+const percentCap = (data: {
     discountType?: CouponDiscountType;
     discountValue?: number;
-}) {
+}) => {
     return (
         data.discountType !== CouponDiscountType.PERCENTAGE ||
         data.discountValue === undefined ||
         data.discountValue <= 100
     );
-}
+};
 
 const PERCENT_CAP_PARAMS = {
     error: 'Процент скидки не может превышать 100',

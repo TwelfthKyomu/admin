@@ -11,7 +11,7 @@ import { useScheduleData } from './useScheduleData';
 
 export type ScheduleTab = 'scheduler' | 'calendar';
 
-export function useScheduleState() {
+export const useScheduleState = () => {
     const { projectId, currency } = useProject();
     const [tab, setTab] = useState<ScheduleTab>('scheduler');
     const [date, setDate] = useState(() => new Date());
@@ -70,6 +70,6 @@ export function useScheduleState() {
         clearEmployeeFilter: () => setEmployeeFilter(new Set()),
         builder,
     };
-}
+};
 
 export type ScheduleState = ReturnType<typeof useScheduleState>;

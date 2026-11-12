@@ -19,14 +19,14 @@ export type ProductType = (typeof ProductType)[keyof typeof ProductType];
 
 export const PRODUCT_TYPE_VALUES = enumValues(ProductType);
 
-export function toProductType(value: string): ProductType {
+export const toProductType = (value: string): ProductType => {
     switch (value) {
         case ProductType.SERVICE:
             return ProductType.SERVICE;
         default:
             return ProductType.PHYSICAL;
     }
-}
+};
 
 export const ProductStatus = {
     DRAFT: 'draft',
@@ -46,17 +46,17 @@ export const SELLABLE_PRODUCT_STATUSES: ProductStatus[] = [
 
 export const PRODUCT_BADGE_MAX = 5;
 
-function normalizeProductBadge(value: string): string | null {
+const normalizeProductBadge = (value: string): string | null => {
     return normalizeCode(value, CODE_MAX);
-}
+};
 
-export function normalizeProductBadges(badges: string[]): string[] {
+export const normalizeProductBadges = (badges: string[]): string[] => {
     return [
         ...new Set(
             badges.flatMap((badge) => normalizeProductBadge(badge) ?? []),
         ),
     ];
-}
+};
 
 export interface ProductOption {
     name: string;
@@ -66,9 +66,9 @@ export interface ProductOption {
 export const PRODUCT_OPTIONS_MAX = 3;
 export const PRODUCT_OPTION_VALUES_MAX = 50;
 
-export function normalizeProductOptions(
+export const normalizeProductOptions = (
     options: ProductOption[],
-): ProductOption[] {
+): ProductOption[] => {
     const result: ProductOption[] = [];
 
     for (const option of options) {
@@ -86,28 +86,28 @@ export function normalizeProductOptions(
     }
 
     return result;
-}
+};
 
-export function defaultAttributesFor(
+export const defaultAttributesFor = (
     type: ProductType,
-): Record<string, unknown> {
+): Record<string, unknown> => {
     switch (type) {
         case ProductType.SERVICE:
             return {};
         default:
             return { weightGrams: null };
     }
-}
+};
 
 export const EDITION_SIZE_DEFAULT = 100;
 
-export function editionSizeOf(
+export const editionSizeOf = (
     attributes: Readonly<Record<string, unknown>>,
-): number | undefined {
+): number | undefined => {
     const size = attributes.editionSize;
 
     return typeof size === 'number' && size > 0 ? size : undefined;
-}
+};
 
 const COMPATIBLE_CATEGORY_TYPES: Record<ProductType, ProjectCategoryType[]> = {
     [ProductType.PHYSICAL]: [
@@ -120,16 +120,16 @@ const COMPATIBLE_CATEGORY_TYPES: Record<ProductType, ProjectCategoryType[]> = {
     ],
 };
 
-export function isCategoryCompatible(
+export const isCategoryCompatible = (
     productType: ProductType,
     categoryType: ProjectCategoryType,
-): boolean {
+): boolean => {
     return COMPATIBLE_CATEGORY_TYPES[productType].includes(categoryType);
-}
+};
 
-export function buildVariantCombinations(
+export const buildVariantCombinations = (
     options: ProductOption[],
-): Record<string, string>[] {
+): Record<string, string>[] => {
     const normalized = normalizeProductOptions(options);
 
     if (normalized.length === 0) return [];
@@ -149,29 +149,31 @@ export function buildVariantCombinations(
     }
 
     return combos;
-}
+};
 
-export function variantComboKey(optionValues: Record<string, string>): string {
+export const variantComboKey = (
+    optionValues: Record<string, string>,
+): string => {
     return Object.entries(optionValues)
         .sort(([a], [b]) => a.localeCompare(b))
         .map(([name, value]) => `${name}=${value}`)
         .join('|');
-}
+};
 
-export function variantComboLabel(
+export const variantComboLabel = (
     optionValues: Record<string, string>,
-): string {
+): string => {
     return Object.values(optionValues).join(' / ');
-}
+};
 
 export type ProductRef = Pick<ProductRecord, 'id' | 'projectId'>;
 
 type VariantInput = NonNullable<CreateProductInput['variants']>[number];
 
-export function buildVariantRecords(
+export const buildVariantRecords = (
     product: ProductRef,
     inputs: VariantInput[],
-): NewProductVariantRecord[] {
+): NewProductVariantRecord[] => {
     const seenCombos = new Set<string>();
 
     return inputs.map((input, index) => {
@@ -210,23 +212,23 @@ export function buildVariantRecords(
             position: input.position ?? index,
         };
     });
-}
+};
 
-export function assertVariantIdsOwned(
+export const assertVariantIdsOwned = (
     variants: NewProductVariantRecord[],
     existing: ProductVariantRecord[],
-): void {
+): void => {
     const ownIds = new Set(existing.map((variant) => variant.id));
 
     if (variants.some((variant) => variant.id && !ownIds.has(variant.id))) {
         throw new ApplicationError('Вариант не найден у этого товара');
     }
-}
+};
 
-export function assertVariantsMatchOptions(
+export const assertVariantsMatchOptions = (
     options: ProductOption[],
     variants: Pick<ProductVariantRecord, 'optionValues'>[],
-): void {
+): void => {
     if (variants.length === 0) return;
     if (options.length === 0) {
         throw new ApplicationError(
@@ -256,4 +258,4 @@ export function assertVariantsMatchOptions(
             }
         }
     }
-}
+};

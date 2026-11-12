@@ -43,16 +43,16 @@ const ORG_ROLE_PERMISSIONS: Record<
     ]),
 };
 
-export function isOrganizationManager(role: OrganizationRole): boolean {
+export const isOrganizationManager = (role: OrganizationRole): boolean => {
     return canInOrg(role, Permission.MANAGE_ORGANIZATION);
-}
+};
 
-export function canInOrg(
+export const canInOrg = (
     role: OrganizationRole,
     permission: Permission,
-): boolean {
+): boolean => {
     return ORG_ROLE_PERMISSIONS[role].has(permission);
-}
+};
 
 export interface OrganizationMemberView {
     id: string;

@@ -35,9 +35,9 @@ const CONTACT_REQUIRED = {
     path: ['phone'],
 };
 
-function hasContact(data: { email?: string; phone?: string }): boolean {
+const hasContact = (data: { email?: string; phone?: string }): boolean => {
     return Boolean(data.email || data.phone);
-}
+};
 
 export const CreateClientActionInputSchema = z
     .extend(ClientFieldsSchema, { projectId: idSchema })

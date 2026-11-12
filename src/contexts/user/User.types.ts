@@ -78,17 +78,17 @@ export const INTEGRATION_READ_PERMISSIONS: Permission[] = [
 
 export type PermissionRequirement = Permission | Permission[];
 
-export function toRequiredPermissions(
+export const toRequiredPermissions = (
     requirement: PermissionRequirement,
-): Permission[] {
+): Permission[] => {
     return typeof requirement === 'string' ? [requirement] : requirement;
-}
+};
 
-export function hasPermission(
+export const hasPermission = (
     granted: Permission[],
     requirement: PermissionRequirement,
-): boolean {
+): boolean => {
     return toRequiredPermissions(requirement).some((permission) =>
         granted.includes(permission),
     );
-}
+};

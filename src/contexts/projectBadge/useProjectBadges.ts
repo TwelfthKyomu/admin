@@ -30,9 +30,9 @@ const projectBadgeQueries = {
         ),
 };
 
-export function useProjectBadgesList(opts: ListOptions) {
+export const useProjectBadgesList = (opts: ListOptions) => {
     return useQuery(projectBadgeQueries.list(opts));
-}
+};
 
 export const useCreateProjectBadge = makeMutation(createProjectBadgeAction);
 export const useUpdateProjectBadge = makeMutation(updateProjectBadgeAction);

@@ -1,8 +1,6 @@
 'use client';
 
-import { CALLBACK_URL_PARAM, safeCallbackPath } from '@/shared/constants/auth';
 import { Tabs } from '@/ui/Base';
-import { useSearchParams } from 'next/navigation';
 import { LoginForm } from './LoginForm';
 import { RegisterForm } from './RegisterForm';
 
@@ -29,9 +27,3 @@ export const LoginTabs = ({ redirectTo }: LoginTabsProps) => (
         ]}
     />
 );
-
-export const CallbackLoginTabs = () => {
-    const searchParams = useSearchParams();
-
-    return <LoginTabs redirectTo={safeCallbackPath(searchParams.get(CALLBACK_URL_PARAM))} />;
-};

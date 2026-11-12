@@ -28,10 +28,10 @@ import { loadAttachments } from './ChatAttachment.lib';
 import { chatMessageReactions, chatMessages } from './ChatChannels.table';
 import { extractUrls } from './ChatText.types';
 
-async function loadReactions(
+const loadReactions = async (
     messageIds: string[],
     userId: string,
-): Promise<Map<string, ChatMessageReactionView[]>> {
+): Promise<Map<string, ChatMessageReactionView[]>> => {
     if (messageIds.length === 0) return new Map();
 
     const rows = await db
@@ -67,13 +67,13 @@ async function loadReactions(
     for (const reactions of byMessage.values()) sortReactions(reactions);
 
     return byMessage;
-}
+};
 
-async function loadMessages(
+const loadMessages = async (
     where: SQL | undefined,
     userId: string,
     limit: number,
-): Promise<ChatMessageView[]> {
+): Promise<ChatMessageView[]> => {
     const repliedMessages = alias(chatMessages, 'replied_messages');
     const repliedAuthors = alias(users, 'replied_authors');
 
@@ -166,13 +166,13 @@ async function loadMessages(
                   }
                 : null,
     }));
-}
+};
 
-export function listChannelMessages(
+export const listChannelMessages = (
     channelId: string,
     userId: string,
     limit: number,
-): Promise<ChatMessageView[]> {
+): Promise<ChatMessageView[]> => {
     return loadMessages(
         and(
             eq(chatMessages.channelId, channelId),
@@ -182,12 +182,12 @@ export function listChannelMessages(
         userId,
         limit,
     );
-}
+};
 
-export function listPinnedMessages(
+export const listPinnedMessages = (
     channelId: string,
     userId: string,
-): Promise<ChatMessageView[]> {
+): Promise<ChatMessageView[]> => {
     return loadMessages(
         and(
             eq(chatMessages.channelId, channelId),
@@ -198,12 +198,12 @@ export function listPinnedMessages(
         userId,
         PAGE_SIZE_SMALL,
     );
-}
+};
 
-export async function listThread(
+export const listThread = async (
     rootMessageId: string,
     userId: string,
-): Promise<ChatThreadView | null> {
+): Promise<ChatThreadView | null> => {
     const [[root], replies] = await Promise.all([
         loadMessages(
             and(
@@ -226,11 +226,11 @@ export async function listThread(
     if (!root) return null;
 
     return { root, replies };
-}
+};
 
-export async function listChannelLinks(
+export const listChannelLinks = async (
     channelId: string,
-): Promise<ChatLinkView[]> {
+): Promise<ChatLinkView[]> => {
     const rows = await db
         .select({
             messageId: chatMessages.id,
@@ -258,4 +258,4 @@ export async function listChannelLinks(
             createdAt: row.createdAt,
         })),
     );
-}
+};

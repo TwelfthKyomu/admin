@@ -11,11 +11,11 @@ interface UseScheduleDataOptions {
     to: Date;
 }
 
-export function useScheduleData({
+export const useScheduleData = ({
     projectId,
     from,
     to,
-}: UseScheduleDataOptions) {
+}: UseScheduleDataOptions) => {
     const employeesQuery = useProjectEmployees({ projectId });
     const shiftsQuery = useShiftsList({ projectId, from, to });
 
@@ -32,4 +32,4 @@ export function useScheduleData({
         shifts: shiftsQuery.data ?? [],
         sales: toScheduleSales(ordersQuery.data ?? []),
     };
-}
+};

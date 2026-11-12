@@ -10,7 +10,10 @@ type SetCustomerField = (
     options?: { shouldValidate?: boolean },
 ) => void;
 
-export function useClientPicker(projectId: string, setValue: SetCustomerField) {
+export const useClientPicker = (
+    projectId: string,
+    setValue: SetCustomerField,
+) => {
     const clients =
         useClientsList({ projectId, limit: CLIENTS_PICKER_LIMIT }).data ?? [];
 
@@ -34,4 +37,4 @@ export function useClientPicker(projectId: string, setValue: SetCustomerField) {
     };
 
     return { clientOptions, onClientChange };
-}
+};

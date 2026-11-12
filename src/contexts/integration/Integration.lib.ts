@@ -7,9 +7,9 @@ import { type StorageBucket, StorageBucketSchema } from './Integration.schema';
 import { IntegrationType } from './Integration.types';
 import { projectIntegrations } from './Integrations.table';
 
-export async function findProjectBucket(
+export const findProjectBucket = async (
     projectId: string,
-): Promise<StorageBucket | undefined> {
+): Promise<StorageBucket | undefined> => {
     const [row] = await db
         .select({ credentials: projectIntegrations.credentials })
         .from(projectIntegrations)
@@ -30,4 +30,4 @@ export async function findProjectBucket(
     );
 
     return parsed.success ? parsed.data : undefined;
-}
+};

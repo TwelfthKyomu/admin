@@ -1,12 +1,9 @@
 'use client';
 
-import { useState } from 'react';
 import { fmtMoney } from '@/shared/format/money';
-import { runAction } from '@/shared/lib/action-result';
-import { toast } from '@/shared/lib/toast';
-import { useRedeemCoupon } from '@/contexts/coupon';
 import type { OrderView } from '@/contexts/order';
 import { Button, Input } from '@/ui/Base';
+import { useCouponSection } from '../hooks/useCouponSection';
 import { Section } from './Section';
 
 interface CouponSectionProps {
@@ -16,26 +13,7 @@ interface CouponSectionProps {
 }
 
 export const CouponSection = ({ order, couponCode, projectId }: CouponSectionProps) => {
-    const [code, setCode] = useState('');
-    const { mutateAsync, isPending } = useRedeemCoupon();
-
-    const apply = async () => {
-        const trimmed = code.trim();
-
-        if (!trimmed) return;
-
-        const { success, response } = await runAction(
-            mutateAsync({ projectId, orderId: order.id, code: trimmed }),
-        );
-
-        if (!success) return;
-
-        toast.success(
-            `Применена скидка ${fmtMoney(response?.data?.discountAmount ?? 0, order.currency)}`,
-        );
-
-        setCode('');
-    };
+    const { code, setCode, isPending, apply } = useCouponSection(order, projectId);
 
     if (couponCode) {
         return (

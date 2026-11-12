@@ -1,37 +1,8 @@
 'use client';
 
 import { type PropsWithChildren, useState } from 'react';
-import { settleLocalMutation, startLocalMutation } from '@/shared/realtime/scope';
-import { MutationCache, QueryClient, QueryClientProvider } from '@tanstack/react-query';
-
-function createQueryClient() {
-    const queryClient: QueryClient = new QueryClient({
-        mutationCache: new MutationCache({
-            onMutate: startLocalMutation,
-            onSettled: settleLocalMutation,
-            onSuccess: (_data, _variables, _result, mutation) => {
-                if (mutation.meta?.invalidatesAll === false) return;
-
-                void queryClient.invalidateQueries();
-            },
-        }),
-        defaultOptions: {
-            queries: {
-                refetchOnWindowFocus: false,
-                retry: 1,
-
-                staleTime: 5 * 60 * 1000,
-                gcTime: 10 * 60 * 1000,
-                refetchOnReconnect: false,
-            },
-            mutations: {
-                retry: false,
-            },
-        },
-    });
-
-    return queryClient;
-}
+import { createQueryClient } from '@/shared/lib/queryClient';
+import { QueryClientProvider } from '@tanstack/react-query';
 
 export const QueryProvider = ({ children }: PropsWithChildren) => {
     const [queryClient] = useState(createQueryClient);

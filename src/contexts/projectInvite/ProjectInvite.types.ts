@@ -10,20 +10,20 @@ export type ProjectInviteStatus =
 
 export const INVITE_TTL_DAYS = 14;
 
-export function inviteStatusAt(
+export const inviteStatusAt = (
     invite: {
         revokedAt?: Date | null;
         acceptedAt?: Date | null;
         expiresAt: Date;
     },
     now: Date = new Date(),
-): ProjectInviteStatus {
+): ProjectInviteStatus => {
     if (invite.revokedAt) return ProjectInviteStatus.REVOKED;
     if (invite.acceptedAt) return ProjectInviteStatus.ACCEPTED;
     if (now > new Date(invite.expiresAt)) return ProjectInviteStatus.EXPIRED;
 
     return ProjectInviteStatus.PENDING;
-}
+};
 
 export interface InviteView {
     projectId: string;

@@ -1,13 +1,9 @@
 'use client';
 
-import { type SubmitHandler, useForm } from 'react-hook-form';
 import { FormDialog } from '@/shared/components/common';
-import { runAction } from '@/shared/lib/action-result';
-import { useModalClose } from '@/shared/lib/modal';
-import { type LookView, UpdateLookActionInputSchema, useUpdateLook } from '@/contexts/look';
-import { zodResolver } from '@hookform/resolvers/zod';
-import type { UpdateLookFormValues } from '../form/formData';
+import type { LookView } from '@/contexts/look';
 import { LookForm } from '../form/LookForm';
+import { useLookEditSheet } from '../hooks/useLookEditSheet';
 
 interface LookEditSheetProps {
     projectId: string;
@@ -15,22 +11,7 @@ interface LookEditSheetProps {
 }
 
 export const LookEditSheet = ({ projectId, look }: LookEditSheetProps) => {
-    const close = useModalClose();
-    const { mutateAsync, isPending } = useUpdateLook();
-
-    const form = useForm<UpdateLookFormValues>({
-        values: { ...look, projectId, description: look.description ?? '' },
-        resolver: zodResolver(UpdateLookActionInputSchema),
-        mode: 'onChange',
-    });
-
-    const onSubmit: SubmitHandler<UpdateLookFormValues> = async (values) => {
-        const { success } = await runAction(mutateAsync(values), {
-            success: `Образ «${values.title}» сохранён`,
-        });
-
-        if (success) close();
-    };
+    const { isPending, form, onSubmit } = useLookEditSheet(projectId, look);
 
     return (
         <FormDialog

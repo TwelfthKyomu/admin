@@ -30,7 +30,7 @@ import { loadClientOrders } from './StorefrontOrder.lib';
 
 const SESSION_DAYS = 30;
 
-function toStorefrontClient(client: ClientRecord) {
+const toStorefrontClient = (client: ClientRecord) => {
     return {
         id: client.id,
         firstName: client.firstName,
@@ -38,9 +38,9 @@ function toStorefrontClient(client: ClientRecord) {
         email: client.email ?? '',
         phone: client.phone ?? undefined,
     };
-}
+};
 
-async function clientSession(client: ClientRecord) {
+const clientSession = async (client: ClientRecord) => {
     return {
         client: toStorefrontClient(client),
         token: await signJWT(
@@ -50,9 +50,9 @@ async function clientSession(client: ClientRecord) {
         ),
         expiresAt: addDays(new Date(), SESSION_DAYS),
     };
-}
+};
 
-async function readClientSession(token: string): Promise<string> {
+const readClientSession = async (token: string): Promise<string> => {
     const session = await verifyJWT<{ clientId?: string }>(
         token,
         env.AUTH_SECRET,
@@ -61,18 +61,18 @@ async function readClientSession(token: string): Promise<string> {
     if (!session?.clientId) throw new StorefrontAuthError('Войдите заново');
 
     return session.clientId;
-}
+};
 
-function limitAttempts(access: StorefrontAccess, email: string): void {
+const limitAttempts = (access: StorefrontAccess, email: string): void => {
     enforceRateLimit('storefront:auth', `${access.projectId}:${email}`);
-}
+};
 
-async function sendCode(
+const sendCode = async (
     access: StorefrontAccess,
     email: string,
     purpose: string,
     code: string,
-): Promise<void> {
+): Promise<void> => {
     await sendEmail({
         to: email,
         subject: `${purpose} — ${access.projectName}`,
@@ -82,12 +82,12 @@ async function sendCode(
             'Не удалось отправить письмо с кодом, попробуйте позже',
         );
     });
-}
+};
 
-export async function registerStorefrontClient(
+export const registerStorefrontClient = async (
     access: StorefrontAccess,
     input: StorefrontRegisterInput,
-) {
+) => {
     limitAttempts(access, input.email);
 
     const code = await startClientRegistration(access.projectId, input);
@@ -95,23 +95,23 @@ export async function registerStorefrontClient(
     await sendCode(access, input.email, 'Код подтверждения', code);
 
     return { email: input.email };
-}
+};
 
-export async function verifyStorefrontClient(
+export const verifyStorefrontClient = async (
     access: StorefrontAccess,
     input: StorefrontVerifyInput,
-) {
+) => {
     limitAttempts(access, input.email);
 
     return clientSession(
         await confirmClientEmail(access.projectId, input.email, input.code),
     );
-}
+};
 
-export async function loginStorefrontClient(
+export const loginStorefrontClient = async (
     access: StorefrontAccess,
     input: StorefrontLoginInput,
-) {
+) => {
     limitAttempts(access, input.email);
 
     return clientSession(
@@ -121,12 +121,12 @@ export async function loginStorefrontClient(
             input.password,
         ),
     );
-}
+};
 
-export async function requestStorefrontPasswordReset(
+export const requestStorefrontPasswordReset = async (
     access: StorefrontAccess,
     input: StorefrontPasswordForgotInput,
-) {
+) => {
     limitAttempts(access, input.email);
 
     const code = await startPasswordReset(access.projectId, input.email);
@@ -134,21 +134,21 @@ export async function requestStorefrontPasswordReset(
     if (code) await sendCode(access, input.email, 'Сброс пароля', code);
 
     return { email: input.email };
-}
+};
 
-export async function resetStorefrontPassword(
+export const resetStorefrontPassword = async (
     access: StorefrontAccess,
     input: StorefrontPasswordResetInput,
-) {
+) => {
     limitAttempts(access, input.email);
 
     return clientSession(await resetClientPassword(access.projectId, input));
-}
+};
 
-export async function loadStorefrontClient(
+export const loadStorefrontClient = async (
     access: StorefrontAccess,
     token: string,
-) {
+) => {
     const client = await findVerifiedClient(
         access.projectId,
         await readClientSession(token),
@@ -160,4 +160,4 @@ export async function loadStorefrontClient(
         client: toStorefrontClient(client),
         orders: await loadClientOrders(access, client.id),
     };
-}
+};

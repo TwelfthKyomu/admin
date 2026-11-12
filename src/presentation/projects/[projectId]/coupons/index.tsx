@@ -26,6 +26,7 @@ export const CouponsPage = () => {
                     data={coupons}
                     emptyMessage="Купонов пока нет. Создайте первый."
                     getRowId={(coupon) => coupon.id}
+                    onRowClick={(row) => onEdit(row.original)}
                 />
             )}
         </QueryBoundary>

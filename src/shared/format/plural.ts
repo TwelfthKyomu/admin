@@ -1,9 +1,9 @@
 const RU_PLURAL_RULES = new Intl.PluralRules('ru-RU');
 
-export function pluralRu(
+export const pluralRu = (
     count: number,
     forms: [one: string, few: string, many: string],
-): string {
+): string => {
     switch (RU_PLURAL_RULES.select(count)) {
         case 'one':
             return forms[0];
@@ -12,4 +12,4 @@ export function pluralRu(
         default:
             return forms[2];
     }
-}
+};

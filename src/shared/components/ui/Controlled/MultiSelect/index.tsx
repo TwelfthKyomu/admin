@@ -2,6 +2,7 @@ import { type FieldPath, type FieldValues, useController, useFormContext } from 
 import type { Option } from '@/shared/types';
 import { Button } from '@/ui/Base';
 import { ControlledField } from '../Field';
+import { toggleValue } from './lib/toggle';
 
 interface MultiSelectControlledProps<
     TFieldValues extends FieldValues,
@@ -33,14 +34,6 @@ const MultiSelect = <
 
     const selected = (field.value as string[] | undefined) ?? [];
 
-    const toggle = (value: string) => {
-        const next = selected.includes(value)
-            ? selected.filter((item) => item !== value)
-            : [...selected, value];
-
-        field.onChange(next);
-    };
-
     return (
         <ControlledField
             name={name}
@@ -62,7 +55,7 @@ const MultiSelect = <
                                 size="xs"
                                 variant={active ? 'default' : 'outline'}
                                 aria-pressed={active}
-                                onClick={() => toggle(option.value)}
+                                onClick={() => field.onChange(toggleValue(selected, option.value))}
                             >
                                 {option.label}
                             </Button>

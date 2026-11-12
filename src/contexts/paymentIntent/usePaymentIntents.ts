@@ -25,9 +25,9 @@ const paymentQueries = {
         ),
 };
 
-export function usePaymentIntentsList(opts: ListOptions) {
+export const usePaymentIntentsList = (opts: ListOptions) => {
     return useQuery(paymentQueries.list(opts));
-}
+};
 
 export const useConnectPaymentProvider = makeMutation(
     connectPaymentProviderAction,

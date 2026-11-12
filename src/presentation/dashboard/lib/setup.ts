@@ -42,21 +42,21 @@ export const SETUP_STEP_TEXT: Record<SetupStep, SetupStepText> = {
 const HIDDEN_KEY = 'setup-hidden';
 const listeners = new Set<() => void>();
 
-export function subscribeSetupHidden(listener: () => void): () => void {
+export const subscribeSetupHidden = (listener: () => void): (() => void) => {
     listeners.add(listener);
 
     return () => listeners.delete(listener);
-}
+};
 
-export function readHiddenSetups(): string {
+export const readHiddenSetups = (): string => {
     try {
         return window.localStorage.getItem(HIDDEN_KEY) ?? '';
     } catch {
         return '';
     }
-}
+};
 
-export function hideSetup(projectId: string): void {
+export const hideSetup = (projectId: string): void => {
     const ids = new Set(readHiddenSetups().split(',').filter(Boolean)).add(
         projectId,
     );
@@ -68,4 +68,4 @@ export function hideSetup(projectId: string): void {
     }
 
     for (const listener of listeners) listener();
-}
+};

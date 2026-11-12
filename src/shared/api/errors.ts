@@ -11,13 +11,15 @@ export class ApplicationError extends Error {
     }
 }
 
-function hasKind(value: unknown): value is { kind: unknown } {
+const hasKind = (value: unknown): value is { kind: unknown } => {
     return typeof value === 'object' && value !== null && 'kind' in value;
-}
+};
 
-export function isApplicationError(value: unknown): value is ApplicationError {
+export const isApplicationError = (
+    value: unknown,
+): value is ApplicationError => {
     return hasKind(value) && value.kind === 'ApplicationError';
-}
+};
 
 const CONSTRAINT_MESSAGES: Record<string, string> = {
     projects_organization_slug_unique: 'Проект с таким slug уже есть',
@@ -47,7 +49,7 @@ const CONSTRAINT_MESSAGES: Record<string, string> = {
     tasks_chat_message_unique: 'По этому сообщению задача уже создана',
 };
 
-function constraintName(error: unknown): string | null {
+const constraintName = (error: unknown): string | null => {
     let current: unknown = error;
 
     for (let depth = 0; depth < 3 && current; depth += 1) {
@@ -64,10 +66,10 @@ function constraintName(error: unknown): string | null {
     }
 
     return null;
-}
+};
 
-export function constraintErrorMessage(error: unknown): string | null {
+export const constraintErrorMessage = (error: unknown): string | null => {
     const constraint = constraintName(error);
 
     return constraint ? (CONSTRAINT_MESSAGES[constraint] ?? null) : null;
-}
+};

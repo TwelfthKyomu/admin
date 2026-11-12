@@ -17,7 +17,7 @@ const BadgeEditSheet = dynamic(() =>
     import('../modal/BadgeEditSheet').then((m) => m.BadgeEditSheet),
 );
 
-export function useBadgesPage() {
+export const useBadgesPage = () => {
     const { projectId } = useProject();
     const query = useProjectBadgesList({ projectId, includeInactive: true });
     const { mutateAsync, isPending } = useDeleteProjectBadge();
@@ -46,4 +46,4 @@ export function useBadgesPage() {
         });
 
     return { query, onCreate, onEdit, onDelete, isDeleting: isPending };
-}
+};

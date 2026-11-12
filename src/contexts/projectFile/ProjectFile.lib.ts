@@ -1,29 +1,35 @@
 import 'server-only';
 
 import { db } from '@/infrastructure/database/client';
-import { deleteProjectFile } from '@/infrastructure/storage/uploads';
+import {
+    deleteProjectFile,
+    projectFileResponse,
+} from '@/infrastructure/storage/uploads';
 import { parseUploadUrl } from '@/infrastructure/storage/uploadUrls';
+import { requireProjectPermission } from '@/shared/api/permission';
 import { insertOne } from '@/shared/api/repository';
+import { forbiddenResponse } from '@/shared/api/response';
 import { projectLooks } from '@/contexts/look/Looks.table';
 import { products } from '@/contexts/product/Products.table';
+import { CATALOG_READ_PERMISSIONS } from '@/contexts/user/User.types';
 import { and, arrayOverlaps, eq, inArray, isNull, lt } from 'drizzle-orm';
 import { type ProjectFileRecord, projectFiles } from './ProjectFiles.table';
 
 const ABANDONED_UPLOAD_MS = 24 * 60 * 60 * 1000;
 
-export async function createProjectFile(input: {
+export const createProjectFile = async (input: {
     projectId: string;
     url: string;
     sizeBytes: number;
-}): Promise<ProjectFileRecord> {
+}): Promise<ProjectFileRecord> => {
     return insertOne(projectFiles, input, 'Не удалось записать файл проекта');
-}
+};
 
-export async function cleanupProjectFiles(
+export const cleanupProjectFiles = async (
     organizationId: string,
     projectId: string,
     removedUrls: readonly string[],
-): Promise<void> {
+): Promise<void> => {
     const oldFiles = await db
         .select({ url: projectFiles.url })
         .from(projectFiles)
@@ -95,4 +101,30 @@ export async function cleanupProjectFiles(
                 );
         }),
     );
-}
+};
+
+export const serveProjectFile = async (
+    userId: string,
+    projectId: string,
+    filename: string,
+    contentType: string,
+): Promise<Response> => {
+    let organizationId: string;
+
+    try {
+        ({ organizationId } = await requireProjectPermission(
+            userId,
+            projectId,
+            CATALOG_READ_PERMISSIONS,
+        ));
+    } catch {
+        return forbiddenResponse();
+    }
+
+    return projectFileResponse(
+        organizationId,
+        projectId,
+        filename,
+        contentType,
+    );
+};

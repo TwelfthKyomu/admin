@@ -1,46 +1,15 @@
 'use client';
 
-import { useState } from 'react';
-import { type SubmitHandler, useForm } from 'react-hook-form';
-import { authClient } from '@/shared/lib/auth-client';
-import { getErrorMessage } from '@/shared/lib/errors';
-import { toast } from '@/shared/lib/toast';
 import { Button, FieldGroup } from '@/ui/Base';
 import { Form, Input } from '@/ui/Controlled';
-import { zodResolver } from '@hookform/resolvers/zod';
-import { FORGOT_DEFAULT, ForgotFormSchema, type ForgotFormValues } from '../form/formData';
+import { useForgotForm } from '../hooks/useForgotForm';
 
 interface ForgotFormProps {
     onBack: () => void;
 }
 
 export const ForgotForm = ({ onBack }: ForgotFormProps) => {
-    const [sentTo, setSentTo] = useState<string>();
-
-    const form = useForm<ForgotFormValues>({
-        resolver: zodResolver(ForgotFormSchema),
-        defaultValues: FORGOT_DEFAULT,
-        mode: 'onChange',
-    });
-
-    const isPending = form.formState.isSubmitting;
-
-    const onSubmit: SubmitHandler<ForgotFormValues> = async (values) => {
-        const email = values.email.trim();
-
-        const { error } = await authClient.requestPasswordReset({
-            email,
-            redirectTo: '/auth/reset-password',
-        });
-
-        if (error) {
-            toast.error(getErrorMessage(error));
-
-            return;
-        }
-
-        setSentTo(email);
-    };
+    const { sentTo, form, isPending, onSubmit } = useForgotForm();
 
     if (sentTo) {
         return (

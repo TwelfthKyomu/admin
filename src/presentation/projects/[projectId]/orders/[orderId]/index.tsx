@@ -28,6 +28,7 @@ export const OrderDetailPage = () => {
         hasOpenDelivery,
         sellerName,
         onChangeSeller,
+        itemStock,
     } = useOrderDetailPage();
 
     return (
@@ -64,6 +65,7 @@ export const OrderDetailPage = () => {
                             <ItemsSection
                                 order={order}
                                 items={items}
+                                itemStock={itemStock}
                             />
                             {canManageFinance && (
                                 <CouponSection

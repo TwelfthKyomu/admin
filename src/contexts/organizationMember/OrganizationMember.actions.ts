@@ -102,10 +102,10 @@ export const organizationMembersAction = organizationReadAction(
         },
     );
 
-async function findManageableMember(
+const findManageableMember = async (
     memberId: string,
     actor: { userId: string; organizationId: string; role: OrganizationRole },
-): Promise<OrganizationMemberRecord> {
+): Promise<OrganizationMemberRecord> => {
     const [member] = await db
         .select()
         .from(organizationMembers)
@@ -135,7 +135,7 @@ async function findManageableMember(
     }
 
     return member;
-}
+};
 
 export const changeOrganizationMemberRoleAction = organizationMutationAction(
     Permission.MANAGE_ROLES,

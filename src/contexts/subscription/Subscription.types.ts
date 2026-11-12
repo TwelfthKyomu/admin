@@ -22,6 +22,30 @@ export type BillingPaymentStatus =
 
 export const BILLING_PAYMENT_STATUS_VALUES = enumValues(BillingPaymentStatus);
 
+export const BillingProvider = {
+    TEST: 'test',
+    STRIPE: 'stripe',
+    YOOKASSA: 'yookassa',
+} as const;
+
+export type BillingProvider =
+    (typeof BillingProvider)[keyof typeof BillingProvider];
+
+export const TEST_BILLING_SESSION_PREFIX = 'test_';
+
+export interface BillingCheckoutInput {
+    organizationId: string;
+    plan: SubscriptionPlan;
+    amount: number;
+    description: string;
+    billingUrl: string;
+}
+
+export type BillingCheckout =
+    | { mode: 'redirect'; sessionId: string; url: string }
+    | { mode: 'embedded'; sessionId: string; clientSecret: string }
+    | { mode: 'test'; sessionId: string };
+
 export const BillingPeriod = {
     MONTH: 'month',
     YEAR: 'year',
@@ -98,7 +122,7 @@ export const PLAN_CATALOG: Record<SubscriptionPlan, PlanInfo> = {
 export interface OrganizationSubscriptionStatus {
     plan: SubscriptionPlan;
     planExpiresAt: Date | null;
-    billingEnabled: boolean;
+    billingProvider: BillingProvider;
     projectsUsed: number;
     projectLimit: number;
     canCreateProject: boolean;

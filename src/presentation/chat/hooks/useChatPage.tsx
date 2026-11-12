@@ -27,7 +27,7 @@ import {
 import { DirectChatStartModal } from '../modal/DirectChatStartModal';
 import { useChatTyping } from './useChatTyping';
 
-export function useChatPage() {
+export const useChatPage = () => {
     const { organization, user } = useStaticData();
     const organizationId = organization.id;
 
@@ -143,4 +143,4 @@ export function useChatPage() {
         listOpen,
         openList: () => setListOpen(true),
     };
-}
+};

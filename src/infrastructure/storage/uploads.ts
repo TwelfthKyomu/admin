@@ -43,7 +43,7 @@ interface StoragePlace {
     encrypted: boolean;
 }
 
-function s3Client(bucket: StorageBucket): S3Client {
+const s3Client = (bucket: StorageBucket): S3Client => {
     return new S3Client({
         endpoint: bucket.endpoint,
         region: bucket.region,
@@ -53,21 +53,21 @@ function s3Client(bucket: StorageBucket): S3Client {
         },
         forcePathStyle: true,
     });
-}
+};
 
-function platformPlaces(key: string): StoragePlace[] {
+const platformPlaces = (key: string): StoragePlace[] => {
     const disk = { key, encrypted: true };
 
     return PLATFORM_BUCKET
         ? [{ bucket: PLATFORM_BUCKET, key, encrypted: true }, disk]
         : [disk];
-}
+};
 
-async function projectPlaces(
+const projectPlaces = async (
     organizationId: string,
     projectId: string,
     filename: string,
-): Promise<StoragePlace[]> {
+): Promise<StoragePlace[]> => {
     const own = await findProjectBucket(projectId);
 
     const platform = platformPlaces(
@@ -77,23 +77,23 @@ async function projectPlaces(
     return own
         ? [{ bucket: own, key: filename, encrypted: false }, ...platform]
         : platform;
-}
+};
 
-function chatPlaces(
+const chatPlaces = (
     organizationId: string,
     channelId: string,
     filename: string,
-): StoragePlace[] {
+): StoragePlace[] => {
     return platformPlaces(
         `organizations/${organizationId}/${CHAT_SEGMENT}/${channelId}/${filename}`,
     );
-}
+};
 
-async function saveFile(
+const saveFile = async (
     [place]: StoragePlace[],
     data: Uint8Array,
     contentType: string,
-): Promise<void> {
+): Promise<void> => {
     if (!place) return;
 
     const body = place.encrypted ? encryptFile(data) : data;
@@ -117,13 +117,13 @@ async function saveFile(
 
     await mkdir(path.dirname(target), { recursive: true });
     await writeFile(target, body);
-}
+};
 
-async function signedUrl(
+const signedUrl = async (
     place: StoragePlace & { bucket: StorageBucket },
     contentType: string,
     disposition: string,
-): Promise<string | undefined> {
+): Promise<string | undefined> => {
     const s3 = s3Client(place.bucket);
     const target = { Bucket: place.bucket.bucket, Key: place.key };
 
@@ -143,11 +143,11 @@ async function signedUrl(
         }),
         { expiresIn: SIGNED_URL_SECONDS },
     );
-}
+};
 
-async function readFileBytes(
+const readFileBytes = async (
     place: StoragePlace,
-): Promise<Uint8Array | undefined> {
+): Promise<Uint8Array | undefined> => {
     if (!place.bucket) {
         return readFile(path.join(UPLOADS_ROOT, place.key)).catch(
             () => undefined,
@@ -164,13 +164,13 @@ async function readFileBytes(
         .catch(() => undefined);
 
     return object?.Body?.transformToByteArray();
-}
+};
 
-async function fileResponse(
+const fileResponse = async (
     places: StoragePlace[],
     contentType: string,
     disposition: string,
-): Promise<Response> {
+): Promise<Response> => {
     for (const place of places) {
         if (place.bucket && !place.encrypted) {
             const url = await signedUrl(
@@ -208,9 +208,9 @@ async function fileResponse(
     }
 
     return new Response('Not found', { status: HTTP.NOT_FOUND });
-}
+};
 
-async function deleteFile(places: StoragePlace[]): Promise<void> {
+const deleteFile = async (places: StoragePlace[]): Promise<void> => {
     for (const place of places) {
         if (place.bucket) {
             await s3Client(place.bucket).send(
@@ -223,72 +223,72 @@ async function deleteFile(places: StoragePlace[]): Promise<void> {
             await rm(path.join(UPLOADS_ROOT, place.key), { force: true });
         }
     }
-}
+};
 
-export async function saveProjectFile(
+export const saveProjectFile = async (
     organizationId: string,
     projectId: string,
     filename: string,
     data: Uint8Array,
     contentType: string,
-): Promise<void> {
+): Promise<void> => {
     await saveFile(
         await projectPlaces(organizationId, projectId, filename),
         data,
         contentType,
     );
-}
+};
 
-export async function projectFileResponse(
+export const projectFileResponse = async (
     organizationId: string,
     projectId: string,
     filename: string,
     contentType: string,
-): Promise<Response> {
+): Promise<Response> => {
     return fileResponse(
         await projectPlaces(organizationId, projectId, filename),
         contentType,
         'inline',
     );
-}
+};
 
-export async function deleteProjectFile(
+export const deleteProjectFile = async (
     organizationId: string,
     projectId: string,
     filename: string,
-): Promise<void> {
+): Promise<void> => {
     await deleteFile(await projectPlaces(organizationId, projectId, filename));
-}
+};
 
-export async function saveChatFile(
+export const saveChatFile = async (
     organizationId: string,
     channelId: string,
     filename: string,
     data: Uint8Array,
     contentType: string,
-): Promise<void> {
+): Promise<void> => {
     await saveFile(
         chatPlaces(organizationId, channelId, filename),
         data,
         contentType,
     );
-}
+};
 
-export async function chatFileResponse(
+export const chatFileResponse = async (
     organizationId: string,
     channelId: string,
     filename: string,
     contentType: string,
     disposition: string,
-): Promise<Response> {
+): Promise<Response> => {
     return fileResponse(
         chatPlaces(organizationId, channelId, filename),
         contentType,
         disposition,
     );
-}
+};
 
-export async function checkBucket(bucket: StorageBucket): Promise<void> {
+export const checkBucket = async (bucket: StorageBucket): Promise<void> => {
     const s3 = s3Client(bucket);
     const key = '.flowsy-check';
 
@@ -297,4 +297,4 @@ export async function checkBucket(bucket: StorageBucket): Promise<void> {
     );
 
     await s3.send(new DeleteObjectCommand({ Bucket: bucket.bucket, Key: key }));
-}
+};

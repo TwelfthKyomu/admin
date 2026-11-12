@@ -1,40 +1,12 @@
 'use client';
 
-import { useForm } from 'react-hook-form';
-import { runAction } from '@/shared/lib/action-result';
-import { useModalClose } from '@/shared/lib/modal';
-import { ConnectStorageActionInputSchema, useConnectStorage } from '@/contexts/integration';
 import { Button, Modal } from '@/ui/Base';
 import { Form, Input } from '@/ui/Controlled';
-import { zodResolver } from '@hookform/resolvers/zod';
-import type * as z from 'zod/mini';
-
-type StorageFormValues = z.infer<typeof ConnectStorageActionInputSchema>;
+import type { ConnectStorageFormValues } from '../form/formData';
+import { useStorageConnectModal } from '../hooks/useStorageConnectModal';
 
 export const StorageConnectModal = ({ projectId }: { projectId: string }) => {
-    const close = useModalClose();
-    const { mutateAsync, isPending } = useConnectStorage();
-
-    const form = useForm<StorageFormValues>({
-        resolver: zodResolver(ConnectStorageActionInputSchema),
-        defaultValues: {
-            projectId,
-            name: 'Хранилище',
-            endpoint: '',
-            region: 'auto',
-            bucket: '',
-            accessKeyId: '',
-            secretAccessKey: '',
-        },
-    });
-
-    const onSubmit = async (values: StorageFormValues) => {
-        const { success } = await runAction(mutateAsync(values), {
-            success: `Хранилище «${values.name}» подключено`,
-        });
-
-        if (success) close();
-    };
+    const { close, isPending, form, onSubmit } = useStorageConnectModal(projectId);
 
     return (
         <Modal
@@ -49,31 +21,31 @@ export const StorageConnectModal = ({ projectId }: { projectId: string }) => {
                 onSubmit={onSubmit}
                 className="grid gap-3"
             >
-                <Input<StorageFormValues>
+                <Input<ConnectStorageFormValues>
                     name="name"
                     label="Название"
                     autoFocus
                 />
-                <Input<StorageFormValues>
+                <Input<ConnectStorageFormValues>
                     name="endpoint"
                     label="Endpoint"
                     placeholder="https://storage.example.com"
                 />
-                <Input<StorageFormValues>
+                <Input<ConnectStorageFormValues>
                     name="region"
                     label="Регион"
                     placeholder="auto"
                 />
-                <Input<StorageFormValues>
+                <Input<ConnectStorageFormValues>
                     name="bucket"
                     label="Бакет"
                 />
-                <Input<StorageFormValues>
+                <Input<ConnectStorageFormValues>
                     name="accessKeyId"
                     label="Access key ID"
                     autoComplete="off"
                 />
-                <Input<StorageFormValues>
+                <Input<ConnectStorageFormValues>
                     name="secretAccessKey"
                     label="Secret access key"
                     type="password"

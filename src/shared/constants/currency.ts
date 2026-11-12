@@ -28,12 +28,12 @@ export const CURRENCY_SYMBOL: Record<Currency, string> = {
 
 export const DEFAULT_CURRENCY: Currency = Currency.RUB;
 
-function isCurrency(value: string): value is Currency {
+const isCurrency = (value: string): value is Currency => {
     return (CURRENCY_VALUES as string[]).includes(value);
-}
+};
 
-export function toCurrency(value: string): Currency {
+export const toCurrency = (value: string): Currency => {
     return isCurrency(value) ? value : DEFAULT_CURRENCY;
-}
+};
 
 export const CURRENCY_OPTIONS = createOptions(CURRENCY_VALUES, CURRENCY_LABEL);

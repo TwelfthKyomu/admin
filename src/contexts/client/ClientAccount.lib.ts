@@ -14,11 +14,11 @@ import { type ClientRecord, clients } from './Clients.table';
 
 export const VERIFICATION_CODE_MINUTES = 15;
 
-function hashCode(code: string): string {
+const hashCode = (code: string): string => {
     return createHash('sha256').update(code).digest('hex');
-}
+};
 
-function issueCode() {
+const issueCode = () => {
     const code = generateRandomString(6, '0-9');
 
     return {
@@ -31,21 +31,24 @@ function issueCode() {
             ),
         },
     };
-}
+};
 
-function isValidCode(client: ClientRecord | undefined, code: string): boolean {
+const isValidCode = (
+    client: ClientRecord | undefined,
+    code: string,
+): boolean => {
     return Boolean(
         client?.verificationCodeHash &&
             client.verificationCodeExpiresAt &&
             client.verificationCodeExpiresAt >= new Date() &&
             client.verificationCodeHash === hashCode(code),
     );
-}
+};
 
-async function findClientByEmail(
+const findClientByEmail = async (
     projectId: string,
     email: string,
-): Promise<ClientRecord | undefined> {
+): Promise<ClientRecord | undefined> => {
     const [client] = await db
         .select()
         .from(clients)
@@ -53,9 +56,9 @@ async function findClientByEmail(
         .limit(1);
 
     return client;
-}
+};
 
-export async function startClientRegistration(
+export const startClientRegistration = async (
     projectId: string,
     input: {
         firstName: string;
@@ -63,7 +66,7 @@ export async function startClientRegistration(
         email: string;
         password: string;
     },
-): Promise<string> {
+): Promise<string> => {
     const existing = await findClientByEmail(projectId, input.email);
 
     if (existing?.emailVerifiedAt) {
@@ -93,13 +96,13 @@ export async function startClientRegistration(
     }
 
     return code;
-}
+};
 
-export async function confirmClientEmail(
+export const confirmClientEmail = async (
     projectId: string,
     email: string,
     code: string,
-): Promise<ClientRecord> {
+): Promise<ClientRecord> => {
     const client = await findClientByEmail(projectId, email);
 
     if (!client || !isValidCode(client, code)) {
@@ -117,13 +120,13 @@ export async function confirmClientEmail(
         .returning();
 
     return verified ?? client;
-}
+};
 
-export async function findClientByPassword(
+export const findClientByPassword = async (
     projectId: string,
     email: string,
     password: string,
-): Promise<ClientRecord> {
+): Promise<ClientRecord> => {
     const client = await findClientByEmail(projectId, email);
 
     const valid =
@@ -136,12 +139,12 @@ export async function findClientByPassword(
     }
 
     return client;
-}
+};
 
-export async function findVerifiedClient(
+export const findVerifiedClient = async (
     projectId: string,
     clientId: string,
-): Promise<ClientRecord | undefined> {
+): Promise<ClientRecord | undefined> => {
     const [client] = await db
         .select()
         .from(clients)
@@ -155,12 +158,12 @@ export async function findVerifiedClient(
         .limit(1);
 
     return client;
-}
+};
 
-export async function startPasswordReset(
+export const startPasswordReset = async (
     projectId: string,
     email: string,
-): Promise<string | undefined> {
+): Promise<string | undefined> => {
     const client = await findClientByEmail(projectId, email);
 
     if (!client?.emailVerifiedAt) return undefined;
@@ -170,12 +173,12 @@ export async function startPasswordReset(
     await db.update(clients).set(fields).where(eq(clients.id, client.id));
 
     return code;
-}
+};
 
-export async function resetClientPassword(
+export const resetClientPassword = async (
     projectId: string,
     input: { email: string; code: string; password: string },
-): Promise<ClientRecord> {
+): Promise<ClientRecord> => {
     const client = await findClientByEmail(projectId, input.email);
 
     if (!client?.emailVerifiedAt || !isValidCode(client, input.code)) {
@@ -193,4 +196,4 @@ export async function resetClientPassword(
         .returning();
 
     return updated ?? client;
-}
+};

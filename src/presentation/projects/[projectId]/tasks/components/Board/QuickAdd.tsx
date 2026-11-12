@@ -1,18 +1,9 @@
-import { useState } from 'react';
 import { Button, Input } from '@/ui/Base';
 import { Plus } from 'lucide-react';
+import { useQuickAdd } from '../../hooks/useQuickAdd';
 
 export const QuickAdd = ({ onAdd }: { onAdd: (title: string) => void }) => {
-    const [title, setTitle] = useState('');
-
-    const submit = () => {
-        const next = title.trim();
-
-        if (!next) return;
-
-        onAdd(next);
-        setTitle('');
-    };
+    const { title, setTitle, submit } = useQuickAdd(onAdd);
 
     return (
         <div className="flex gap-1">

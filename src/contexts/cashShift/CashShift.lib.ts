@@ -17,16 +17,16 @@ import {
     courierHandovers,
 } from './CashShifts.table';
 
-function openShiftOf(projectId: string) {
+const openShiftOf = (projectId: string) => {
     return and(
         eq(cashShifts.projectId, projectId),
         isNull(cashShifts.closedAt),
     );
-}
+};
 
-export async function findOpenCashShift(
+export const findOpenCashShift = async (
     projectId: string,
-): Promise<CashShiftRecord | null> {
+): Promise<CashShiftRecord | null> => {
     const [shift] = await db
         .select()
         .from(cashShifts)
@@ -34,14 +34,14 @@ export async function findOpenCashShift(
         .limit(1);
 
     return shift ?? null;
-}
+};
 
-export async function lockOpenCashShift(
+export const lockOpenCashShift = async (
     tx: Tx,
     projectId: string,
     mode: 'share' | 'update',
     missingMessage: string,
-): Promise<CashShiftRecord> {
+): Promise<CashShiftRecord> => {
     const [shift] = await tx
         .select()
         .from(cashShifts)
@@ -52,12 +52,12 @@ export async function lockOpenCashShift(
     if (!shift) throw new ApplicationError(missingMessage);
 
     return shift;
-}
+};
 
-export async function listCourierBalances(
+export const listCourierBalances = async (
     projectId: string,
     options: { employeeId?: string; executor?: Reader } = {},
-): Promise<CourierBalanceView[]> {
+): Promise<CourierBalanceView[]> => {
     const executor = options.executor ?? db;
 
     const [paymentRows, handoverRows] = await Promise.all([
@@ -128,4 +128,4 @@ export async function listCourierBalances(
             onHand: totals.charged - totals.refunded - handed,
         };
     });
-}
+};

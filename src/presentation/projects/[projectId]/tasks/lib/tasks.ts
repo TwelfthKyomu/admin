@@ -23,17 +23,17 @@ export const SORT_OPTIONS: Option<TaskSort>[] = [
 
 const NO_DUE = Number.MAX_SAFE_INTEGER;
 
-export function taskKey(projectKey: string, task: TaskView): string {
+export const taskKey = (projectKey: string, task: TaskView): string => {
     return `${projectKey}-${task.number}`;
-}
+};
 
-export function isOverdue(task: TaskView): boolean {
+export const isOverdue = (task: TaskView): boolean => {
     if (!task.dueAt || task.status === TaskStatus.DONE) return false;
 
     return new Date(task.dueAt) < startOfDay(new Date());
-}
+};
 
-export function subtaskProgress(task: Pick<TaskView, 'subtasks'>) {
+export const subtaskProgress = (task: Pick<TaskView, 'subtasks'>) => {
     const total = task.subtasks.length;
 
     if (total === 0) return null;
@@ -41,12 +41,12 @@ export function subtaskProgress(task: Pick<TaskView, 'subtasks'>) {
     const done = task.subtasks.filter((subtask) => subtask.done).length;
 
     return { done, total, percent: Math.round((done / total) * 100) };
-}
+};
 
-function matches(
+const matches = (
     task: TaskView,
     { search, priority, assignee }: TaskFilterValues,
-): boolean {
+): boolean => {
     if (!matchesSearch(search, task.title, task.number, task.description)) {
         return false;
     }
@@ -55,9 +55,9 @@ function matches(
     if (assignee === 'all') return true;
 
     return (task.assigneeUserId ?? NONE) === assignee;
-}
+};
 
-function compare(a: TaskView, b: TaskView, sort: TaskSort): number {
+const compare = (a: TaskView, b: TaskView, sort: TaskSort): number => {
     if (sort === 'priority') {
         return (
             TASK_PRIORITY_ORDER.indexOf(a.priority) -
@@ -72,13 +72,13 @@ function compare(a: TaskView, b: TaskView, sort: TaskSort): number {
     if (sort === 'title') return a.title.localeCompare(b.title, 'ru');
 
     return a.number - b.number;
-}
+};
 
-export function filterTasks(
+export const filterTasks = (
     tasks: TaskView[],
     filters: TaskFilterValues,
-): TaskView[] {
+): TaskView[] => {
     return tasks
         .filter((task) => matches(task, filters))
         .sort((a, b) => compare(a, b, filters.sort));
-}
+};

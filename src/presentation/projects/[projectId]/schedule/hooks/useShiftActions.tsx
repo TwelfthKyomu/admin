@@ -28,12 +28,12 @@ interface UseShiftActionsOptions {
     workingEmployees: ProjectEmployeeView[];
 }
 
-export function useShiftActions({
+export const useShiftActions = ({
     projectId,
     shift,
     employeeName,
     workingEmployees,
-}: UseShiftActionsOptions) {
+}: UseShiftActionsOptions) => {
     const { can } = useProject();
     const { mutateAsync, isPending } = useChangeShiftStatus();
 
@@ -89,4 +89,4 @@ export function useShiftActions({
         onNoShow,
         onCancel,
     };
-}
+};

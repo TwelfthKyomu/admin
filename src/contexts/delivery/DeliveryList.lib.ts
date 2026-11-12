@@ -27,10 +27,10 @@ import {
     OPEN_DELIVERY_STATUSES,
 } from './Delivery.types';
 
-async function selectDeliveries(
+const selectDeliveries = async (
     where: SQL | undefined,
     limit: number,
-): Promise<DeliveryView[]> {
+): Promise<DeliveryView[]> => {
     const rows = await db
         .select({
             delivery: deliveries,
@@ -67,12 +67,12 @@ async function selectDeliveries(
                 deliveryTimeOf(a).getTime() - deliveryTimeOf(b).getTime() ||
                 b.createdAt.getTime() - a.createdAt.getTime(),
         );
-}
+};
 
-export function listProjectDeliveries(
+export const listProjectDeliveries = (
     projectId: string,
     options: { visibleCourierId: string | null; from?: Date; to?: Date },
-): Promise<DeliveryView[]> {
+): Promise<DeliveryView[]> => {
     const inPeriod = (column: PgColumn) =>
         and(
             options.from ? gte(column, options.from) : undefined,
@@ -104,12 +104,12 @@ export function listProjectDeliveries(
         ),
         PAGE_SIZE_HUGE,
     );
-}
+};
 
-export async function findOrderDelivery(
+export const findOrderDelivery = async (
     orderId: string,
     projectId: string,
-): Promise<DeliveryView | null> {
+): Promise<DeliveryView | null> => {
     const [delivery] = await selectDeliveries(
         and(
             eq(deliveries.orderId, orderId),
@@ -119,4 +119,4 @@ export async function findOrderDelivery(
     );
 
     return delivery ?? null;
-}
+};

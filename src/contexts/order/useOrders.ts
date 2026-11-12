@@ -83,13 +83,13 @@ const orderQueries = {
         ),
 };
 
-export function useOrdersList(opts: ListOptions) {
+export const useOrdersList = (opts: ListOptions) => {
     return useQuery(orderQueries.list(opts));
-}
+};
 
-export function useOrderDetail(opts: DetailOptions) {
+export const useOrderDetail = (opts: DetailOptions) => {
     return useQuery(orderQueries.detail(opts));
-}
+};
 
 export const useCreateOrder = makeMutation(createOrderAction);
 export const useChangeOrderStatus = makeMutation(changeOrderStatusAction);
@@ -119,11 +119,11 @@ const employeeRevenueQueries = {
         ),
 };
 
-export function useEmployeeRevenue(opts: RevenueOptions) {
+export const useEmployeeRevenue = (opts: RevenueOptions) => {
     return useQuery(employeeRevenueQueries.range(opts));
-}
+};
 
-export function useMargin({ projectId, from, to }: RevenueOptions) {
+export const useMargin = ({ projectId, from, to }: RevenueOptions) => {
     return useQuery(
         itemQuery(
             ['margin', projectId, from.toISOString(), to.toISOString()],
@@ -131,7 +131,7 @@ export function useMargin({ projectId, from, to }: RevenueOptions) {
             { enabled: projectId.length > 0 },
         ),
     );
-}
+};
 
 const dashboardQueries = {
     all: ['dashboard'] as const,
@@ -139,9 +139,9 @@ const dashboardQueries = {
         itemQuery([...dashboardQueries.all, 'summary'], dashboardAction),
 };
 
-export function useDashboard() {
+export const useDashboard = () => {
     return useQuery(dashboardQueries.summary());
-}
+};
 
 interface MyDayOptions {
     from: Date;
@@ -156,9 +156,9 @@ const myDayQueries = {
         ),
 };
 
-export function useMyDay(opts: MyDayOptions) {
+export const useMyDay = (opts: MyDayOptions) => {
     return useQuery(myDayQueries.range(opts));
-}
+};
 
 interface MySalesOptions {
     dayFrom: Date;
@@ -174,6 +174,6 @@ const mySalesQueries = {
         ),
 };
 
-export function useMySales(opts: MySalesOptions) {
+export const useMySales = (opts: MySalesOptions) => {
     return useQuery(mySalesQueries.range(opts));
-}
+};

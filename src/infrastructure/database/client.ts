@@ -3,7 +3,7 @@ import { drizzle } from 'drizzle-orm/node-postgres';
 import { Pool } from 'pg';
 import * as schema from './schemas';
 
-function createConnectionPool(): Pool {
+const createConnectionPool = (): Pool => {
     return new Pool({
         connectionString: env.DATABASE_URL,
         max: 20,
@@ -11,7 +11,7 @@ function createConnectionPool(): Pool {
         connectionTimeoutMillis: 10000,
         statement_timeout: 120000,
     });
-}
+};
 
 const pool = createConnectionPool();
 

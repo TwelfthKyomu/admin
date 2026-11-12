@@ -20,9 +20,9 @@ const lookQueries = {
         ),
 };
 
-export function useLooksList(projectId: string) {
+export const useLooksList = (projectId: string) => {
     return useQuery(lookQueries.list(projectId));
-}
+};
 
 export const useCreateLook = makeMutation(createLookAction);
 export const useUpdateLook = makeMutation(updateLookAction);

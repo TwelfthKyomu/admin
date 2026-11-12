@@ -1,11 +1,11 @@
 import type { Option } from '@/shared/types';
 import type { ProjectEmployeeView } from '@/contexts/employeeAssignment';
 
-export function employeeOptions(
+export const employeeOptions = (
     employees: Pick<ProjectEmployeeView, 'employeeId' | 'name'>[],
-): Option[] {
+): Option[] => {
     return employees.map(({ employeeId, name }) => ({
         value: employeeId,
         label: name,
     }));
-}
+};

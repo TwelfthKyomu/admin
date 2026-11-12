@@ -19,10 +19,10 @@ import {
 } from './Coupon.types';
 import { type CouponRecord, couponRedemptions, coupons } from './Coupons.table';
 
-export async function assertScopeInProject(
+export const assertScopeInProject = async (
     projectId: string,
     scope: CouponScope | undefined,
-): Promise<void> {
+): Promise<void> => {
     const { productIds, categoryIds } = splitCouponScope(scope);
 
     if (productIds.length === 0 && categoryIds.length === 0) return;
@@ -58,12 +58,12 @@ export async function assertScopeInProject(
             'В условиях купона есть товар или категория не из этого проекта',
         );
     }
-}
+};
 
-async function eligibleSubtotal(
+const eligibleSubtotal = async (
     scope: CouponScope,
     items: Pick<OrderItemRecord, 'productId' | 'totalAmount'>[],
-): Promise<number> {
+): Promise<number> => {
     const { productIds, categoryIds } = splitCouponScope(scope);
 
     if (productIds.length === 0 && categoryIds.length === 0) {
@@ -104,13 +104,13 @@ async function eligibleSubtotal(
             );
         })
         .reduce((sum, item) => sum + item.totalAmount, 0);
-}
+};
 
-async function assertClientLimit(
+const assertClientLimit = async (
     reader: Reader,
     coupon: CouponRecord,
     clientId: string | null,
-): Promise<void> {
+): Promise<void> => {
     if (coupon.maxUsesPerClient === null || !clientId) return;
 
     const [row] = await reader
@@ -128,14 +128,14 @@ async function assertClientLimit(
             'Достигнут лимит применений купона для этого клиента',
         );
     }
-}
+};
 
-export async function evaluateCoupon(
+export const evaluateCoupon = async (
     reader: Reader,
     coupon: CouponRecord,
     order: Pick<OrderRecord, 'subtotalAmount' | 'discountAmount' | 'clientId'>,
     items: Pick<OrderItemRecord, 'productId' | 'totalAmount'>[],
-): Promise<number> {
+): Promise<number> => {
     assertCouponRedeemable(coupon, new Date());
 
     if (
@@ -167,13 +167,13 @@ export async function evaluateCoupon(
     }
 
     return discountAmount;
-}
+};
 
-export async function previewCoupon(
+export const previewCoupon = async (
     projectId: string,
     rawCode: string,
     items: Pick<OrderItemRecord, 'productId' | 'totalAmount'>[],
-): Promise<number> {
+): Promise<number> => {
     const [coupon] = await db
         .select()
         .from(coupons)
@@ -201,4 +201,4 @@ export async function previewCoupon(
         },
         items,
     );
-}
+};

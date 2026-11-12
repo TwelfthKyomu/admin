@@ -27,15 +27,15 @@ interface DeliveryEvent {
     payload: Record<string, unknown>;
 }
 
-export function lockDelivery(
+export const lockDelivery = (
     tx: Tx,
     id: string,
     projectId: string,
-): Promise<DeliveryRecord> {
+): Promise<DeliveryRecord> => {
     return lockInProject(tx, deliveries, id, projectId, 'Доставка не найдена');
-}
+};
 
-export async function lockCourierDelivery(
+export const lockCourierDelivery = async (
     tx: Tx,
     input: {
         id: string;
@@ -44,7 +44,7 @@ export async function lockCourierDelivery(
         wrongStatus: string;
         ownCourierId?: string | null;
     },
-): Promise<DeliveryRecord> {
+): Promise<DeliveryRecord> => {
     const delivery = await lockDelivery(tx, input.id, input.projectId);
 
     if (delivery.kind !== DeliveryKind.COURIER) {
@@ -58,12 +58,12 @@ export async function lockCourierDelivery(
     }
 
     return delivery;
-}
+};
 
-export async function assertCourierAvailable(
+export const assertCourierAvailable = async (
     tx: Tx,
     window: EmployeeWindow,
-): Promise<void> {
+): Promise<void> => {
     const assignment = await findActiveAssignment(
         window.employeeId,
         window.projectId,
@@ -79,22 +79,22 @@ export async function assertCourierAvailable(
     if (!(await isCoveredByShift(tx, window))) {
         throw new ApplicationError('У курьера нет смены на это время');
     }
-}
+};
 
-function deliveryEvent(orderId: string, event: DeliveryEvent) {
+const deliveryEvent = (orderId: string, event: DeliveryEvent) => {
     return {
         orderId,
         type: OrderEventType.SHIPMENT_UPDATED,
         byUserId: event.byUserId,
         payload: { delivery: event.payload },
     };
-}
+};
 
-export async function createDelivery(
+export const createDelivery = async (
     tx: Tx,
     values: NewDeliveryRecord,
     byUserId: string,
-): Promise<DeliveryRecord> {
+): Promise<DeliveryRecord> => {
     const created = await insertOne(
         deliveries,
         values,
@@ -110,14 +110,14 @@ export async function createDelivery(
     ]);
 
     return created;
-}
+};
 
-export async function writeDeliveryUpdate(
+export const writeDeliveryUpdate = async (
     tx: Tx,
     delivery: DeliveryRecord,
     values: Partial<DeliveryRecord>,
     event: DeliveryEvent,
-): Promise<DeliveryRecord> {
+): Promise<DeliveryRecord> => {
     const [updated] = await tx
         .update(deliveries)
         .set(values)
@@ -129,9 +129,9 @@ export async function writeDeliveryUpdate(
     await recordOrderEvents(tx, [deliveryEvent(delivery.orderId, event)]);
 
     return updated;
-}
+};
 
-export async function assignCourier(
+export const assignCourier = async (
     tx: Tx,
     input: {
         id: string;
@@ -141,7 +141,7 @@ export async function assignCourier(
         statuses: readonly DeliveryStatus[];
         wrongStatus: string;
     },
-): Promise<DeliveryRecord> {
+): Promise<DeliveryRecord> => {
     await lockEmployees(tx, [input.courierId]);
 
     const delivery = await lockCourierDelivery(tx, input);
@@ -172,12 +172,12 @@ export async function assignCourier(
             },
         },
     );
-}
+};
 
-export async function hasOpenDelivery(
+export const hasOpenDelivery = async (
     executor: Reader,
     orderId: string,
-): Promise<boolean> {
+): Promise<boolean> => {
     const [delivery] = await executor
         .select({ id: deliveries.id })
         .from(deliveries)
@@ -190,13 +190,13 @@ export async function hasOpenDelivery(
         .limit(1);
 
     return delivery !== undefined;
-}
+};
 
-export async function cancelActiveDelivery(
+export const cancelActiveDelivery = async (
     tx: Tx,
     orderId: string,
     byUserId: string | null,
-): Promise<void> {
+): Promise<void> => {
     const [delivery] = await tx
         .select()
         .from(deliveries)
@@ -220,12 +220,12 @@ export async function cancelActiveDelivery(
             payload: { from: delivery.status, to: DeliveryStatus.CANCELLED },
         },
     );
-}
+};
 
-export async function moveCourierDeliveries(
+export const moveCourierDeliveries = async (
     tx: Tx,
     window: EmployeeWindow & { toEmployeeId: string; byUserId: string },
-): Promise<number> {
+): Promise<number> => {
     const moved = await tx
         .update(deliveries)
         .set({ courierId: window.toEmployeeId, assignedAt: new Date() })
@@ -256,4 +256,4 @@ export async function moveCourierDeliveries(
     );
 
     return moved.length;
-}
+};

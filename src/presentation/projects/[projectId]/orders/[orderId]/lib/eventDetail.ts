@@ -9,10 +9,10 @@ import {
 } from '@/contexts/order';
 import { isPaymentMethod } from '@/contexts/payment';
 
-export function eventDetail(
+export const eventDetail = (
     { type, payload }: OrderEventView,
     currency: Currency,
-): string | undefined {
+): string | undefined => {
     const reason =
         typeof payload.reason === 'string' && payload.reason
             ? ` · ${payload.reason}`
@@ -49,4 +49,4 @@ export function eventDetail(
     }
 
     return undefined;
-}
+};

@@ -6,15 +6,17 @@ import {
 } from '@/contexts/product';
 import { parse } from 'papaparse';
 
-function decode(buffer: ArrayBuffer): string {
+const decode = (buffer: ArrayBuffer): string => {
     try {
         return new TextDecoder('utf-8', { fatal: true }).decode(buffer);
     } catch {
         return new TextDecoder('windows-1251').decode(buffer);
     }
-}
+};
 
-export async function readImportFile(file: File): Promise<ParsedImportRow[]> {
+export const readImportFile = async (
+    file: File,
+): Promise<ParsedImportRow[]> => {
     const { data } = parse<Record<string, string>>(
         decode(await file.arrayBuffer()),
         {
@@ -24,9 +26,9 @@ export async function readImportFile(file: File): Promise<ParsedImportRow[]> {
     );
 
     return data.map((record, index) => parseImportRecord(record, index + 2));
-}
+};
 
-export function downloadImportTemplate(): void {
+export const downloadImportTemplate = (): void => {
     downloadCsv('products-import.csv', PRODUCT_IMPORT_HEADER, [
         [
             'Футболка оверсайз',
@@ -39,4 +41,4 @@ export function downloadImportTemplate(): void {
             'Хлопок 100%',
         ],
     ]);
-}
+};

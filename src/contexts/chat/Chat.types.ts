@@ -31,10 +31,10 @@ export const CHAT_SCOPE_PREFIX = {
     channels: 'chat-channels:',
 } as const;
 
-export function chatScopeKey(
+export const chatScopeKey = (
     organizationId: string,
     target: ChatTarget,
-): string {
+): string => {
     if (target.kind === 'project') {
         return `${CHAT_SCOPE_PREFIX.project}${target.projectId}`;
     }
@@ -43,15 +43,15 @@ export function chatScopeKey(
     }
 
     return `${CHAT_SCOPE_PREFIX.organization}${organizationId}`;
-}
+};
 
-export function chatChannelsScope(organizationId: string) {
+export const chatChannelsScope = (organizationId: string) => {
     return `${CHAT_SCOPE_PREFIX.channels}${organizationId}`;
-}
+};
 
-export function channelTarget(
+export const channelTarget = (
     channel: Pick<ChatChannelRecord, 'id' | 'type' | 'projectId'>,
-): ChatTarget {
+): ChatTarget => {
     if (channel.type === ChatChannelType.PROJECT) {
         return { kind: 'project', projectId: channel.projectId ?? '' };
     }
@@ -60,7 +60,7 @@ export function channelTarget(
     }
 
     return { kind: 'organization' };
-}
+};
 
 export const CHAT_REACTIONS = [
     '👍',
@@ -74,25 +74,25 @@ export const CHAT_REACTIONS = [
 
 export type ChatReaction = (typeof CHAT_REACTIONS)[number];
 
-export function isChatReaction(value: string): value is ChatReaction {
+export const isChatReaction = (value: string): value is ChatReaction => {
     return (CHAT_REACTIONS as readonly string[]).includes(value);
-}
+};
 
-export function isChatParticipant(
+export const isChatParticipant = (
     channel: ChatChannelRecord,
     userId: string,
-): boolean {
+): boolean => {
     if (channel.type !== ChatChannelType.DIRECT) return false;
 
     return channel.userAId === userId || channel.userBId === userId;
-}
+};
 
-export function directChannelPair(
+export const directChannelPair = (
     userId: string,
     otherUserId: string,
-): [userAId: string, userBId: string] {
+): [userAId: string, userBId: string] => {
     return userId < otherUserId ? [userId, otherUserId] : [otherUserId, userId];
-}
+};
 
 export type ChatUserView = Pick<UserRecord, 'id' | 'name' | 'image'>;
 
@@ -159,11 +159,11 @@ export type ChannelAttachmentView = ChatAttachmentView & {
     createdAt: ChatAttachmentRecord['createdAt'];
 };
 
-export function isImageAttachment(
+export const isImageAttachment = (
     attachment: Pick<ChatAttachmentView, 'contentType'>,
-): boolean {
+): boolean => {
     return attachment.contentType.startsWith('image/');
-}
+};
 
 export type ChatMessageView = Pick<
     ChatMessageRecord,
@@ -203,9 +203,9 @@ export type ChatSearchResultView = Pick<
     target: ChatTarget;
 };
 
-export function sortReactions(
+export const sortReactions = (
     reactions: ChatMessageReactionView[],
-): ChatMessageReactionView[] {
+): ChatMessageReactionView[] => {
     const order = (emoji: string) => {
         const index = (CHAT_REACTIONS as readonly string[]).indexOf(emoji);
 
@@ -213,11 +213,14 @@ export function sortReactions(
     };
 
     return reactions.sort((a, b) => order(a.emoji) - order(b.emoji));
-}
+};
 
-export function setMessageReaction<
+export const setMessageReaction = <
     T extends Pick<ChatMessageView, 'reactions'>,
->(message: T, emoji: string): T {
+>(
+    message: T,
+    emoji: string,
+): T => {
     const own = message.reactions.find((reaction) => reaction.reacted);
     const removeOwn = own !== undefined;
     const addNew = own?.emoji !== emoji;
@@ -250,4 +253,4 @@ export function setMessageReaction<
     if (isNewEmoji) reactions.push({ emoji, count: 1, reacted: true });
 
     return { ...message, reactions: sortReactions(reactions) };
-}
+};

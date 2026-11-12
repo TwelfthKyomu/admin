@@ -11,10 +11,10 @@ import {
     chatMessages,
 } from './ChatChannels.table';
 
-export async function requireChatMessage(
+export const requireChatMessage = async (
     messageId: string,
     organizationId: string,
-): Promise<{ message: ChatMessageRecord; channel: ChatChannelRecord }> {
+): Promise<{ message: ChatMessageRecord; channel: ChatChannelRecord }> => {
     const [row] = await db
         .select({ message: chatMessages, channel: chatChannels })
         .from(chatMessages)
@@ -31,12 +31,12 @@ export async function requireChatMessage(
     if (!row) throw new ApplicationError('Сообщение не найдено');
 
     return row;
-}
+};
 
-export async function findMessageInChannel(
+export const findMessageInChannel = async (
     channelId: string,
     messageId: string,
-): Promise<{ threadRootId: string | null } | null> {
+): Promise<{ threadRootId: string | null } | null> => {
     const [row] = await db
         .select({ threadRootId: chatMessages.threadRootId })
         .from(chatMessages)
@@ -50,23 +50,23 @@ export async function findMessageInChannel(
         .limit(1);
 
     return row ?? null;
-}
+};
 
-export async function setMessagePin(
+export const setMessagePin = async (
     messageId: string,
     pinned: boolean,
-): Promise<void> {
+): Promise<void> => {
     await db
         .update(chatMessages)
         .set({ pinnedAt: pinned ? new Date() : null })
         .where(eq(chatMessages.id, messageId));
-}
+};
 
-export async function setReaction(
+export const setReaction = async (
     messageId: string,
     userId: string,
     emoji: string,
-): Promise<{ emoji: string | null }> {
+): Promise<{ emoji: string | null }> => {
     const own = and(
         eq(chatMessageReactions.messageId, messageId),
         eq(chatMessageReactions.userId, userId),
@@ -96,4 +96,4 @@ export async function setReaction(
         });
 
     return { emoji };
-}
+};

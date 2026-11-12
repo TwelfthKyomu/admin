@@ -19,10 +19,10 @@ import {
     type NewEmployeeShiftRecord,
 } from './EmployeeShifts.table';
 
-async function planShiftStart(
+const planShiftStart = async (
     shift: EmployeeShiftRecord,
     at: Date,
-): Promise<Partial<NewEmployeeShiftRecord>> {
+): Promise<Partial<NewEmployeeShiftRecord>> => {
     if (shift.status !== ShiftStatus.SCHEDULED) {
         throw new ApplicationError('Начать можно только запланированную смену');
     }
@@ -47,13 +47,13 @@ async function planShiftStart(
     }
 
     return { status: ShiftStatus.IN_PROGRESS };
-}
+};
 
-async function planShiftComplete(
+const planShiftComplete = async (
     shift: EmployeeShiftRecord,
     at: Date,
     fullAccess: boolean,
-): Promise<Partial<NewEmployeeShiftRecord>> {
+): Promise<Partial<NewEmployeeShiftRecord>> => {
     const completable =
         shift.status === ShiftStatus.IN_PROGRESS ||
         (fullAccess && shift.status === ShiftStatus.SCHEDULED);
@@ -79,12 +79,12 @@ async function planShiftComplete(
     }
 
     return { status: ShiftStatus.COMPLETED };
-}
+};
 
-async function planShiftCancel(
+const planShiftCancel = async (
     shift: EmployeeShiftRecord,
     cancelReason?: ShiftCancelReason,
-): Promise<Partial<NewEmployeeShiftRecord>> {
+): Promise<Partial<NewEmployeeShiftRecord>> => {
     if (!OPEN_SHIFT_STATUSES.includes(shift.status)) {
         throw new ApplicationError(
             'Отменить можно только запланированную или идущую смену',
@@ -96,13 +96,13 @@ async function planShiftCancel(
         cancelReason: cancelReason ?? null,
         seekingReplacement: false,
     };
-}
+};
 
-async function planShiftNoShow(
+const planShiftNoShow = async (
     shift: EmployeeShiftRecord,
     at: Date,
     fullAccess: boolean,
-): Promise<Partial<NewEmployeeShiftRecord>> {
+): Promise<Partial<NewEmployeeShiftRecord>> => {
     if (!fullAccess) {
         throw new ApplicationError(
             'Отметить неявку может только администратор расписания',
@@ -120,9 +120,9 @@ async function planShiftNoShow(
     }
 
     return { status: ShiftStatus.NO_SHOW, seekingReplacement: false };
-}
+};
 
-export function planShiftStatusChange(
+export const planShiftStatusChange = (
     shift: EmployeeShiftRecord,
     change: {
         action: ShiftAction;
@@ -130,7 +130,7 @@ export function planShiftStatusChange(
         fullAccess: boolean;
         cancelReason?: ShiftCancelReason;
     },
-): Promise<Partial<NewEmployeeShiftRecord>> {
+): Promise<Partial<NewEmployeeShiftRecord>> => {
     switch (change.action) {
         case ShiftAction.START:
             return planShiftStart(shift, change.at);
@@ -141,13 +141,13 @@ export function planShiftStatusChange(
         case ShiftAction.NO_SHOW:
             return planShiftNoShow(shift, change.at, change.fullAccess);
     }
-}
+};
 
-export function updateShiftStatus(
+export const updateShiftStatus = (
     shift: EmployeeShiftRecord,
     patch: Partial<NewEmployeeShiftRecord>,
     executor?: Tx,
-): Promise<EmployeeShiftRecord> {
+): Promise<EmployeeShiftRecord> => {
     return updateOne(
         employeeShifts,
         and(
@@ -158,4 +158,4 @@ export function updateShiftStatus(
         'Смена изменилась в другом окне — обновите страницу',
         executor,
     );
-}
+};

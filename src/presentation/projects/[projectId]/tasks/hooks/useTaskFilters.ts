@@ -6,7 +6,7 @@ import type { TaskFilterValues, TaskSort } from '../lib/tasks';
 
 export type TasksMode = 'board' | 'table';
 
-export function useTaskFilters() {
+export const useTaskFilters = () => {
     const [mode, setMode] = useState<TasksMode>('board');
     const [search, setSearch] = useState('');
     const [priority, setPriority] = useState<TaskPriority | 'all'>('all');
@@ -33,6 +33,6 @@ export function useTaskFilters() {
         sort,
         setSort,
     };
-}
+};
 
 export type TaskFilters = ReturnType<typeof useTaskFilters>;

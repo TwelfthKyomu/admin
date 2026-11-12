@@ -1,6 +1,7 @@
 'use client';
 
-import { type ReactNode, useState } from 'react';
+import type { ReactNode } from 'react';
+import { useDismissible } from '@/shared/hooks/useDismissible';
 import { cn } from '@/shared/lib/utils';
 import {
     Sheet as BaseSheet,
@@ -35,20 +36,12 @@ const SheetBase = ({
     busy = false,
     children,
 }: FormSheetProps) => {
-    const [open, setOpen] = useState(true);
-
-    const close = () => {
-        setOpen(false);
-        onClose?.();
-    };
+    const { open, close, onOpenChange } = useDismissible({ onClose, canClose, busy });
 
     return (
         <BaseSheet
             open={open}
-            onOpenChange={async (next) => {
-                if (next || busy) return;
-                if (!canClose || (await canClose())) close();
-            }}
+            onOpenChange={onOpenChange}
         >
             <SheetContent
                 side={side}

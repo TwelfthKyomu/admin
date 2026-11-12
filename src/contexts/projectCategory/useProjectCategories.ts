@@ -30,9 +30,9 @@ const categoryQueries = {
         ),
 };
 
-export function useCategoriesList(opts: ListOptions) {
+export const useCategoriesList = (opts: ListOptions) => {
     return useQuery(categoryQueries.list(opts));
-}
+};
 
 export const useCreateCategory = makeMutation(createCategoryAction);
 export const useUpdateCategory = makeMutation(updateCategoryAction);

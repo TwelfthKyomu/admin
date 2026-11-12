@@ -8,9 +8,9 @@ import {
     type UserOrganizationView,
 } from './Organizations.table';
 
-export async function findOrganizationByUserId(
+export const findOrganizationByUserId = async (
     userId: string,
-): Promise<UserOrganizationView | null> {
+): Promise<UserOrganizationView | null> => {
     const [row] = await db
         .select({ organization: organizations, role: organizationMembers.role })
         .from(organizationMembers)
@@ -27,4 +27,4 @@ export async function findOrganizationByUserId(
         .limit(1);
 
     return row ? { ...row.organization, role: row.role } : null;
-}
+};

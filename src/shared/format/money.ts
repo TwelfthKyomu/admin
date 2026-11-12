@@ -1,9 +1,9 @@
 import { type Currency, DEFAULT_CURRENCY } from '@/shared/constants/currency';
 
-export function fmtMoney(
+export const fmtMoney = (
     amount: number,
     currency: Currency = DEFAULT_CURRENCY,
-): string {
+): string => {
     try {
         return new Intl.NumberFormat('ru-RU', {
             style: 'currency',
@@ -13,4 +13,4 @@ export function fmtMoney(
     } catch {
         return `${(amount / 100).toFixed(2)} ${currency}`;
     }
-}
+};

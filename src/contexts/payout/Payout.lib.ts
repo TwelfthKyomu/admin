@@ -21,18 +21,18 @@ export interface PayrollActivity {
     delivered: Map<string, number>;
 }
 
-export function assertPayrollPeriod(from: Date, to: Date): void {
+export const assertPayrollPeriod = (from: Date, to: Date): void => {
     if (to <= from) {
         throw new ApplicationError(
             'Дата окончания периода должна быть позже даты начала',
         );
     }
-}
+};
 
-export async function findPayrollAssignments(
+export const findPayrollAssignments = async (
     executor: Reader,
     input: { projectId: string; from: Date; to: Date; employeeId?: string },
-): Promise<EmployeeAssignmentRecord[]> {
+): Promise<EmployeeAssignmentRecord[]> => {
     const rows = await executor
         .select()
         .from(employeeAssignments)
@@ -58,12 +58,12 @@ export async function findPayrollAssignments(
     }
 
     return [...latest.values()];
-}
+};
 
-export function findOverlappingPayouts(
+export const findOverlappingPayouts = (
     executor: Reader,
     input: { projectId: string; from: Date; to: Date; employeeId?: string },
-): Promise<PayoutRecord[]> {
+): Promise<PayoutRecord[]> => {
     return executor
         .select()
         .from(payouts)
@@ -77,12 +77,12 @@ export function findOverlappingPayouts(
                     : undefined,
             ),
         );
-}
+};
 
-export function findPayoutsCovering(
+export const findPayoutsCovering = (
     executor: Reader,
     input: { projectId: string; employeeIds: string[]; at: Date },
-): Promise<PayoutRecord[]> {
+): Promise<PayoutRecord[]> => {
     return executor
         .select()
         .from(payouts)
@@ -94,13 +94,13 @@ export function findPayoutsCovering(
                 gt(payouts.periodEnd, input.at),
             ),
         );
-}
+};
 
-export async function loadPayrollActivity(
+export const loadPayrollActivity = async (
     projectId: string,
     from: Date,
     to: Date,
-): Promise<PayrollActivity> {
+): Promise<PayrollActivity> => {
     const [shifts, sales, delivered] = await Promise.all([
         aggregateWorkedShiftsByEmployee(projectId, from, to),
         aggregateSellerRevenue(projectId, from, to),
@@ -128,12 +128,12 @@ export async function loadPayrollActivity(
         siteRevenue,
         delivered: new Map(delivered.map((row) => [row.courierId, row.count])),
     };
-}
+};
 
-export function payoutInputsOf(
+export const payoutInputsOf = (
     assignment: EmployeeAssignmentRecord,
     activity: PayrollActivity,
-): PayoutInputs {
+): PayoutInputs => {
     return {
         shiftsCount: activity.shifts.get(assignment.employeeId) ?? 0,
         shiftRateAmount: assignment.shiftRateAmount ?? 0,
@@ -144,4 +144,4 @@ export function payoutInputsOf(
         deliveriesCount: activity.delivered.get(assignment.employeeId) ?? 0,
         deliveryRateAmount: assignment.deliveryRateAmount ?? 0,
     };
-}
+};

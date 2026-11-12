@@ -21,13 +21,13 @@ const projectQueries = {
         ),
 };
 
-export function useProjectsList(organizationId: string) {
+export const useProjectsList = (organizationId: string) => {
     return useQuery(projectQueries.list(organizationId));
-}
+};
 
-export function useProjectSetup() {
+export const useProjectSetup = () => {
     return useQuery(listQuery(['project-setup'], projectSetupAction));
-}
+};
 
 export const useCreateProject = makeMutation(createProjectAction);
 export const useUpdateProject = makeMutation(updateProjectAction);

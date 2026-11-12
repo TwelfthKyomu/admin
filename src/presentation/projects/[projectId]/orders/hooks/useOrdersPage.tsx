@@ -18,7 +18,7 @@ const SaleCreateModal = dynamic(() =>
 
 const STATUS_FILTER_VALUES = ['all', ...ORDER_STATUS_VALUES] as const;
 
-export function useOrdersPage() {
+export const useOrdersPage = () => {
     const { projectId, currency, can } = useProject();
     const router = useRouter();
     const [search, setSearch] = useQueryState('q', parseAsString.withDefault(''));
@@ -68,4 +68,4 @@ export function useOrdersPage() {
         canCreateSale,
         onCreateSale,
     };
-}
+};

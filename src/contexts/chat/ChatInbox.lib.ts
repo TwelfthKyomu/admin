@@ -31,11 +31,11 @@ import {
     chatReads,
 } from './ChatChannels.table';
 
-function visibleChannels(
+const visibleChannels = (
     organizationId: string,
     userId: string,
     visibleProjectIds: string[],
-): SQL | undefined {
+): SQL | undefined => {
     return and(
         eq(chatChannels.organizationId, organizationId),
         or(
@@ -55,7 +55,7 @@ function visibleChannels(
                 : undefined,
         ),
     );
-}
+};
 
 const channelColumns = {
     channelId: chatChannels.id,
@@ -69,7 +69,7 @@ interface ChannelColumns {
     projectId: string | null;
 }
 
-function scopeOf(organizationId: string, row: ChannelColumns): string {
+const scopeOf = (organizationId: string, row: ChannelColumns): string => {
     return chatScopeKey(
         organizationId,
         channelTarget({
@@ -78,13 +78,13 @@ function scopeOf(organizationId: string, row: ChannelColumns): string {
             projectId: row.projectId,
         }),
     );
-}
+};
 
-export async function countUnreadByScope(
+export const countUnreadByScope = async (
     organizationId: string,
     userId: string,
     visibleProjectIds: string[],
-): Promise<Record<string, number>> {
+): Promise<Record<string, number>> => {
     const rows = await db
         .select({ ...channelColumns, unread: count(chatMessages.id) })
         .from(chatChannels)
@@ -120,13 +120,13 @@ export async function countUnreadByScope(
     }
 
     return unread;
-}
+};
 
-export async function listLastMessages(
+export const listLastMessages = async (
     organizationId: string,
     userId: string,
     visibleProjectIds: string[],
-): Promise<Record<string, ChatLastMessageView>> {
+): Promise<Record<string, ChatLastMessageView>> => {
     const rows = await db
         .selectDistinctOn([chatMessages.channelId], {
             ...channelColumns,
@@ -159,13 +159,13 @@ export async function listLastMessages(
     }
 
     return lastMessages;
-}
+};
 
-export async function listReadByOthers(
+export const listReadByOthers = async (
     organizationId: string,
     userId: string,
     visibleProjectIds: string[],
-): Promise<Record<string, Date>> {
+): Promise<Record<string, Date>> => {
     const rows = await db
         .select({ ...channelColumns, readAt: max(chatReads.lastReadAt) })
         .from(chatChannels)
@@ -186,14 +186,14 @@ export async function listReadByOthers(
     }
 
     return readByOthers;
-}
+};
 
-export async function searchChatMessages(
+export const searchChatMessages = async (
     organizationId: string,
     userId: string,
     visibleProjectIds: string[],
     query: string,
-): Promise<ChatSearchResultView[]> {
+): Promise<ChatSearchResultView[]> => {
     const pattern = `%${query.replace(/[\\%_]/g, (char) => `\\${char}`)}%`;
 
     const rows = await db
@@ -230,12 +230,12 @@ export async function searchChatMessages(
             projectId: row.projectId,
         }),
     }));
-}
+};
 
-export async function markChannelRead(
+export const markChannelRead = async (
     channelId: string,
     userId: string,
-): Promise<void> {
+): Promise<void> => {
     await db
         .insert(chatReads)
         .values({ channelId, userId, lastReadAt: new Date() })
@@ -243,4 +243,4 @@ export async function markChannelRead(
             target: [chatReads.channelId, chatReads.userId],
             set: { lastReadAt: new Date() },
         });
-}
+};

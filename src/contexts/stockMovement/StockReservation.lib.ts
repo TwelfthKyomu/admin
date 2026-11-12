@@ -12,28 +12,31 @@ import { and, eq, gt, inArray, isNull, or, sum } from 'drizzle-orm';
 import { lockStock } from './StockLevel.lib';
 import {
     mergeStockLines,
+    type OrderStockLine,
     type ReservedLine,
     type StockLine,
+    StockMovementReason,
     type StockTarget,
     stockKey,
 } from './StockMovement.types';
 import {
     type NewStockReservationRecord,
+    stockMovements,
     stockReservations,
 } from './StockMovements.table';
 
-function activeReservation(now: Date) {
+const activeReservation = (now: Date) => {
     return or(
         isNull(stockReservations.expiresAt),
         gt(stockReservations.expiresAt, now),
     );
-}
+};
 
-async function reservedQuantity(
+const reservedQuantity = async (
     tx: Tx,
     warehouseId: string,
     target: Pick<StockTarget, 'productId' | 'variantId'>,
-): Promise<number> {
+): Promise<number> => {
     const [row] = await tx
         .select({ reserved: sum(stockReservations.quantity).mapWith(Number) })
         .from(stockReservations)
@@ -49,22 +52,22 @@ async function reservedQuantity(
         );
 
     return row?.reserved ?? 0;
-}
+};
 
-export async function freeInWarehouse(
+export const freeInWarehouse = async (
     tx: Tx,
     warehouseId: string,
     target: Pick<StockTarget, 'productId' | 'variantId'>,
-): Promise<number> {
+): Promise<number> => {
     const [quantity, reserved] = await Promise.all([
         warehouseQuantity(tx, warehouseId, target),
         reservedQuantity(tx, warehouseId, target),
     ]);
 
     return quantity - reserved;
-}
+};
 
-export async function reserveOrderStock(
+export const reserveOrderStock = async (
     tx: Tx,
     input: {
         orderId: string;
@@ -73,7 +76,7 @@ export async function reserveOrderStock(
         expiresAt: Date | null;
         warehouseIds: string[];
     },
-): Promise<void> {
+): Promise<void> => {
     const rows: NewStockReservationRecord[] = [];
 
     for (const line of mergeStockLines(input.lines)) {
@@ -116,12 +119,12 @@ export async function reserveOrderStock(
     if (rows.length === 0) return;
 
     await tx.insert(stockReservations).values(rows);
-}
+};
 
-export function orderReservations(
+export const orderReservations = (
     tx: Tx,
     orderId: string,
-): Promise<ReservedLine[]> {
+): Promise<ReservedLine[]> => {
     return tx
         .select({
             productId: stockReservations.productId,
@@ -131,20 +134,94 @@ export function orderReservations(
         })
         .from(stockReservations)
         .where(eq(stockReservations.orderId, orderId));
-}
+};
 
-export async function releaseOrderStock(
+export const releaseOrderStock = async (
     tx: Tx,
     orderId: string,
-): Promise<void> {
+): Promise<void> => {
     await tx
         .delete(stockReservations)
         .where(eq(stockReservations.orderId, orderId));
-}
+};
 
-export async function loadSiteFreeStock(
+export const loadOrderStock = async (
+    projectId: string,
+    orderId: string,
+): Promise<OrderStockLine[]> => {
+    const [reserved, moved] = await Promise.all([
+        db
+            .select({
+                productId: stockReservations.productId,
+                variantId: stockReservations.variantId,
+                warehouseId: stockReservations.warehouseId,
+                quantity: stockReservations.quantity,
+            })
+            .from(stockReservations)
+            .where(
+                and(
+                    eq(stockReservations.projectId, projectId),
+                    eq(stockReservations.orderId, orderId),
+                    activeReservation(new Date()),
+                ),
+            ),
+        db
+            .select({
+                productId: stockMovements.productId,
+                variantId: stockMovements.variantId,
+                warehouseId: stockMovements.warehouseId,
+                quantity: sum(stockMovements.quantityDelta).mapWith(Number),
+            })
+            .from(stockMovements)
+            .where(
+                and(
+                    eq(stockMovements.projectId, projectId),
+                    eq(stockMovements.orderId, orderId),
+                    inArray(stockMovements.reason, [
+                        StockMovementReason.SALE,
+                        StockMovementReason.RETURN,
+                    ]),
+                ),
+            )
+            .groupBy(
+                stockMovements.productId,
+                stockMovements.variantId,
+                stockMovements.warehouseId,
+            ),
+    ]);
+
+    return [
+        ...reserved.map((line) => ({ ...line, reserved: true })),
+        ...moved
+            .filter((line) => line.quantity < 0)
+            .map((line) => ({
+                ...line,
+                quantity: -line.quantity,
+                reserved: false,
+            })),
+    ];
+};
+
+export const loadActiveReservations = (projectId: string) => {
+    return db
+        .select({
+            productId: stockReservations.productId,
+            variantId: stockReservations.variantId,
+            total: sum(stockReservations.quantity).mapWith(Number),
+        })
+        .from(stockReservations)
+        .where(
+            and(
+                eq(stockReservations.projectId, projectId),
+                activeReservation(new Date()),
+            ),
+        )
+        .groupBy(stockReservations.productId, stockReservations.variantId);
+};
+
+export const loadSiteFreeStock = async (
     productIds: string[],
-): Promise<Map<string, number>> {
+): Promise<Map<string, number>> => {
     const siteWarehouse = and(
         eq(warehouses.forSite, true),
         isNull(warehouses.deletedAt),
@@ -200,4 +277,4 @@ export async function loadSiteFreeStock(
             Math.max(0, row.total - (reserved.get(stockKey(row)) ?? 0)),
         ]),
     );
-}
+};

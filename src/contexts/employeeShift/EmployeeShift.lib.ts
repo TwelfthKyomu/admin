@@ -32,17 +32,17 @@ import {
     type NewEmployeeShiftRecord,
 } from './EmployeeShifts.table';
 
-export function findShiftInProject(
+export const findShiftInProject = (
     id: string,
     projectId: string,
-): Promise<EmployeeShiftRecord> {
+): Promise<EmployeeShiftRecord> => {
     return findInProject(employeeShifts, id, projectId, 'Смена не найдена');
-}
+};
 
-export function findOverlappingShifts(
+export const findOverlappingShifts = (
     executor: Reader,
     window: Omit<EmployeeWindow, 'projectId'> & { excludeShiftId?: string },
-): Promise<EmployeeShiftRecord[]> {
+): Promise<EmployeeShiftRecord[]> => {
     return executor
         .select()
         .from(employeeShifts)
@@ -58,15 +58,15 @@ export function findOverlappingShifts(
             ),
         )
         .orderBy(asc(employeeShifts.startsAt));
-}
+};
 
-export async function insertShiftsWithoutOverlaps(
+export const insertShiftsWithoutOverlaps = async (
     tx: Tx,
     drafts: NewEmployeeShiftRecord[],
 ): Promise<{
     created: EmployeeShiftRecord[];
     overlapping: NewEmployeeShiftRecord[];
-}> {
+}> => {
     if (drafts.length === 0) return { created: [], overlapping: [] };
 
     const employeeIds = [...new Set(drafts.map((draft) => draft.employeeId))];
@@ -115,13 +115,13 @@ export async function insertShiftsWithoutOverlaps(
             : [];
 
     return { created, overlapping };
-}
+};
 
-export function aggregateWorkedShiftsByEmployee(
+export const aggregateWorkedShiftsByEmployee = (
     projectId: string,
     from: Date,
     to: Date,
-): Promise<{ employeeId: string; count: number }[]> {
+): Promise<{ employeeId: string; count: number }[]> => {
     return db
         .select({ employeeId: employeeShifts.employeeId, count: count() })
         .from(employeeShifts)
@@ -140,12 +140,12 @@ export function aggregateWorkedShiftsByEmployee(
             ),
         )
         .groupBy(employeeShifts.employeeId);
-}
+};
 
-export async function isCoveredByShift(
+export const isCoveredByShift = async (
     executor: Reader,
     window: EmployeeWindow,
-): Promise<boolean> {
+): Promise<boolean> => {
     const [shift] = await executor
         .select({ id: employeeShifts.id })
         .from(employeeShifts)
@@ -161,12 +161,12 @@ export async function isCoveredByShift(
         .limit(1);
 
     return shift !== undefined;
-}
+};
 
-export async function assertShiftAccess(
+export const assertShiftAccess = async (
     userId: string,
     shift: EmployeeShiftRecord,
-): Promise<{ fullAccess: boolean }> {
+): Promise<{ fullAccess: boolean }> => {
     const ownEmployeeId = await ownShiftsEmployeeId(userId, shift.projectId);
 
     if (ownEmployeeId && shift.employeeId !== ownEmployeeId) {
@@ -174,12 +174,12 @@ export async function assertShiftAccess(
     }
 
     return { fullAccess: ownEmployeeId === null };
-}
+};
 
-export async function assertShiftWindowFree(
+export const assertShiftWindowFree = async (
     shift: EmployeeShiftRecord,
     window: Pick<EmployeeShiftRecord, 'startsAt' | 'endsAt'>,
-): Promise<void> {
+): Promise<void> => {
     const overlapping = await findOverlappingShifts(db, {
         employeeId: shift.employeeId,
         startsAt: window.startsAt,
@@ -192,13 +192,13 @@ export async function assertShiftWindowFree(
             'Смена в новых границах пересекается с другой сменой сотрудника',
         );
     }
-}
+};
 
-export function listEmployeeShiftsBetween(
+export const listEmployeeShiftsBetween = (
     employeeId: string,
     from: Date,
     to: Date,
-): Promise<MyShiftView[]> {
+): Promise<MyShiftView[]> => {
     return db
         .select({
             id: employeeShifts.id,
@@ -217,4 +217,4 @@ export function listEmployeeShiftsBetween(
             ),
         )
         .orderBy(asc(employeeShifts.startsAt));
-}
+};

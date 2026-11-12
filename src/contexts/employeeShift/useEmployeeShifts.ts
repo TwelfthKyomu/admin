@@ -37,9 +37,9 @@ const shiftQueries = {
         ),
 };
 
-export function useShiftsList(opts: ListOptions) {
+export const useShiftsList = (opts: ListOptions) => {
     return useQuery(shiftQueries.list(opts));
-}
+};
 
 const replacementShiftQueries = {
     all: ['replacement-shifts'] as const,
@@ -51,9 +51,9 @@ const replacementShiftQueries = {
         ),
 };
 
-export function useReplacementShifts(projectId: string) {
+export const useReplacementShifts = (projectId: string) => {
     return useQuery(replacementShiftQueries.list(projectId));
-}
+};
 
 export const useSetShiftSeekingReplacement = makeMutation(
     setShiftSeekingReplacementAction,

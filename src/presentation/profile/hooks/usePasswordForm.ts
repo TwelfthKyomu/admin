@@ -10,7 +10,7 @@ import {
     type PasswordFormValues,
 } from '../form/formData';
 
-export function usePasswordForm() {
+export const usePasswordForm = () => {
     const form = useForm<PasswordFormValues>({
         resolver: zodResolver(PasswordFormSchema),
         defaultValues: PASSWORD_DEFAULT,
@@ -34,4 +34,4 @@ export function usePasswordForm() {
     };
 
     return { form, onSubmit };
-}
+};

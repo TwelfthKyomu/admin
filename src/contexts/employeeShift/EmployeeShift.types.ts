@@ -38,12 +38,12 @@ export type EmployeeWindow = Pick<
     'employeeId' | 'projectId' | 'startsAt' | 'endsAt'
 >;
 
-export function overlaps(
+export const overlaps = (
     a: Pick<EmployeeShiftRecord, 'startsAt' | 'endsAt'>,
     b: Pick<EmployeeShiftRecord, 'startsAt' | 'endsAt'>,
-): boolean {
+): boolean => {
     return a.startsAt < b.endsAt && a.endsAt > b.startsAt;
-}
+};
 
 export const ShiftCancelReason = {
     SICK: 'sick',
@@ -90,21 +90,21 @@ export interface SkippedShiftView
     reason: string;
 }
 
-export function skippedShift(
+export const skippedShift = (
     shift: Pick<EmployeeShiftRecord, 'employeeId' | 'startsAt' | 'endsAt'>,
     reason: string,
-): SkippedShiftView {
+): SkippedShiftView => {
     return {
         employeeId: shift.employeeId,
         startsAt: shift.startsAt,
         endsAt: shift.endsAt,
         reason,
     };
-}
+};
 
-export function shiftWindowError(
+export const shiftWindowError = (
     shift: Pick<EmployeeShiftRecord, 'startsAt' | 'endsAt' | 'breakMinutes'>,
-): string | null {
+): string | null => {
     if (shift.endsAt <= shift.startsAt) {
         return 'Смена должна заканчиваться позже своего начала';
     }
@@ -115,4 +115,4 @@ export function shiftWindowError(
     }
 
     return null;
-}
+};

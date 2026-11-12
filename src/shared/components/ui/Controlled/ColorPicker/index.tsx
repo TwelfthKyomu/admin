@@ -1,5 +1,5 @@
 import { type FieldPath, type FieldValues, useController, useFormContext } from 'react-hook-form';
-import { InputGroupField } from '@/ui/Base/InputGroup';
+import { ColorPicker as BaseColorPicker } from '@/ui/Base/ColorPicker';
 import { ControlledField } from '../Field';
 
 interface ColorPickerControlledProps<
@@ -12,8 +12,6 @@ interface ColorPickerControlledProps<
     placeholder?: string;
 }
 
-const FALLBACK_COLOR = '#000000';
-
 const ColorPicker = <
     TFieldValues extends FieldValues = FieldValues,
     TName extends FieldPath<TFieldValues> = FieldPath<TFieldValues>,
@@ -21,7 +19,7 @@ const ColorPicker = <
     name,
     label,
     description,
-    placeholder = '#737373',
+    placeholder,
 }: ColorPickerControlledProps<TFieldValues, TName>) => {
     const { control } = useFormContext<TFieldValues>();
 
@@ -30,7 +28,7 @@ const ColorPicker = <
         fieldState: { error, invalid },
     } = useController({ name, control });
 
-    const value = (field.value as string) ?? '';
+    const value = typeof field.value === 'string' ? field.value : '';
 
     return (
         <ControlledField
@@ -39,22 +37,13 @@ const ColorPicker = <
             description={description}
             error={error}
         >
-            <InputGroupField
+            <BaseColorPicker
                 id={name}
-                aria-invalid={invalid}
+                invalid={invalid}
                 value={value}
                 placeholder={placeholder}
-                onChange={(event) => field.onChange(event.target.value)}
+                onChange={field.onChange}
                 onBlur={field.onBlur}
-                startAddon={
-                    <input
-                        type="color"
-                        aria-label="Выбрать цвет"
-                        value={value || FALLBACK_COLOR}
-                        onChange={(event) => field.onChange(event.target.value)}
-                        className="size-6 cursor-pointer rounded-sm border-0 bg-transparent p-0"
-                    />
-                }
             />
         </ControlledField>
     );

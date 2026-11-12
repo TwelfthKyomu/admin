@@ -25,16 +25,16 @@ const CLIENT_ACCESS: Permission[] = [
     Permission.VIEW_FINANCES,
 ];
 
-function projectsWith(
+const projectsWith = (
     permissions: Record<string, Permission[]>,
     required: Permission[],
-): string[] {
+): string[] => {
     return Object.entries(permissions)
         .filter(([, granted]) =>
             granted.some((item) => required.includes(item)),
         )
         .map(([projectId]) => projectId);
-}
+};
 
 export const searchAction = organizationMemberAction()
     .inputSchema(SearchActionInputSchema)

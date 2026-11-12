@@ -22,18 +22,21 @@ export type PaymentMethod = (typeof PaymentMethod)[keyof typeof PaymentMethod];
 
 export const PAYMENT_METHOD_VALUES = enumValues(PaymentMethod);
 
-export function isPaymentMethod(value: string): value is PaymentMethod {
+export const isPaymentMethod = (value: string): value is PaymentMethod => {
     return PAYMENT_METHOD_VALUES.some((method) => method === value);
-}
+};
 
 export interface PaymentTotals {
     charged: number;
     refunded: number;
 }
 
-export function foldPaymentTotals<
+export const foldPaymentTotals = <
     Row extends { direction: PaymentDirection; total: number },
->(rows: Row[], keyOf: (row: Row) => string | null): Map<string, PaymentTotals> {
+>(
+    rows: Row[],
+    keyOf: (row: Row) => string | null,
+): Map<string, PaymentTotals> => {
     const totals = new Map<string, PaymentTotals>();
 
     for (const row of rows) {
@@ -51,4 +54,4 @@ export function foldPaymentTotals<
     }
 
     return totals;
-}
+};

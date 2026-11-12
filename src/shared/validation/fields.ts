@@ -20,29 +20,29 @@ export const httpUrlField = z.url({
     error: 'Нужна ссылка http(s)',
 });
 
-export function textField(max: number, min = 1) {
+export const textField = (max: number, min = 1) => {
     return z.string().check(z.minLength(min), z.maxLength(max));
-}
+};
 
-export function slugField(max: number) {
+export const slugField = (max: number) => {
     return z
         .string()
         .check(z.minLength(1), z.maxLength(max), z.regex(SLUG_PATTERN));
-}
+};
 
-export function upperCodeField(max: number, min = 1) {
+export const upperCodeField = (max: number, min = 1) => {
     return z
         .string()
         .check(z.minLength(min), z.maxLength(max), z.regex(UPPER_CODE_PATTERN));
-}
+};
 
-export function lowerCodeField(max: number) {
+export const lowerCodeField = (max: number) => {
     return z
         .string()
         .check(z.minLength(1), z.maxLength(max), z.regex(LOWER_CODE_PATTERN));
-}
+};
 
-export function upperKeyField(min: number, max: number) {
+export const upperKeyField = (min: number, max: number) => {
     return z
         .string()
         .check(
@@ -50,7 +50,7 @@ export function upperKeyField(min: number, max: number) {
             z.maxLength(max),
             z.regex(UPPER_LETTERS_PATTERN),
         );
-}
+};
 
 export const hexColorField = z.string().check(z.regex(HEX_COLOR_PATTERN));
 
@@ -58,7 +58,7 @@ export const hexColorAlphaField = z
     .string()
     .check(z.regex(HEX_COLOR_ALPHA_PATTERN));
 
-export function normalizeCode(value: string, max: number): string | null {
+export const normalizeCode = (value: string, max: number): string | null => {
     const code = value
         .trim()
         .toLowerCase()
@@ -70,7 +70,7 @@ export function normalizeCode(value: string, max: number): string | null {
     if (!code || code.length > max) return null;
 
     return LOWER_CODE_PATTERN.test(code) ? code : null;
-}
+};
 
 export const imageUrlField = z.string().check(
     z.maxLength(URL_MAX),

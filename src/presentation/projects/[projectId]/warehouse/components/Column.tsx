@@ -15,7 +15,10 @@ interface OverviewColumnsProps {
 }
 
 export const OVERVIEW_COLUMNS = ({ warehouses, ...handlers }: OverviewColumnsProps) => [
-    accessor('name', { header: 'Товар' }),
+    accessor('name', {
+        header: 'Товар',
+        cell: ({ getValue }) => <div className="max-w-72 truncate">{getValue()}</div>,
+    }),
     accessor('sku', {
         header: 'Артикул',
         cell: ({ getValue }) => <code>{getValue()}</code>,
@@ -45,6 +48,10 @@ export const OVERVIEW_COLUMNS = ({ warehouses, ...handlers }: OverviewColumnsPro
 
             return <Badge variant={stock === 0 ? 'destructive' : 'secondary'}>{stock}</Badge>;
         },
+    }),
+    accessor('reserved', {
+        header: 'В брони',
+        cell: ({ getValue }) => getValue() || '—',
     }),
     display({
         id: 'actions',

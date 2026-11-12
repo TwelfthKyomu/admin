@@ -1,5 +1,6 @@
 'use client';
 
+import { DetailRow } from '@/shared/components/common';
 import { fmtMoney } from '@/shared/format/money';
 import { modal } from '@/shared/lib/modal';
 import { IntegrationType, useIntegrationsList } from '@/contexts/integration';
@@ -8,7 +9,6 @@ import { usePaymentIntentsList } from '@/contexts/paymentIntent';
 import { Button } from '@/ui/Base';
 import { OnlinePaymentModal } from '../../modal/OnlinePayment';
 import { PaymentModal } from '../../modal/PaymentModal';
-import { DetailRow } from '../DetailRow';
 import { Section } from '../Section';
 import { PaymentIntentsList } from './IntentsList';
 

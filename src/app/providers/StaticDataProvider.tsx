@@ -22,10 +22,10 @@ export const StaticDataProvider = ({
     return <StaticDataContext.Provider value={data}>{children}</StaticDataContext.Provider>;
 };
 
-export function useStaticData() {
+export const useStaticData = () => {
     const ctx = useContext(StaticDataContext);
 
     if (!ctx) throw new Error('useStaticData must be used within <StaticDataProvider>');
 
     return ctx;
-}
+};

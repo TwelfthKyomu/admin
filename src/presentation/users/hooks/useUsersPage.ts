@@ -14,7 +14,7 @@ import {
 } from '@/contexts/organizationMember';
 import { Permission } from '@/contexts/user';
 
-export function useUsersPage() {
+export const useUsersPage = () => {
     const { organization, user } = useStaticData();
     const query = useOrganizationMembersList(organization.id);
     const changeRole = useChangeOrganizationMemberRole();
@@ -80,4 +80,4 @@ export function useUsersPage() {
         canOffboard,
         onOffboard,
     };
-}
+};

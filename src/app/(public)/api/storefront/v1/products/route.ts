@@ -1,3 +1,4 @@
+import { positiveInt } from '@/shared/lib/number';
 import { PRODUCT_TYPE_VALUES } from '@/contexts/product/Product.types';
 import {
     authenticateStorefront,
@@ -11,15 +12,7 @@ const MAX_LIMIT = 1000;
 const MAX_PAGE = 100_000;
 const SEARCH_MAX = 100;
 
-function positiveInt(value: string | null, max: number): number | undefined {
-    const parsed = value ? Number(value) : Number.NaN;
-
-    return Number.isInteger(parsed) && parsed > 0
-        ? Math.min(parsed, max)
-        : undefined;
-}
-
-export async function GET(request: Request) {
+export const GET = async (request: Request) => {
     await connection();
 
     const { searchParams } = new URL(request.url);
@@ -47,4 +40,4 @@ export async function GET(request: Request) {
             options,
         ),
     );
-}
+};

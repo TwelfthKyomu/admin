@@ -21,10 +21,10 @@ import {
     paymentIntents,
 } from './PaymentIntents.table';
 
-async function refundAtProvider(
+const refundAtProvider = async (
     intent: PaymentIntentRecord,
     input: { amount: number; reason: string | null; idempotenceKey: string },
-): Promise<string> {
+): Promise<string> => {
     const credentials = await getProviderCredentials(intent.integrationId);
 
     if (!credentials) {
@@ -47,13 +47,13 @@ async function refundAtProvider(
     });
 
     return providerRefundId;
-}
+};
 
-export async function refundOrderOnline(
+export const refundOrderOnline = async (
     tx: Tx,
     order: OrderRecord,
     input: { amount: number; reason: string | null; recordedBy: string },
-): Promise<OrderRecord> {
+): Promise<OrderRecord> => {
     const rows = await tx
         .select({
             intentId: payments.sourceIntentId,
@@ -118,13 +118,13 @@ export async function refundOrderOnline(
     });
 
     return updated;
-}
+};
 
-export async function refundUnappliedIntent(
+export const refundUnappliedIntent = async (
     intentId: string,
     projectId: string,
     recordedBy: string,
-): Promise<void> {
+): Promise<void> => {
     await db.transaction(async (tx) => {
         const intent = await lockInProject(
             tx,
@@ -183,4 +183,4 @@ export async function refundUnappliedIntent(
             })
             .where(eq(paymentIntents.id, intent.id));
     });
-}
+};

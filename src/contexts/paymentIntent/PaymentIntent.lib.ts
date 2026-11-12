@@ -28,10 +28,10 @@ import {
     paymentIntents,
 } from './PaymentIntents.table';
 
-export async function getProviderCredentials(
+export const getProviderCredentials = async (
     integrationId: string,
     activeInProjectId?: string,
-): Promise<PaymentProviderCredentials | null> {
+): Promise<PaymentProviderCredentials | null> => {
     const [row] = await db
         .select({
             provider: projectIntegrations.provider,
@@ -59,9 +59,11 @@ export async function getProviderCredentials(
         provider: row.provider,
         payload: decryptCredentials(row.credentials),
     };
-}
+};
 
-export async function findActiveProviderId(projectId: string): Promise<string> {
+export const findActiveProviderId = async (
+    projectId: string,
+): Promise<string> => {
     const [provider] = await db
         .select({ id: projectIntegrations.id })
         .from(projectIntegrations)
@@ -82,12 +84,12 @@ export async function findActiveProviderId(projectId: string): Promise<string> {
     }
 
     return provider.id;
-}
+};
 
-function amountMismatch(
+const amountMismatch = (
     intent: PaymentIntentRecord,
     event: PaymentWebhookEvent,
-): string | null {
+): string | null => {
     const amountDiffers =
         event.amount !== undefined && event.amount !== intent.amount;
 
@@ -97,12 +99,12 @@ function amountMismatch(
     return amountDiffers || currencyDiffers
         ? `Провайдер сообщил ${event.amount} ${event.currency}, ожидалось ${intent.amount} ${intent.currency}`
         : null;
-}
+};
 
-async function recordIntentPayment(
+const recordIntentPayment = async (
     tx: Tx,
     intent: PaymentIntentRecord,
-): Promise<string | null> {
+): Promise<string | null> => {
     try {
         await tx.transaction(async (savepoint) => {
             const order = await lockOrder(
@@ -123,12 +125,12 @@ async function recordIntentPayment(
     } catch (error) {
         return getErrorMessage(error);
     }
-}
+};
 
-export async function applyPaymentWebhookEvent(
+export const applyPaymentWebhookEvent = async (
     integrationId: string,
     event: PaymentWebhookEvent,
-): Promise<WebhookOutcome> {
+): Promise<WebhookOutcome> => {
     if (!event.providerPaymentId) return 'ignored';
 
     return db.transaction(async (tx) => {
@@ -183,9 +185,9 @@ export async function applyPaymentWebhookEvent(
 
         return 'applied';
     });
-}
+};
 
-export async function startOnlinePayment(input: {
+export const startOnlinePayment = async (input: {
     projectId: string;
     integrationId: string;
     orderId: string;
@@ -194,7 +196,7 @@ export async function startOnlinePayment(input: {
     returnUrl: string;
     description?: string;
     expiresAt?: Date;
-}): Promise<PaymentIntentRecord> {
+}): Promise<PaymentIntentRecord> => {
     const [credentials, order] = await Promise.all([
         getProviderCredentials(input.integrationId, input.projectId),
         findOrderInProject(input.orderId, input.projectId),
@@ -260,4 +262,4 @@ export async function startOnlinePayment(input: {
         },
         'Не удалось сохранить платёж',
     );
-}
+};

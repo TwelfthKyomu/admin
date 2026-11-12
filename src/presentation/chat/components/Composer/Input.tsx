@@ -1,9 +1,9 @@
 'use client';
 
-import type { ClipboardEvent, KeyboardEvent } from 'react';
 import { TEXT_MAX } from '@/shared/constants/default';
 import { cn } from '@/shared/lib/utils';
 import { InputGroupTextarea } from '@/ui/Base';
+import { useMessageInput } from '../../hooks/useMessageInput';
 
 interface MessageInputProps {
     value: string;
@@ -30,35 +30,13 @@ export const MessageInput = ({
     label,
     className,
 }: MessageInputProps) => {
-    const handlePaste = (event: ClipboardEvent<HTMLTextAreaElement>) => {
-        const files = [...event.clipboardData.files];
-
-        if (files.length === 0 || !onPasteFiles) return;
-
-        event.preventDefault();
-        onPasteFiles(files);
-    };
-
-    const handleKeyDown = (event: KeyboardEvent<HTMLTextAreaElement>) => {
-        if (event.key === 'Enter' && !event.shiftKey) {
-            event.preventDefault();
-            onSubmit();
-
-            return;
-        }
-
-        if (event.key === 'Escape' && onCancel) {
-            event.preventDefault();
-            onCancel();
-
-            return;
-        }
-
-        if (event.key === 'ArrowUp' && value.length === 0 && onArrowUpOnEmpty) {
-            event.preventDefault();
-            onArrowUpOnEmpty();
-        }
-    };
+    const { handlePaste, handleKeyDown } = useMessageInput({
+        value,
+        onSubmit,
+        onCancel,
+        onArrowUpOnEmpty,
+        onPasteFiles,
+    });
 
     return (
         <InputGroupTextarea

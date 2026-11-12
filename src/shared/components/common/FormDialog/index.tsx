@@ -1,16 +1,11 @@
 'use client';
 
-import { type ComponentProps, type ReactNode, useRef } from 'react';
-import {
-    type FieldValues,
-    type SubmitHandler,
-    type UseFormReturn,
-    useFormState,
-} from 'react-hook-form';
-import { modal, useModalClose } from '@/shared/lib/modal';
+import type { ComponentProps, ReactNode } from 'react';
+import type { FieldValues, SubmitHandler, UseFormReturn } from 'react-hook-form';
 import { cn } from '@/shared/lib/utils';
 import { Button, Modal, Sheet } from '@/ui/Base';
 import { Form } from '@/ui/Controlled';
+import { useDiscardGuard } from './hooks/useDiscardGuard';
 
 interface FormDialogProps<T extends FieldValues> {
     surface?: 'modal' | 'sheet';
@@ -45,31 +40,7 @@ export const FormDialog = <T extends FieldValues>({
     busy,
     children,
 }: FormDialogProps<T>) => {
-    const close = useModalClose();
-    const { isValid, isDirty } = useFormState({ control: form.control });
-    const discardPrompt = useRef<Promise<boolean> | null>(null);
-
-    const canClose = (): Promise<boolean> => {
-        if (!isDirty) return Promise.resolve(true);
-
-        discardPrompt.current ??= modal
-            .confirm({
-                title: 'Закрыть без сохранения?',
-                description: 'Введённые изменения пропадут.',
-                confirmLabel: 'Закрыть',
-                cancelLabel: 'Вернуться к форме',
-                tone: 'destructive',
-            })
-            .finally(() => {
-                discardPrompt.current = null;
-            });
-
-        return discardPrompt.current;
-    };
-
-    const cancel = async () => {
-        if (await canClose()) close();
-    };
+    const { close, isValid, isDirty, canClose, cancel } = useDiscardGuard(form.control);
 
     const footer = (
         <>

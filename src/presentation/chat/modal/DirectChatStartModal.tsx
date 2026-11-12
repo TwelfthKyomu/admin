@@ -1,13 +1,9 @@
 'use client';
 
-import { useState } from 'react';
 import { PageLoader, PersonCell } from '@/shared/components/common';
 import { ORGANIZATION_ROLE_LABEL } from '@/shared/labels/team';
-import { runAction } from '@/shared/lib/action-result';
-import { useModalClose } from '@/shared/lib/modal';
-import { matchesSearch } from '@/shared/lib/search';
-import { useChatContacts, useStartDirectChat } from '@/contexts/chat';
 import { Input, Modal } from '@/ui/Base';
+import { useDirectChatStartModal } from '../hooks/useDirectChatStartModal';
 
 interface StartDmModalProps {
     organizationId: string;
@@ -15,26 +11,8 @@ interface StartDmModalProps {
 }
 
 export const DirectChatStartModal = ({ organizationId, onOpened }: StartDmModalProps) => {
-    const close = useModalClose();
-    const [search, setSearch] = useState('');
-    const contacts = useChatContacts(organizationId, true);
-    const { mutateAsync, isPending } = useStartDirectChat();
-
-    const visible = (contacts.data ?? []).filter((contact) =>
-        matchesSearch(search, contact.name, contact.email),
-    );
-
-    const pick = async (userId: string) => {
-        if (isPending) return;
-
-        const { success, response } = await runAction(mutateAsync({ otherUserId: userId }));
-        const channelId = response?.data?.channelId;
-
-        if (success && channelId) {
-            close();
-            onOpened(channelId);
-        }
-    };
+    const { close, search, setSearch, contacts, isPending, visible, pick } =
+        useDirectChatStartModal(organizationId, onOpened);
 
     return (
         <Modal

@@ -4,7 +4,7 @@ import { projects } from '@/contexts/project/Projects.table';
 import { users } from '@/contexts/user/Users.table';
 import { warehouses } from '@/contexts/warehouse/Warehouses.table';
 
-export async function seedProject() {
+export const seedProject = async () => {
     const user = await insertOne(
         users,
         { name: 'Тест', email: `${crypto.randomUUID()}@test.invalid` },
@@ -35,4 +35,4 @@ export async function seedProject() {
     );
 
     return { user, organization, project, warehouse };
-}
+};

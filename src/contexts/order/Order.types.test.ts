@@ -222,7 +222,7 @@ describe('rollUpRevenueByCurrency', () => {
     });
 });
 
-function item(overrides: Partial<OrderItemInput>): OrderItemInput {
+const item = (overrides: Partial<OrderItemInput>): OrderItemInput => {
     return {
         name: 'Позиция',
         type: ProductType.PHYSICAL,
@@ -230,7 +230,7 @@ function item(overrides: Partial<OrderItemInput>): OrderItemInput {
         quantity: 1,
         ...overrides,
     };
-}
+};
 
 describe('sumOrderItems', () => {
     it('цена × количество по всем позициям', () => {

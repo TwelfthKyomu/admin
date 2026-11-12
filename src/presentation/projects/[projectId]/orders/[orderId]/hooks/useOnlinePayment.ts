@@ -22,12 +22,12 @@ interface UseOnlinePaymentOptions {
     defaultAmount: number;
 }
 
-export function useOnlinePayment({
+export const useOnlinePayment = ({
     projectId,
     order,
     providers,
     defaultAmount,
-}: UseOnlinePaymentOptions) {
+}: UseOnlinePaymentOptions) => {
     const [confirmationUrl, setConfirmationUrl] = useState<string>();
     const { mutateAsync, isPending } = useCreatePaymentIntent();
 
@@ -64,4 +64,4 @@ export function useOnlinePayment({
     };
 
     return { form, isPending, confirmationUrl, returnUrl, submit };
-}
+};

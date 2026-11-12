@@ -35,26 +35,26 @@ import {
 
 type OrderEventDraft = Omit<NewOrderEventRecord, 'orderId'>;
 
-export function findOrderInProject(
+export const findOrderInProject = (
     id: string,
     projectId: string,
-): Promise<OrderRecord> {
+): Promise<OrderRecord> => {
     return findInProject(orders, id, projectId, 'Заказ не найден');
-}
+};
 
-export function lockOrder(
+export const lockOrder = (
     tx: Tx,
     id: string,
     projectId: string,
-): Promise<OrderRecord> {
+): Promise<OrderRecord> => {
     return lockInProject(tx, orders, id, projectId, 'Заказ не найден');
-}
+};
 
-export async function findClientOrders(
+export const findClientOrders = async (
     projectId: string,
     clientId: string,
     limit: number,
-): Promise<{ order: OrderRecord; items: OrderItemRecord[] }[]> {
+): Promise<{ order: OrderRecord; items: OrderItemRecord[] }[]> => {
     const orderRows = await db
         .select()
         .from(orders)
@@ -82,24 +82,24 @@ export async function findClientOrders(
         order,
         items: itemsByOrder.get(order.id) ?? [],
     }));
-}
+};
 
-export async function recordOrderEvents(
+export const recordOrderEvents = async (
     tx: Tx,
     events: NewOrderEventRecord[],
-): Promise<void> {
+): Promise<void> => {
     if (events.length === 0) return;
 
     await tx.insert(orderEvents).values(events);
-}
+};
 
-export async function createOrderWithItems(
+export const createOrderWithItems = async (
     tx: Tx,
     values: NewOrderRecord,
     items: ResolvedOrderItem[],
     event: Pick<OrderEventDraft, 'byUserId' | 'payload'>,
     reservation: { warehouseIds: string[]; expiresAt: Date | null },
-): Promise<{ order: OrderRecord; items: OrderItemRecord[] }> {
+): Promise<{ order: OrderRecord; items: OrderItemRecord[] }> => {
     const order = await insertOne(
         orders,
         values,
@@ -147,14 +147,14 @@ export async function createOrderWithItems(
     ]);
 
     return { order, items: savedItems };
-}
+};
 
-export async function writeOrderUpdate(
+export const writeOrderUpdate = async (
     tx: Tx,
     order: OrderRecord,
     values: Partial<OrderRecord>,
     event: OrderEventDraft,
-): Promise<OrderRecord> {
+): Promise<OrderRecord> => {
     const [updated] = await tx
         .update(orders)
         .set(values)
@@ -166,14 +166,14 @@ export async function writeOrderUpdate(
     await recordOrderEvents(tx, [{ ...event, orderId: order.id }]);
 
     return updated;
-}
+};
 
-export async function changeOrderStatus(
+export const changeOrderStatus = async (
     tx: Tx,
     order: OrderRecord,
     status: OrderStatus,
     event: { byUserId: string | null; reason: string | null },
-): Promise<OrderRecord> {
+): Promise<OrderRecord> => {
     const hasDelivery =
         status === OrderStatus.READY && (await hasOpenDelivery(tx, order.id));
 
@@ -215,27 +215,27 @@ export async function changeOrderStatus(
     }
 
     return updated;
-}
+};
 
-export async function completeOrder(
+export const completeOrder = async (
     tx: Tx,
     order: OrderRecord,
     event: { byUserId: string | null; reason: string | null },
-): Promise<OrderRecord> {
+): Promise<OrderRecord> => {
     const confirmed =
         order.status === OrderStatus.PENDING
             ? await changeOrderStatus(tx, order, OrderStatus.CONFIRMED, event)
             : order;
 
     return changeOrderStatus(tx, confirmed, OrderStatus.COMPLETED, event);
-}
+};
 
-export function setOrderSeller(
+export const setOrderSeller = (
     tx: Tx,
     order: OrderRecord,
     sellerId: string | null,
     byUserId: string | null,
-): Promise<OrderRecord> {
+): Promise<OrderRecord> => {
     return writeOrderUpdate(
         tx,
         order,
@@ -246,14 +246,14 @@ export function setOrderSeller(
             payload: { from: order.sellerId, to: sellerId },
         },
     );
-}
+};
 
-export async function addOrderDiscount(
+export const addOrderDiscount = async (
     tx: Tx,
     order: OrderRecord,
     amount: number,
     byUserId: string | null,
-): Promise<OrderRecord> {
+): Promise<OrderRecord> => {
     if (isOrderTerminal(order.status)) {
         throw new ApplicationError('Нельзя менять скидку завершённого заказа');
     }
@@ -280,4 +280,4 @@ export async function addOrderDiscount(
             payload: { from: order.discountAmount, to: discountAmount },
         },
     );
-}
+};

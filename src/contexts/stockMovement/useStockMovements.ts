@@ -4,6 +4,7 @@ import { makeMutation } from '@/shared/lib/mutations';
 import { listQuery } from '@/shared/lib/queries';
 import { useQuery } from '@tanstack/react-query';
 import {
+    orderStockAction,
     stockMovementsAction,
     stockOverviewAction,
 } from './StockMovement.actions';
@@ -33,15 +34,25 @@ const stockQueries = {
             () => stockMovementsAction({ projectId, productId }),
             { enabled: projectId.length > 0, staleTime: 15_000 },
         ),
+    order: (projectId: string, orderId: string) =>
+        listQuery(
+            [...stockQueries.all, 'order', projectId, orderId],
+            () => orderStockAction({ projectId, orderId }),
+            { enabled: orderId.length > 0 },
+        ),
 };
 
-export function useStockOverview(projectId: string) {
-    return useQuery(stockQueries.overview(projectId));
-}
+export const useOrderStock = (projectId: string, orderId: string) => {
+    return useQuery(stockQueries.order(projectId, orderId));
+};
 
-export function useStockMovements(opts: MovementsOptions) {
+export const useStockOverview = (projectId: string) => {
+    return useQuery(stockQueries.overview(projectId));
+};
+
+export const useStockMovements = (opts: MovementsOptions) => {
     return useQuery(stockQueries.movements(opts));
-}
+};
 
 export const useReceiveStock = makeMutation(receiveStockAction);
 export const useWriteOffStock = makeMutation(writeOffStockAction);

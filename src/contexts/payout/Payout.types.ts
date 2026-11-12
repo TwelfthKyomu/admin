@@ -20,11 +20,11 @@ export interface PayoutAmounts {
     totalAmount: number;
 }
 
-export function commissionOf(revenue: number, rate: number): number {
+export const commissionOf = (revenue: number, rate: number): number => {
     return Math.floor((revenue * rate) / 100);
-}
+};
 
-export function calcPayout(inputs: PayoutInputs): PayoutAmounts {
+export const calcPayout = (inputs: PayoutInputs): PayoutAmounts => {
     const shiftsPay = inputs.shiftsCount * inputs.shiftRateAmount;
 
     const commissionPay = commissionOf(
@@ -47,13 +47,13 @@ export function calcPayout(inputs: PayoutInputs): PayoutAmounts {
         totalAmount:
             shiftsPay + commissionPay + siteCommissionPay + deliveriesPay,
     };
-}
+};
 
-export function isPreSalesSnapshot(
+export const isPreSalesSnapshot = (
     payout: Pick<PayoutRecord, 'siteCommissionRate'>,
-): boolean {
+): boolean => {
     return payout.siteCommissionRate === null;
-}
+};
 
 export interface PayrollRowView extends PayoutInputs, PayoutAmounts {
     employeeId: string;
@@ -67,9 +67,9 @@ export interface PayrollRowView extends PayoutInputs, PayoutAmounts {
     recalculatedTotal: number | null;
 }
 
-export function payoutCovers(
+export const payoutCovers = (
     payout: Pick<PayoutRecord, 'periodStart' | 'periodEnd'>,
     at: Date,
-): boolean {
+): boolean => {
     return at >= payout.periodStart && at < payout.periodEnd;
-}
+};

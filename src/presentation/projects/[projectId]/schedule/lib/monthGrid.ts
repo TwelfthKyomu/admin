@@ -20,17 +20,17 @@ export interface MonthDay {
     shifts: EmployeeShiftView[];
 }
 
-export function computeMonthRange(date: Date): { from: Date; to: Date } {
+export const computeMonthRange = (date: Date): { from: Date; to: Date } => {
     const from = startOfWeek(startOfMonth(date), { weekStartsOn: 1 });
 
     return { from, to: addDays(from, 42) };
-}
+};
 
-export function buildMonthGrid(args: {
+export const buildMonthGrid = (args: {
     date: Date;
     sales: ScheduleSale[];
     shifts: EmployeeShiftView[];
-}): MonthDay[] {
+}): MonthDay[] => {
     const { from, to } = computeMonthRange(args.date);
     const currentMonth = args.date.getMonth();
     const today = new Date();
@@ -46,12 +46,15 @@ export function buildMonthGrid(args: {
             ),
         }),
     );
-}
+};
 
-export function monthSales(days: MonthDay[]): ScheduleSale[] {
+export const monthSales = (days: MonthDay[]): ScheduleSale[] => {
     return days.flatMap((day) => (day.isInCurrentMonth ? day.sales : []));
-}
+};
 
-export function salesAmount(sales: ScheduleSale[], currency: Currency): string {
+export const salesAmount = (
+    sales: ScheduleSale[],
+    currency: Currency,
+): string => {
     return fmtMoney(salesTotal(sales.map((sale) => sale.order)), currency);
-}
+};

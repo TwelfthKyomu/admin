@@ -5,10 +5,10 @@ import type { ColumnDef, Row } from '@tanstack/react-table';
 
 const SELECT_COLUMN_ID = '__select';
 
-export function resolveTableColumns<TData>(
+export const resolveTableColumns = <TData,>(
     columns: ColumnDef<TData, any>[],
     enableRowSelection: boolean | ((row: Row<TData>) => boolean),
-): ColumnDef<TData, any>[] {
+): ColumnDef<TData, any>[] => {
     if (!enableRowSelection || columns.some((column) => column.id === SELECT_COLUMN_ID)) {
         return columns;
     }
@@ -24,4 +24,4 @@ export function resolveTableColumns<TData>(
         },
         ...columns,
     ];
-}
+};

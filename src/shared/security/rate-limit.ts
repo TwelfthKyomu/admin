@@ -31,17 +31,20 @@ const SWEEP_THRESHOLD = 10_000;
 
 const buckets = new Map<string, Bucket>();
 
-function sweepExpired(now: number): void {
+const sweepExpired = (now: number): void => {
     if (buckets.size < SWEEP_THRESHOLD) return;
 
     for (const [key, bucket] of buckets) {
         if (bucket.resetAt <= now) buckets.delete(key);
     }
-}
+};
 
 export class RateLimitError extends ApplicationError {}
 
-export function enforceRateLimit(key: RateLimitKey, identifier: string): void {
+export const enforceRateLimit = (
+    key: RateLimitKey,
+    identifier: string,
+): void => {
     const now = Date.now();
     const bucketKey = `${key}:${identifier}`;
     const bucket = buckets.get(bucketKey);
@@ -60,4 +63,4 @@ export function enforceRateLimit(key: RateLimitKey, identifier: string): void {
             'Слишком много запросов, попробуйте через минуту',
         );
     }
-}
+};

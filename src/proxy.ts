@@ -11,18 +11,18 @@ import { type NextRequest, NextResponse } from 'next/server';
 
 const PUBLIC_PREFIXES = [AUTH_ROUTE, '/api', '/invite', '/terms'];
 
-function matchesPrefix(pathname: string, prefix: string): boolean {
+const matchesPrefix = (pathname: string, prefix: string): boolean => {
     return pathname === prefix || pathname.startsWith(`${prefix}/`);
-}
+};
 
-function stripCookiePrefix(name: string) {
+const stripCookiePrefix = (name: string) => {
     if (name.startsWith('__Secure-')) return name.slice('__Secure-'.length);
     if (name.startsWith('__Host-')) return name.slice('__Host-'.length);
 
     return name;
-}
+};
 
-function clearAuthCookies(request: NextRequest, response: NextResponse) {
+const clearAuthCookies = (request: NextRequest, response: NextResponse) => {
     for (const cookie of request.cookies.getAll()) {
         if (!stripCookiePrefix(cookie.name).startsWith(AUTH_COOKIE_PREFIX)) {
             continue;
@@ -36,9 +36,9 @@ function clearAuthCookies(request: NextRequest, response: NextResponse) {
     }
 
     return response;
-}
+};
 
-export function proxy(request: NextRequest) {
+export const proxy = (request: NextRequest) => {
     const { pathname, searchParams } = request.nextUrl;
 
     const sessionCookie = getSessionCookie(request);
@@ -76,7 +76,7 @@ export function proxy(request: NextRequest) {
     }
 
     return NextResponse.next();
-}
+};
 
 export const config = {
     matcher: [

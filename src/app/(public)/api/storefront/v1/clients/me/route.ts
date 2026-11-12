@@ -6,7 +6,7 @@ import { CLIENT_SESSION_HEADER } from '@/contexts/storefront/Storefront.types';
 import { loadStorefrontClient } from '@/contexts/storefront/StorefrontClient.lib';
 import { connection } from 'next/server';
 
-export async function GET(request: Request) {
+export const GET = async (request: Request) => {
     await connection();
 
     return storefrontResponse(async () =>
@@ -15,4 +15,4 @@ export async function GET(request: Request) {
             request.headers.get(CLIENT_SESSION_HEADER) ?? '',
         ),
     );
-}
+};

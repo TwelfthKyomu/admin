@@ -11,7 +11,7 @@ const KIND_FILTER_VALUES = [
 
 export type KindFilterValue = (typeof KIND_FILTER_VALUES)[number];
 
-export function useKindParam() {
+export const useKindParam = () => {
     const [kind, setKind] = useQueryState(
         'kind',
         parseAsStringLiteral(KIND_FILTER_VALUES).withDefault('all'),
@@ -23,4 +23,4 @@ export function useKindParam() {
             void setKind(next === 'all' ? null : next),
         matches: (value: EmployeeKind) => kind === 'all' || kind === value,
     };
-}
+};

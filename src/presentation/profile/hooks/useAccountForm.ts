@@ -8,7 +8,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { useRouter } from 'next/navigation';
 import { AccountFormSchema, type AccountFormValues } from '../form/formData';
 
-export function useAccountForm() {
+export const useAccountForm = () => {
     const { user } = useStaticData();
     const router = useRouter();
 
@@ -31,4 +31,4 @@ export function useAccountForm() {
     };
 
     return { form, onSubmit };
-}
+};

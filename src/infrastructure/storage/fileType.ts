@@ -31,13 +31,13 @@ const TEXT_TYPES: Record<string, string> = {
     csv: 'text/csv; charset=utf-8',
 };
 
-function extensionOf(name: string): string {
+const extensionOf = (name: string): string => {
     return name.includes('.')
         ? (name.split('.').pop() ?? '').toLowerCase()
         : '';
-}
+};
 
-function isUtf8Text(bytes: Uint8Array): boolean {
+const isUtf8Text = (bytes: Uint8Array): boolean => {
     if (bytes.includes(0)) return false;
 
     try {
@@ -47,12 +47,12 @@ function isUtf8Text(bytes: Uint8Array): boolean {
     } catch {
         return false;
     }
-}
+};
 
-export async function detectFileType(
+export const detectFileType = async (
     bytes: Uint8Array,
     name: string,
-): Promise<FileType | null> {
+): Promise<FileType | null> => {
     const detected = await fileTypeFromBuffer(bytes);
     const ext = extensionOf(name);
 
@@ -78,12 +78,12 @@ export async function detectFileType(
     }
 
     return null;
-}
+};
 
-export async function detectImageType(
+export const detectImageType = async (
     bytes: Uint8Array,
-): Promise<FileType | null> {
+): Promise<FileType | null> => {
     const type = await detectFileType(bytes, '');
 
     return type?.isImage ? type : null;
-}
+};

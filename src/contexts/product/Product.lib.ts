@@ -35,11 +35,11 @@ import { loadVariants } from './ProductVariant.lib';
 
 type ProductRelations = Pick<ProductView, 'variants' | 'badges' | 'soldCount'>;
 
-export async function assertProductLimit(
+export const assertProductLimit = async (
     organizationId: string,
     projectId: string,
     adding = 1,
-): Promise<void> {
+): Promise<void> => {
     const [used] = await db
         .select({ value: count() })
         .from(products)
@@ -53,13 +53,13 @@ export async function assertProductLimit(
         (used?.value ?? 0) + adding - 1,
         'товаров',
     );
-}
+};
 
-export async function assertCategoryCompatible(
+export const assertCategoryCompatible = async (
     projectId: string,
     categoryId: string | null,
     productType: ProductType,
-): Promise<void> {
+): Promise<void> => {
     if (!categoryId) return;
 
     const [category] = await db
@@ -81,13 +81,13 @@ export async function assertCategoryCompatible(
             `Категория «${category.name}» (${category.type}) несовместима с типом товара «${productType}»`,
         );
     }
-}
+};
 
-export async function assertProductCodesFree(
+export const assertProductCodesFree = async (
     projectId: string,
     codes: { slug?: string; sku?: string },
     excludeId?: string,
-): Promise<void> {
+): Promise<void> => {
     await Promise.all([
         codes.slug &&
             assertUniqueInProject({
@@ -108,13 +108,13 @@ export async function assertProductCodesFree(
                 conflict: `Товар с SKU «${codes.sku}» уже существует`,
             }),
     ]);
-}
+};
 
-export async function assertBarcodesFree(
+export const assertBarcodesFree = async (
     projectId: string,
     barcodes: (string | null | undefined)[],
     excludeProductId?: string,
-): Promise<void> {
+): Promise<void> => {
     const codes = barcodes.filter((code): code is string => Boolean(code));
     const repeated = codes.find((code, index) => codes.indexOf(code) !== index);
 
@@ -160,12 +160,12 @@ export async function assertBarcodesFree(
             `Штрихкод «${taken}» уже есть у другого товара`,
         );
     }
-}
+};
 
-export async function resolveBadgeIds(
+export const resolveBadgeIds = async (
     projectId: string,
     codes: string[],
-): Promise<string[]> {
+): Promise<string[]> => {
     const normalized = normalizeProductBadges(codes);
 
     if (normalized.length === 0) return [];
@@ -191,13 +191,13 @@ export async function resolveBadgeIds(
     }
 
     return normalized.flatMap((code) => idByCode.get(code) ?? []);
-}
+};
 
-export async function replaceProductBadges(
+export const replaceProductBadges = async (
     tx: Tx,
     product: ProductRef,
     badgeIds: string[],
-): Promise<void> {
+): Promise<void> => {
     await tx
         .delete(productBadges)
         .where(eq(productBadges.productId, product.id));
@@ -212,11 +212,11 @@ export async function replaceProductBadges(
             position,
         })),
     );
-}
+};
 
-export async function loadSoldCounts(
+export const loadSoldCounts = async (
     productIds: string[],
-): Promise<Map<string, number>> {
+): Promise<Map<string, number>> => {
     const rows = await db
         .select({
             productId: orderItems.productId,
@@ -237,11 +237,11 @@ export async function loadSoldCounts(
             row.productId ? [[row.productId, row.sold]] : [],
         ),
     );
-}
+};
 
-export async function loadProductRelations(
+export const loadProductRelations = async (
     productIds: string[],
-): Promise<(productId: string) => ProductRelations> {
+): Promise<(productId: string) => ProductRelations> => {
     const [variants, badgeRows, soldCounts] = await Promise.all([
         loadVariants(productIds),
         db
@@ -266,12 +266,12 @@ export async function loadProductRelations(
         badges: badges.get(productId)?.map((row) => row.code) ?? [],
         soldCount: soldCounts.get(productId) ?? 0,
     });
-}
+};
 
-export async function withRelations<T extends { id: string }>(
+export const withRelations = async <T extends { id: string }>(
     product: T,
-): Promise<T & ProductRelations> {
+): Promise<T & ProductRelations> => {
     const relationsOf = await loadProductRelations([product.id]);
 
     return { ...product, ...relationsOf(product.id) };
-}
+};

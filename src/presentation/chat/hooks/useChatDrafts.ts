@@ -8,8 +8,8 @@ import {
     subscribeDrafts,
 } from '../lib/drafts';
 
-export function useChatDrafts(viewerId: string) {
+export const useChatDrafts = (viewerId: string) => {
     useSyncExternalStore(subscribeDrafts, draftsVersion, serverDraftsVersion);
 
     return (scope: string) => readDraft(`${viewerId}:${scope}`);
-}
+};

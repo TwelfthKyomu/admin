@@ -10,21 +10,21 @@ import type { OrderItemInput } from './Order.schema';
 import type { ResolvedOrderItem } from './Order.types';
 import { type OrderItemRecord, orderItems } from './Orders.table';
 
-export function loadOrderItems(
+export const loadOrderItems = (
     orderId: string,
     executor: Reader = db,
-): Promise<OrderItemRecord[]> {
+): Promise<OrderItemRecord[]> => {
     return executor
         .select()
         .from(orderItems)
         .where(eq(orderItems.orderId, orderId));
-}
+};
 
-export async function resolveOrderItems(
+export const resolveOrderItems = async (
     projectId: string,
     items: OrderItemInput[],
     currency: Currency,
-): Promise<ResolvedOrderItem[]> {
+): Promise<ResolvedOrderItem[]> => {
     const productIds = [
         ...new Set(items.flatMap((item) => item.productId ?? [])),
     ];
@@ -115,4 +115,4 @@ export async function resolveOrderItems(
             unitCostAmount: product.costAmount,
         };
     });
-}
+};

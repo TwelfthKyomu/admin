@@ -37,13 +37,13 @@ import {
     toMajorUnits,
 } from './Storefront.types';
 
-export function publicImageUrl(projectId: string, url: string): string {
+export const publicImageUrl = (projectId: string, url: string): string => {
     const prefix = `${uploadUrl(projectId, '')}`;
 
     return url.startsWith(prefix)
         ? storefrontImageUrl(projectId, url.slice(prefix.length))
         : url;
-}
+};
 
 export interface LoadCatalogOptions {
     page?: number;
@@ -65,10 +65,10 @@ const CATALOG_ORDER = {
     [CatalogSort.PRICE_DESC]: [desc(products.price), asc(products.name)],
 };
 
-export async function loadStorefrontCatalog(
+export const loadStorefrontCatalog = async (
     access: StorefrontAccess,
     options: LoadCatalogOptions = {},
-) {
+) => {
     const { projectId } = access;
 
     const categories = await db
@@ -219,4 +219,4 @@ export async function loadStorefrontCatalog(
             };
         }),
     };
-}
+};

@@ -17,16 +17,25 @@ import {
     Permission,
 } from '@/contexts/user/User.types';
 import { and, eq, gt } from 'drizzle-orm';
-import { findWarehouseInProject, listWarehouses } from './Warehouse.lib';
+import {
+    findWarehouseInProject,
+    listWarehouses,
+    makePrimaryWarehouse,
+} from './Warehouse.lib';
 import {
     CreateWarehouseActionInputSchema,
     DeleteWarehouseActionInputSchema,
+    MakePrimaryWarehouseActionInputSchema,
     UpdateWarehouseActionInputSchema,
     WarehousesActionInputSchema,
 } from './Warehouse.schema';
 import { warehouseStock, warehouses } from './Warehouses.table';
 
-function assertNameFree(projectId: string, name: string, excludeId?: string) {
+const assertNameFree = (
+    projectId: string,
+    name: string,
+    excludeId?: string,
+) => {
     return assertUniqueInProject({
         table: warehouses,
         column: warehouses.name,
@@ -35,7 +44,7 @@ function assertNameFree(projectId: string, name: string, excludeId?: string) {
         excludeId,
         conflict: `Склад «${name}» уже есть в проекте`,
     });
-}
+};
 
 export const warehousesAction = projectReadAction(CATALOG_READ_PERMISSIONS)
     .inputSchema(WarehousesActionInputSchema)
@@ -77,6 +86,14 @@ export const updateWarehouseAction = projectMutationAction(
             'Склад не найден',
         );
     });
+
+export const makePrimaryWarehouseAction = projectMutationAction(
+    Permission.MANAGE_CATALOG,
+)
+    .inputSchema(MakePrimaryWarehouseActionInputSchema)
+    .action(({ parsedInput: { id, projectId } }) =>
+        db.transaction((tx) => makePrimaryWarehouse(tx, projectId, id)),
+    );
 
 export const deleteWarehouseAction = projectMutationAction(
     Permission.MANAGE_CATALOG,

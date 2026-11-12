@@ -5,33 +5,33 @@ import { findInProject, insertOne } from '@/shared/api/repository';
 import { and, eq } from 'drizzle-orm';
 import { type ClientRecord, type ClientView, clients } from './Clients.table';
 
-export function findClientInProject(
+export const findClientInProject = (
     id: string,
     projectId: string,
-): Promise<ClientRecord> {
+): Promise<ClientRecord> => {
     return findInProject(clients, id, projectId, 'Клиент не найден');
-}
+};
 
-export function toClientView({
+export const toClientView = ({
     passwordHash: _passwordHash,
     verificationCodeHash: _verificationCodeHash,
     verificationCodeExpiresAt: _verificationCodeExpiresAt,
     ...client
-}: ClientRecord): ClientView {
+}: ClientRecord): ClientView => {
     return client;
-}
+};
 
-function clientNameParts(name: string) {
+const clientNameParts = (name: string) => {
     const [firstName = name, ...rest] = name.trim().split(/\s+/);
 
     return { firstName, lastName: rest.join(' ') || null };
-}
+};
 
-export async function addClientSpending(
+export const addClientSpending = async (
     tx: Tx,
     clientId: string,
     change: { orders: number; amount: number; visitedAt?: Date },
-): Promise<void> {
+): Promise<void> => {
     const [client] = await tx
         .select({
             totalOrders: clients.totalOrders,
@@ -55,13 +55,13 @@ export async function addClientSpending(
             lastVisitAt: change.visitedAt,
         })
         .where(eq(clients.id, clientId));
-}
+};
 
-export async function findOrCreateClient(
+export const findOrCreateClient = async (
     tx: Tx,
     projectId: string,
     customer: { name: string; email?: string; phone?: string },
-): Promise<string> {
+): Promise<string> => {
     const [existing] = await tx
         .select({ id: clients.id, phone: clients.phone })
         .from(clients)
@@ -99,4 +99,4 @@ export async function findOrCreateClient(
     );
 
     return created.id;
-}
+};

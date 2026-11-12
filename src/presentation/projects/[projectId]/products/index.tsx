@@ -2,7 +2,7 @@
 
 import { CreateButton, QueryBoundary } from '@/shared/components/common';
 import { Button, Input, Table } from '@/ui/Base';
-import { Upload } from 'lucide-react';
+import { Download, Upload } from 'lucide-react';
 import { COLUMNS } from './components/Column';
 import { useProductsPage } from './hooks/useProductsPage';
 
@@ -13,6 +13,8 @@ export const ProductsPage = () => {
         setSearch,
         onCreate,
         onImport,
+        onExport,
+        canExport,
         onEdit,
         onDelete,
         onBulkDelete,
@@ -29,6 +31,14 @@ export const ProductsPage = () => {
                     onChange={(event) => setSearch(event.target.value)}
                 />
                 <div className="ml-auto flex gap-2">
+                    <Button
+                        variant="ghost"
+                        disabled={!canExport}
+                        onClick={onExport}
+                    >
+                        <Download />
+                        CSV
+                    </Button>
                     <Button
                         variant="outline"
                         onClick={onImport}
@@ -57,6 +67,9 @@ export const ProductsPage = () => {
                         }
                         enableRowSelection
                         getRowId={(product) => product.id}
+                        enableColumnPinning
+                        initialColumnPinning={{ right: ['actions'] }}
+                        onRowClick={(row) => onEdit(row.original)}
                         bulkActions={(rows) => (
                             <Button
                                 size="sm"

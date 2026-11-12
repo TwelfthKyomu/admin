@@ -20,7 +20,7 @@ const COLUMN_MIN_WIDTH = 160;
 
 const NO_SHIFT_WINDOW = [0, 0] as const;
 
-export function useScheduleColumns(): ScheduleColumn<ScheduleSale>[] {
+export const useScheduleColumns = (): ScheduleColumn<ScheduleSale>[] => {
     const { date, mode, data, visibleEmployees, workingEmployees, projectId } =
         useScheduleContext();
 
@@ -94,4 +94,4 @@ export function useScheduleColumns(): ScheduleColumn<ScheduleSale>[] {
     });
 
     return columns;
-}
+};

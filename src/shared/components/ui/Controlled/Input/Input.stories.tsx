@@ -2,28 +2,26 @@ import { type FieldValues, FormProvider, useForm } from 'react-hook-form';
 import { Input } from '@/ui/Controlled/Input';
 import type { Decorator, Meta, StoryObj } from '@storybook/react';
 
-function withReactHookForm(defaultValues: FieldValues = {}): Decorator {
-    return function FormDecorator(Story) {
-        const form = useForm({ defaultValues });
+const FormDecorator: Decorator = (Story, { parameters }) => {
+    const form = useForm<FieldValues>({ defaultValues: parameters.formDefaults });
 
-        return (
-            <FormProvider {...form}>
-                <form
-                    style={{ minWidth: 320 }}
-                    onSubmit={form.handleSubmit(() => undefined)}
-                >
-                    <Story />
-                </form>
-            </FormProvider>
-        );
-    };
-}
+    return (
+        <FormProvider {...form}>
+            <form
+                style={{ minWidth: 320 }}
+                onSubmit={form.handleSubmit(() => undefined)}
+            >
+                <Story />
+            </form>
+        </FormProvider>
+    );
+};
 
 const meta = {
     title: 'Controlled/Input',
     component: Input,
-    decorators: [withReactHookForm({ email: '', amount: undefined })],
-    parameters: { layout: 'padded' },
+    decorators: [FormDecorator],
+    parameters: { layout: 'padded', formDefaults: { email: '', amount: undefined } },
     args: {
         name: 'email',
         label: 'Email',
@@ -53,5 +51,5 @@ export const NumberField: Story = {
 };
 
 export const Prefilled: Story = {
-    decorators: [withReactHookForm({ email: 'user@dannis.online' })],
+    parameters: { formDefaults: { email: 'user@dannis.online' } },
 };

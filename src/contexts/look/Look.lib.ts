@@ -11,17 +11,17 @@ import {
     projectLooks,
 } from './Looks.table';
 
-export function findLookInProject(
+export const findLookInProject = (
     id: string,
     projectId: string,
-): Promise<ProjectLookRecord> {
+): Promise<ProjectLookRecord> => {
     return findInProject(projectLooks, id, projectId, 'Образ не найден');
-}
+};
 
-export async function loadProjectLooks(
+export const loadProjectLooks = async (
     projectId: string,
     onlyActive: boolean,
-): Promise<ProjectLookView[]> {
+): Promise<ProjectLookView[]> => {
     const looks = await db
         .select()
         .from(projectLooks)
@@ -57,13 +57,13 @@ export async function loadProjectLooks(
             y,
         })),
     }));
-}
+};
 
-export async function replaceLookItems(
+export const replaceLookItems = async (
     tx: Tx,
     look: Pick<ProjectLookRecord, 'id' | 'projectId'>,
     items: readonly LookItem[],
-): Promise<void> {
+): Promise<void> => {
     await tx
         .delete(projectLookItems)
         .where(eq(projectLookItems.lookId, look.id));
@@ -80,4 +80,4 @@ export async function replaceLookItems(
             position,
         })),
     );
-}
+};

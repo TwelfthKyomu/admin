@@ -19,10 +19,12 @@ for (const [network, prefix] of [
     PRIVATE_NETWORKS.addSubnet(network, prefix, 'ipv4');
 }
 
+// '::ffff:0:0/96' (IPv4-mapped) тут не нужен и вреден: BlockList в Node сопоставляет IPv4
+// с mapped-правилами, и с ним ЛЮБОЙ IPv4 считался бы внутренним. Mapped-адреса
+// (::ffff:127.0.0.1) BlockList и так проверяет по IPv4-правилам выше.
 for (const [network, prefix] of [
     ['::', 128],
     ['::1', 128],
-    ['::ffff:0:0', 96],
     ['fc00::', 7],
     ['fe80::', 10],
     ['ff00::', 8],
@@ -30,13 +32,13 @@ for (const [network, prefix] of [
     PRIVATE_NETWORKS.addSubnet(network, prefix, 'ipv6');
 }
 
-function isPrivateAddress(address: string): boolean {
+const isPrivateAddress = (address: string): boolean => {
     const family = isIP(address) === 6 ? 'ipv6' : 'ipv4';
 
     return PRIVATE_NETWORKS.check(address, family);
-}
+};
 
-export async function isPublicHttpUrl(value: string): Promise<boolean> {
+export const isPublicHttpUrl = async (value: string): Promise<boolean> => {
     let url: URL;
 
     try {
@@ -57,4 +59,4 @@ export async function isPublicHttpUrl(value: string): Promise<boolean> {
               .catch(() => []);
 
     return addresses.length > 0 && !addresses.some(isPrivateAddress);
-}
+};

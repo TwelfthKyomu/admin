@@ -1,14 +1,15 @@
+import { DetailRow } from '@/shared/components/common';
 import { fmtMoney } from '@/shared/format/money';
 import type { OrderItemView, OrderView } from '@/contexts/order';
-import { DetailRow } from './DetailRow';
 import { Section } from './Section';
 
 interface ItemsSectionProps {
     order: OrderView;
     items: OrderItemView[];
+    itemStock: (item: OrderItemView) => string | undefined;
 }
 
-export const ItemsSection = ({ order, items }: ItemsSectionProps) => (
+export const ItemsSection = ({ order, items, itemStock }: ItemsSectionProps) => (
     <Section title="Позиции">
         {items.length === 0 && (
             <p className="px-4 py-6 text-center text-[13px] text-muted-foreground">Позиций нет.</p>
@@ -24,6 +25,11 @@ export const ItemsSection = ({ order, items }: ItemsSectionProps) => (
                         <div className="text-[11px] tabular-nums text-muted-foreground">
                             {fmtMoney(item.unitPriceAmount, order.currency)} × {item.quantity}
                         </div>
+                        {itemStock(item) && (
+                            <div className="truncate text-[11px] text-muted-foreground">
+                                {itemStock(item)}
+                            </div>
+                        )}
                     </div>
                     <div className="text-[13px] font-semibold tabular-nums">
                         {fmtMoney(item.totalAmount, order.currency)}

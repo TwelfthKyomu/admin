@@ -20,9 +20,9 @@ const taskQueries = {
         ),
 };
 
-export function useTasksList(projectId: string) {
+export const useTasksList = (projectId: string) => {
     return useQuery(taskQueries.list(projectId));
-}
+};
 
 export const useCreateTask = makeMutation(createTaskAction);
 export const useUpdateTask = makeMutation(updateTaskAction);

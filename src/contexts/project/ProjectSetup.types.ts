@@ -18,6 +18,6 @@ export interface ProjectSetupView {
     done: SetupStep[];
 }
 
-export function isSetupComplete(setup: ProjectSetupView): boolean {
+export const isSetupComplete = (setup: ProjectSetupView): boolean => {
     return SETUP_STEP_VALUES.every((step) => setup.done.includes(step));
-}
+};

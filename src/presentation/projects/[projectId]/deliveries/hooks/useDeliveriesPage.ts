@@ -41,7 +41,7 @@ export interface CourierRow {
     onHand?: number;
 }
 
-export function useDeliveriesPage() {
+export const useDeliveriesPage = () => {
     const { projectId, currency, can } = useProject();
     const canManage = can(Permission.MANAGE_DELIVERIES);
     const canFinance = can(Permission.VIEW_FINANCES);
@@ -196,4 +196,4 @@ export function useDeliveriesPage() {
                 success: 'Доставка отменена',
             }),
     };
-}
+};

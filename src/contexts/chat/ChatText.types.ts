@@ -6,7 +6,7 @@ export type MessageTextPart =
     | { kind: 'text'; value: string }
     | { kind: 'link'; value: string };
 
-export function splitMessageText(text: string): MessageTextPart[] {
+export const splitMessageText = (text: string): MessageTextPart[] => {
     const parts: MessageTextPart[] = [];
     let cursor = 0;
 
@@ -29,13 +29,13 @@ export function splitMessageText(text: string): MessageTextPart[] {
     }
 
     return parts;
-}
+};
 
-export function extractUrls(text: string): string[] {
+export const extractUrls = (text: string): string[] => {
     return splitMessageText(text)
         .filter((part) => part.kind === 'link')
         .map((part) => part.value);
-}
+};
 
 const IMAGE_EXTENSIONS = [
     '.png',
@@ -47,10 +47,10 @@ const IMAGE_EXTENSIONS = [
     '.bmp',
 ];
 
-export function isImageUrl(url: string): boolean {
+export const isImageUrl = (url: string): boolean => {
     const withoutQuery = url.split(/[?#]/)[0]?.toLowerCase() ?? '';
 
     return IMAGE_EXTENSIONS.some((extension) =>
         withoutQuery.endsWith(extension),
     );
-}
+};

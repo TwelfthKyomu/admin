@@ -31,17 +31,17 @@ import {
     UpdateCategoryActionInputSchema,
 } from './ProjectCategory.schema';
 
-function findCategoryInProject(
+const findCategoryInProject = (
     id: string,
     projectId: string,
-): Promise<ProjectCategoryRecord> {
+): Promise<ProjectCategoryRecord> => {
     return findInProject(
         projectCategories,
         id,
         projectId,
         'Категория не найдена',
     );
-}
+};
 
 export const categoriesAction = projectReadAction(CATALOG_READ_PERMISSIONS)
     .inputSchema(CategoriesActionInputSchema)

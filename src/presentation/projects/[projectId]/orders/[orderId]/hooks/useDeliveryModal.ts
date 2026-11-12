@@ -29,11 +29,11 @@ interface UseDeliveryModalOptions {
     initial?: DeliveryView;
 }
 
-export function useDeliveryModal({
+export const useDeliveryModal = ({
     projectId,
     order,
     initial,
-}: UseDeliveryModalOptions) {
+}: UseDeliveryModalOptions) => {
     const close = useModalClose();
     const create = useCreateDelivery();
     const update = useUpdateDelivery();
@@ -172,4 +172,4 @@ export function useDeliveryModal({
     };
 
     return { form, kind, amountDue, isPending, submit };
-}
+};

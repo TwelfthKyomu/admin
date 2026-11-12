@@ -12,35 +12,35 @@ export interface GeneratedShift {
     endsAt: Date;
 }
 
-function shiftForDay(
+const shiftForDay = (
     employeeId: string,
     day: Date,
     start: string,
     end: string,
-): GeneratedShift[] {
+): GeneratedShift[] => {
     const startsAt = parse(start, 'HH:mm', day);
     const endsAt = parse(end, 'HH:mm', day);
 
     if (!isValid(startsAt) || !isValid(endsAt) || endsAt <= startsAt) return [];
 
     return [{ employeeId, startsAt, endsAt }];
-}
+};
 
-export function buildShiftsForDays(
+export const buildShiftsForDays = (
     employeeId: string,
     days: Date[],
     start: string,
     end: string,
-): GeneratedShift[] {
+): GeneratedShift[] => {
     return days.flatMap((day) => shiftForDay(employeeId, day, start, end));
-}
+};
 
-export function buildShiftsFromRows(
+export const buildShiftsFromRows = (
     employeeId: string,
     from: Date,
     to: Date,
     rows: Record<number, DayRow>,
-): GeneratedShift[] {
+): GeneratedShift[] => {
     if (differenceInCalendarDays(to, from) < 0) return [];
 
     return eachDayOfInterval({ start: from, end: to }).flatMap((day) => {
@@ -50,15 +50,15 @@ export function buildShiftsFromRows(
             ? shiftForDay(employeeId, day, row.start, row.end)
             : [];
     });
-}
+};
 
-export function createdShiftsMessage(
+export const createdShiftsMessage = (
     data: { created: unknown[]; skipped: unknown[] } | undefined,
-): string {
+): string => {
     const created = data?.created.length ?? 0;
     const skipped = data?.skipped.length ?? 0;
 
     return skipped > 0
         ? `Создано смен: ${created}, пропущено: ${skipped}`
         : `Создано смен: ${created}`;
-}
+};

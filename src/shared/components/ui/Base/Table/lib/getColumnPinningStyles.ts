@@ -1,10 +1,10 @@
 import type { CSSProperties } from 'react';
 
-export function getColumnPinningStyles(column: {
+export const getColumnPinningStyles = (column: {
     getIsPinned: () => false | 'left' | 'right';
     getStart: (position?: 'left' | 'right' | 'center') => number;
     getAfter: (position?: 'left' | 'right' | 'center') => number;
-}): CSSProperties {
+}): CSSProperties => {
     const isPinned = column.getIsPinned();
 
     if (!isPinned) return {};
@@ -16,4 +16,4 @@ export function getColumnPinningStyles(column: {
         backgroundColor: 'var(--background)',
         zIndex: 1,
     };
-}
+};

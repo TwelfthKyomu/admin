@@ -7,7 +7,7 @@ import { buildVariants } from '../lib/variants';
 
 const SUGGESTED_OPTIONS = ['Цвет', 'Размер'];
 
-export function useVariantsFields() {
+export const useVariantsFields = () => {
     const { control, setValue } = useFormContext<CreateProductFormValues>();
     const optionsArray = useFieldArray({ control, name: 'options' });
     const options = useWatch({ control, name: 'options' }) ?? [];
@@ -37,4 +37,4 @@ export function useVariantsFields() {
         generateVariants,
         hasOptions: options.length > 0,
     };
-}
+};

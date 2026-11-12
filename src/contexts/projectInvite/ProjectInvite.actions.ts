@@ -36,11 +36,11 @@ import {
 } from './ProjectInvite.types';
 import { projectInvites } from './ProjectInvites.table';
 
-function validateInvite(
+const validateInvite = (
     invite: typeof projectInvites.$inferSelect,
     code: string,
     email: string | null | undefined,
-) {
+) => {
     const status = inviteStatusAt(invite);
 
     if (status !== ProjectInviteStatus.PENDING) {
@@ -55,13 +55,13 @@ function validateInvite(
     ) {
         throw new ApplicationError('Это приглашение оформлено на другой email');
     }
-}
+};
 
-async function ensureOrganizationMember(
+const ensureOrganizationMember = async (
     tx: Tx,
     userId: string,
     organizationId: string,
-) {
+) => {
     const [member] = await tx
         .select()
         .from(organizationMembers)
@@ -87,7 +87,7 @@ async function ensureOrganizationMember(
         .update(organizationMembers)
         .set({ leftAt: null, role: OrganizationRole.MEMBER })
         .where(eq(organizationMembers.id, member.id));
-}
+};
 
 export const projectInvitesAction = projectReadAction(Permission.MANAGE_MEMBERS)
     .inputSchema(ProjectInvitesActionInputSchema)

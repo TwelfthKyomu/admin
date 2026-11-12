@@ -26,6 +26,7 @@ export const BadgesPage = () => {
                     data={badges}
                     emptyMessage="Бейджей пока нет. Добавьте «Sale», «Хит», «Лимит» — что нужно вашему магазину."
                     getRowId={(badge) => badge.id}
+                    onRowClick={(row) => onEdit(row.original)}
                 />
             )}
         </QueryBoundary>

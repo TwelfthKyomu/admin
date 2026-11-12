@@ -32,6 +32,6 @@ export const HOME_LABEL = 'Главная';
 
 export const ORDER_LABEL = 'Заказ';
 
-export function segmentLabel(segment: string): string {
+export const segmentLabel = (segment: string): string => {
     return SEGMENT_LABEL[segment] ?? segment;
-}
+};

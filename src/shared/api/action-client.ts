@@ -45,18 +45,18 @@ export const authActionClient = actionClient.use(async ({ next }) => {
     return next({ ctx: { userId: session.user.id, user: session.user } });
 });
 
-function inputValue(clientInput: unknown, key: string): string | undefined {
+const inputValue = (clientInput: unknown, key: string): string | undefined => {
     if (!clientInput || typeof clientInput !== 'object') return undefined;
 
     const value = (clientInput as Record<string, unknown>)[key];
 
     return typeof value === 'string' && value ? value : undefined;
-}
+};
 
-function withProjectGuard(
+const withProjectGuard = (
     permission: PermissionRequirement,
     rateLimit?: RateLimitKey,
-) {
+) => {
     return authActionClient.use(async ({ next, clientInput, ctx }) => {
         const projectId = inputValue(clientInput, 'projectId');
 
@@ -72,16 +72,16 @@ function withProjectGuard(
 
         return next({ ctx: { ...ctx, projectId, organizationId } });
     });
-}
+};
 
-export function projectReadAction(permission: PermissionRequirement) {
+export const projectReadAction = (permission: PermissionRequirement) => {
     return withProjectGuard(permission);
-}
+};
 
-export function projectMutationAction(
+export const projectMutationAction = (
     permission: PermissionRequirement,
     rateLimit: RateLimitKey = 'mutation',
-) {
+) => {
     return withProjectGuard(permission, rateLimit).use(
         async ({ next, ctx }) => {
             const result = await next();
@@ -98,12 +98,12 @@ export function projectMutationAction(
             return result;
         },
     );
-}
+};
 
-function withOrganizationGuard(
+const withOrganizationGuard = (
     permission?: PermissionRequirement,
     rateLimit?: RateLimitKey,
-) {
+) => {
     return authActionClient.use(async ({ next, clientInput, ctx }) => {
         if (rateLimit) enforceRateLimit(rateLimit, ctx.userId);
 
@@ -129,23 +129,23 @@ function withOrganizationGuard(
             },
         });
     });
-}
+};
 
-export function organizationMemberAction() {
+export const organizationMemberAction = () => {
     return withOrganizationGuard();
-}
+};
 
-export function organizationMemberMutationAction() {
+export const organizationMemberMutationAction = () => {
     return withOrganizationGuard(undefined, 'mutation');
-}
+};
 
-export function organizationReadAction(permission: PermissionRequirement) {
+export const organizationReadAction = (permission: PermissionRequirement) => {
     return withOrganizationGuard(permission);
-}
+};
 
-export function organizationMutationAction(
+export const organizationMutationAction = (
     permission: PermissionRequirement,
     rateLimit: RateLimitKey = 'mutation',
-) {
+) => {
     return withOrganizationGuard(permission, rateLimit);
-}
+};

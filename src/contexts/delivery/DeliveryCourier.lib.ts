@@ -29,11 +29,11 @@ import {
     type MyDeliveryView,
 } from './Delivery.types';
 
-export async function aggregateDeliveredByCourier(
+export const aggregateDeliveredByCourier = async (
     projectId: string,
     from: Date,
     to: Date,
-): Promise<{ courierId: string; count: number }[]> {
+): Promise<{ courierId: string; count: number }[]> => {
     const rows = await db
         .select({ courierId: deliveries.courierId, count: count() })
         .from(deliveries)
@@ -51,13 +51,13 @@ export async function aggregateDeliveredByCourier(
     return rows.flatMap((row) =>
         row.courierId ? [{ courierId: row.courierId, count: row.count }] : [],
     );
-}
+};
 
-export async function loadCourierStats(
+export const loadCourierStats = async (
     projectId: string,
     from: Date,
     to: Date,
-): Promise<CourierStatsView[]> {
+): Promise<CourierStatsView[]> => {
     const [delivered, failed, collected, handedOver, balances] =
         await Promise.all([
             aggregateDeliveredByCourier(projectId, from, to),
@@ -146,11 +146,11 @@ export async function loadCourierStats(
             onHand: onHand.get(employeeId) ?? 0,
         }))
         .sort((a, b) => b.delivered - a.delivered);
-}
+};
 
-export async function courierLoadInWindow(
+export const courierLoadInWindow = async (
     window: EmployeeWindow,
-): Promise<{ count: number; cashDue: number }> {
+): Promise<{ count: number; cashDue: number }> => {
     const [row] = await db
         .select({ count: count(), cashDue: sum(deliveries.cashDue) })
         .from(deliveries)
@@ -165,11 +165,11 @@ export async function courierLoadInWindow(
         );
 
     return { count: row?.count ?? 0, cashDue: Number(row?.cashDue ?? 0) };
-}
+};
 
-export function listCourierDeliveriesInWork(
+export const listCourierDeliveriesInWork = (
     courierId: string,
-): Promise<MyDeliveryView[]> {
+): Promise<MyDeliveryView[]> => {
     return db
         .select({
             id: deliveries.id,
@@ -189,4 +189,4 @@ export function listCourierDeliveriesInWork(
             ),
         )
         .orderBy(asc(deliveries.windowStart));
-}
+};

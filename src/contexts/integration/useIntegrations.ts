@@ -20,9 +20,9 @@ const integrationQueries = {
         ),
 };
 
-export function useIntegrationsList(projectId: string) {
+export const useIntegrationsList = (projectId: string) => {
     return useQuery(integrationQueries.list(projectId));
-}
+};
 
 export const useCreateIntegration = makeMutation(createIntegrationAction);
 export const useRevokeIntegration = makeMutation(revokeIntegrationAction);

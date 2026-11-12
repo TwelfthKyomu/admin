@@ -14,6 +14,6 @@ const auditLogQueries = {
         ),
 };
 
-export function useAuditLogList(organizationId: string) {
+export const useAuditLogList = (organizationId: string) => {
     return useQuery(auditLogQueries.list(organizationId));
-}
+};

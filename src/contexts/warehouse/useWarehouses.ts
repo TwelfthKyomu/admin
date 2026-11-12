@@ -6,6 +6,7 @@ import { useQuery } from '@tanstack/react-query';
 import {
     createWarehouseAction,
     deleteWarehouseAction,
+    makePrimaryWarehouseAction,
     updateWarehouseAction,
     warehousesAction,
 } from './Warehouse.actions';
@@ -20,10 +21,11 @@ const warehouseQueries = {
         ),
 };
 
-export function useWarehousesList(projectId: string) {
+export const useWarehousesList = (projectId: string) => {
     return useQuery(warehouseQueries.list(projectId));
-}
+};
 
 export const useCreateWarehouse = makeMutation(createWarehouseAction);
 export const useUpdateWarehouse = makeMutation(updateWarehouseAction);
 export const useDeleteWarehouse = makeMutation(deleteWarehouseAction);
+export const useMakePrimaryWarehouse = makeMutation(makePrimaryWarehouseAction);

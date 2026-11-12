@@ -29,10 +29,10 @@ import type {
 } from './EmployeeAssignment.types';
 import { employeeAssignments } from './EmployeeAssignments.table';
 
-export async function listProjectEmployees(
+export const listProjectEmployees = async (
     projectId: string,
     options: { includeEnded: boolean; withRates: boolean; now?: Date },
-): Promise<ProjectEmployeeView[]> {
+): Promise<ProjectEmployeeView[]> => {
     const now = options.now ?? new Date();
     const dayStart = startOfDay(now);
     const dayEnd = addDays(dayStart, 1);
@@ -155,4 +155,4 @@ export async function listProjectEmployees(
         today: todayByEmployee.get(assignment.employeeId) ?? null,
         seekingShifts: seekingByEmployee.get(assignment.employeeId) ?? 0,
     }));
-}
+};

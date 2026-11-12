@@ -14,6 +14,6 @@ export const staticTimestamps = {
     updatedAt: timestamp('updated_at').notNull().defaultNow(),
 };
 
-export function textArray(name: string) {
+export const textArray = (name: string) => {
     return text(name).array().notNull().default(sql`'{}'::text[]`);
-}
+};

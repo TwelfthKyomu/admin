@@ -25,9 +25,9 @@ const assignmentQueries = {
         ),
 };
 
-export function useProjectEmployees(opts: ListOptions) {
+export const useProjectEmployees = (opts: ListOptions) => {
     return useQuery(assignmentQueries.list(opts));
-}
+};
 
 export const useUpdateAssignment = makeMutation(updateAssignmentAction);
 export const useUpdateAssignmentRates = makeMutation(

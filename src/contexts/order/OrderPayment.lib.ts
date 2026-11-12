@@ -34,12 +34,12 @@ export type OrderPaymentInput = Pick<
     'amount' | 'method' | 'reason' | 'sourceIntentId' | 'collectedByEmployeeId'
 > & { recordedBy: string | null };
 
-async function insertPayment(
+const insertPayment = async (
     tx: Tx,
     order: OrderRecord,
     direction: PaymentDirection,
     input: OrderPaymentInput,
-): Promise<void> {
+): Promise<void> => {
     const intoRegister =
         input.method === PaymentMethod.CASH && !input.collectedByEmployeeId;
 
@@ -59,13 +59,13 @@ async function insertPayment(
         direction,
         cashShiftId: cashShift?.id ?? null,
     });
-}
+};
 
-export async function applyOrderPayment(
+export const applyOrderPayment = async (
     tx: Tx,
     order: OrderRecord,
     input: OrderPaymentInput,
-): Promise<OrderRecord> {
+): Promise<OrderRecord> => {
     if (isOrderCancelled(order.status)) {
         throw new ApplicationError(
             'Нельзя провести оплату по отменённому заказу',
@@ -101,13 +101,13 @@ export async function applyOrderPayment(
     }
 
     return updated;
-}
+};
 
-export async function applyOrderRefund(
+export const applyOrderRefund = async (
     tx: Tx,
     order: OrderRecord,
     input: OrderPaymentInput,
-): Promise<OrderRecord> {
+): Promise<OrderRecord> => {
     const money = orderAfterRefund(order, input.amount);
 
     const updated = await writeOrderUpdate(tx, order, money, {
@@ -139,4 +139,4 @@ export async function applyOrderRefund(
     }
 
     return updated;
-}
+};

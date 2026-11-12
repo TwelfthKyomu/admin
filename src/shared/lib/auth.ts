@@ -18,15 +18,15 @@ const trustedProxies = (env.TRUSTED_PROXY_IPS ?? '')
     .map((entry) => entry.trim())
     .filter(Boolean);
 
-function greeting(name: string | null | undefined): string {
+const greeting = (name: string | null | undefined): string => {
     return name ? `Здравствуйте, ${name}!` : 'Здравствуйте!';
-}
+};
 
-function sendInBackground(
+const sendInBackground = (
     to: string,
     subject: string,
     props: ActionEmailProps,
-): void {
+): void => {
     sendEmail({
         to,
         subject: `${subject} — ${BRAND}`,
@@ -35,7 +35,7 @@ function sendInBackground(
     }).catch((error: unknown) => {
         console.error(`[email] «${subject}» для ${to} не отправлено:`, error);
     });
-}
+};
 
 export const auth = betterAuth({
     secret: env.AUTH_SECRET,

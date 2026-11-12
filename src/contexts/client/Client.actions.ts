@@ -61,13 +61,13 @@ export const clientsAction = projectReadAction(CLIENT_READ_PERMISSIONS)
             .limit(limit ?? CLIENTS_LIST_LIMIT);
     });
 
-function clientValues(input: {
+const clientValues = (input: {
     firstName: string;
     lastName?: string;
     middleName?: string;
     email?: string;
     phone?: string;
-}) {
+}) => {
     return {
         firstName: input.firstName,
         lastName: input.lastName || null,
@@ -75,13 +75,13 @@ function clientValues(input: {
         email: input.email || null,
         phone: input.phone || null,
     };
-}
+};
 
-async function assertEmailFree(
+const assertEmailFree = async (
     projectId: string,
     email: string | null,
     excludeId?: string,
-): Promise<void> {
+): Promise<void> => {
     if (!email) return;
 
     await assertUniqueInProject({
@@ -92,7 +92,7 @@ async function assertEmailFree(
         excludeId,
         conflict: `Клиент с email ${email} уже есть`,
     });
-}
+};
 
 export const createClientAction = projectMutationAction(
     Permission.MANAGE_ORDERS,

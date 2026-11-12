@@ -5,7 +5,7 @@ import { useQuery } from '@tanstack/react-query';
 import { searchAction } from './Search.actions';
 import { SEARCH_MIN_LENGTH } from './Search.schema';
 
-export function useGlobalSearch(query: string) {
+export const useGlobalSearch = (query: string) => {
     const trimmed = query.trim();
 
     return useQuery(
@@ -14,4 +14,4 @@ export function useGlobalSearch(query: string) {
             staleTime: 15_000,
         }),
     );
-}
+};

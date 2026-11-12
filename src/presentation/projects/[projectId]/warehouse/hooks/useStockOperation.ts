@@ -7,7 +7,7 @@ import {
 } from '@/contexts/stockMovement';
 import { StockOperationType } from '../lib/stockOperation';
 
-export function useStockOperation(type: StockOperationType) {
+export const useStockOperation = (type: StockOperationType) => {
     const receive = useReceiveStock();
     const writeOff = useWriteOffStock();
     const count = useCountStock();
@@ -19,4 +19,4 @@ export function useStockOperation(type: StockOperationType) {
     };
 
     return byType[type];
-}
+};

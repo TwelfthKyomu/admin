@@ -40,7 +40,7 @@ import {
     projectIntegrations,
 } from './Integrations.table';
 
-function rowToView(integration: ProjectIntegrationRecord): IntegrationView {
+const rowToView = (integration: ProjectIntegrationRecord): IntegrationView => {
     return {
         id: integration.id,
         name: integration.name,
@@ -50,7 +50,7 @@ function rowToView(integration: ProjectIntegrationRecord): IntegrationView {
         apiKeyPrefix: integration.apiKeyPrefix,
         createdAt: integration.createdAt,
     };
-}
+};
 
 export const integrationsAction = projectReadAction(
     INTEGRATION_READ_PERMISSIONS,

@@ -28,11 +28,11 @@ interface UseGenerateShiftsOptions {
     onDone: () => void;
 }
 
-export function useGenerateShifts({
+export const useGenerateShifts = ({
     projectId,
     employees,
     onDone,
-}: UseGenerateShiftsOptions) {
+}: UseGenerateShiftsOptions) => {
     const bulk = useBulkCreateShifts();
     const updateAssignment = useUpdateAssignment();
 
@@ -116,4 +116,4 @@ export function useGenerateShifts({
         isPending: bulk.isPending,
         submit,
     };
-}
+};

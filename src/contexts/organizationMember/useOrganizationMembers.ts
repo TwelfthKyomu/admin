@@ -19,9 +19,9 @@ const organizationMemberQueries = {
         ),
 };
 
-export function useOrganizationMembersList(organizationId: string) {
+export const useOrganizationMembersList = (organizationId: string) => {
     return useQuery(organizationMemberQueries.list(organizationId));
-}
+};
 
 export const useChangeOrganizationMemberRole = makeMutation(
     changeOrganizationMemberRoleAction,

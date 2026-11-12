@@ -26,9 +26,9 @@ const WeeklyHoursSchema = z.record(
     z.object({ start: TimeSchema, end: TimeSchema }),
 );
 
-export function readDayRows(
+export const readDayRows = (
     metadata?: Record<string, unknown>,
-): Record<number, DayRow> {
+): Record<number, DayRow> => {
     const saved = WeeklyHoursSchema.safeParse(metadata?.weeklyHours);
 
     const weekly =
@@ -47,12 +47,12 @@ export function readDayRows(
     }
 
     return rows;
-}
+};
 
-export function writeDayRows(
+export const writeDayRows = (
     metadata: Record<string, unknown> | undefined,
     rows: Record<number, DayRow>,
-): Record<string, unknown> {
+): Record<string, unknown> => {
     const weeklyHours: Record<number, { start: string; end: string }> = {};
 
     for (const { day } of WEEKDAYS_MON_FIRST) {
@@ -62,4 +62,4 @@ export function writeDayRows(
     }
 
     return { ...metadata, weeklyHours };
-}
+};

@@ -21,11 +21,11 @@ interface HandlerSource {
     actions: ReturnType<typeof useMessageActions>;
 }
 
-export function messageHandlers(
+export const messageHandlers = (
     source: HandlerSource,
     onJumpTo: (messageId: string) => void,
     onOpenProfile: (userId: string) => void,
-): MessageHandlers {
+): MessageHandlers => {
     return {
         onReply: source.composer.startReply,
         onEdit: source.composer.startEdit,
@@ -37,4 +37,4 @@ export function messageHandlers(
         onJumpTo,
         onOpenProfile,
     };
-}
+};

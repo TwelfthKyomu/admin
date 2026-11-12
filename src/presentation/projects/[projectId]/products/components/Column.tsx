@@ -20,7 +20,7 @@ export const COLUMNS = (props: ColumnsProps) => [
         header: 'Название',
         cell: ({ row: { original } }) => (
             <div className="flex items-center gap-3">
-                <Avatar className="size-10 rounded-md">
+                <Avatar className="size-10 shrink-0 rounded-md">
                     <AvatarImage
                         src={original.images[0]}
                         alt={original.name}
@@ -30,7 +30,7 @@ export const COLUMNS = (props: ColumnsProps) => [
                         <Package className="size-4 text-muted-foreground" />
                     </AvatarFallback>
                 </Avatar>
-                <div className="min-w-0">
+                <div className="min-w-0 max-w-72">
                     <div className="truncate">{original.name}</div>
                     <div className="truncate text-muted-foreground text-xs">/{original.slug}</div>
                 </div>
@@ -38,7 +38,7 @@ export const COLUMNS = (props: ColumnsProps) => [
         ),
     }),
     accessor('sku', {
-        header: 'SKU',
+        header: 'Артикул',
         cell: ({ getValue }) => <code>{getValue()}</code>,
     }),
     accessor('price', {

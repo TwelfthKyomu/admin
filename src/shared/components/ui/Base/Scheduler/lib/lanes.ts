@@ -6,10 +6,10 @@ import type {
     ScheduleItem,
 } from '../Scheduler.types';
 
-export function groupByColumn<TItem extends ScheduleItem>(
+export const groupByColumn = <TItem extends ScheduleItem>(
     columns: readonly ScheduleColumn<TItem>[],
     items: readonly TItem[],
-): Record<string, TItem[]> {
+): Record<string, TItem[]> => {
     const groups: Record<string, TItem[]> = {};
 
     for (const column of columns) {
@@ -17,11 +17,11 @@ export function groupByColumn<TItem extends ScheduleItem>(
     }
 
     return groups;
-}
+};
 
-export function assignLanes<TItem extends ScheduleItem>(
+export const assignLanes = <TItem extends ScheduleItem>(
     items: readonly TItem[],
-): LanedItem<TItem>[] {
+): LanedItem<TItem>[] => {
     const sorted = [...items].sort(
         (a, b) => +a.start - +b.start || +a.end - +b.end,
     );
@@ -59,15 +59,15 @@ export function assignLanes<TItem extends ScheduleItem>(
     flush();
 
     return result;
-}
+};
 
-export function wouldOverlap<TItem extends ScheduleItem>(
+export const wouldOverlap = <TItem extends ScheduleItem>(
     items: readonly TItem[],
     startMin: number,
     durMin: number,
     ignoreId: string,
     exclude?: (item: TItem) => boolean,
-): boolean {
+): boolean => {
     return items.some((item) => {
         if (item.id === ignoreId || exclude?.(item)) return false;
 
@@ -78,4 +78,4 @@ export function wouldOverlap<TItem extends ScheduleItem>(
             itemStart + differenceInMinutes(item.end, item.start) > startMin
         );
     });
-}
+};

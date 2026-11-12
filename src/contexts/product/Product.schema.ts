@@ -44,14 +44,14 @@ const PhysicalAttributesSchema = z.object({
 
 const ServiceAttributesSchema = z.object({});
 
-function attributesSchemaFor(type: ProductType) {
+const attributesSchemaFor = (type: ProductType) => {
     switch (type) {
         case ProductType.SERVICE:
             return ServiceAttributesSchema;
         default:
             return PhysicalAttributesSchema;
     }
-}
+};
 
 const skuSchema = upperCodeField(SKU_MAX, SKU_MIN);
 
@@ -158,10 +158,10 @@ export const ProductsActionInputSchema = z.object({
     search: z.optional(z.string().check(z.maxLength(LABEL_MAX))),
 });
 
-export function parseProductAttributes(
+export const parseProductAttributes = (
     type: ProductType,
     attributes: Record<string, unknown> | undefined,
-): Record<string, unknown> {
+): Record<string, unknown> => {
     const result = attributesSchemaFor(type).safeParse(attributes ?? {});
 
     if (!result.success) {
@@ -175,7 +175,7 @@ export function parseProductAttributes(
     }
 
     return result.data;
-}
+};
 
 export const ImportProductsActionInputSchema = z.object({
     projectId: idSchema,

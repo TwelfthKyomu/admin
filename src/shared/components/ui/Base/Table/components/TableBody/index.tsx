@@ -3,11 +3,11 @@
 'use no memo';
 
 import { Fragment, type ReactElement, type ReactNode } from 'react';
-import { cn } from '@/shared/lib/utils';
 import { useDataTable } from '@/ui/Base/Table/context';
 import { getColumnPinningStyles } from '@/ui/Base/Table/lib/getColumnPinningStyles';
 import { TableBody as BaseTableBody, TableCell, TableRow } from '@/ui/Base/Table/primitives';
 import { flexRender, type Row } from '@tanstack/react-table';
+import { rowClass } from '../../lib/rowClass';
 
 interface TableBodyProps<TData> {
     bodyClassName?: string;
@@ -36,19 +36,7 @@ export const TableBody = <TData,>({
 }: TableBodyProps<TData>) => {
     const table = useDataTable<TData>();
     const rows = table.getRowModel().rows;
-
-    const buildRowClass = (row: Row<TData>) => {
-        const base = cn(
-            highlightOnHover && 'hover:bg-muted/50',
-            stripedRows && 'even:bg-muted/30',
-            row.getIsSelected() && 'bg-muted',
-            (onRowClick || onRowDoubleClick) && 'cursor-pointer',
-        );
-
-        const custom = typeof rowClassName === 'function' ? rowClassName(row) : rowClassName;
-
-        return cn(base, custom);
-    };
+    const clickable = Boolean(onRowClick || onRowDoubleClick);
 
     if (rows.length === 0) {
         return (
@@ -71,7 +59,12 @@ export const TableBody = <TData,>({
                 <Fragment key={row.id}>
                     <TableRow
                         data-state={row.getIsSelected() ? 'selected' : undefined}
-                        className={buildRowClass(row)}
+                        className={rowClass(row, {
+                            highlightOnHover,
+                            stripedRows,
+                            clickable,
+                            rowClassName,
+                        })}
                         onClick={() => onRowClick?.(row)}
                         onDoubleClick={() => onRowDoubleClick?.(row)}
                     >

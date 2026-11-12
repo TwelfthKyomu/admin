@@ -27,7 +27,7 @@ export interface OwnShiftRow extends EmployeeShiftView {
     employeeName: string;
 }
 
-export function useReplacementsPage() {
+export const useReplacementsPage = () => {
     const { projectId, currency, can } = useProject();
     const canAssign = can(Permission.MANAGE_ORDERS);
     const { kind, setKind, matches } = useKindParam();
@@ -98,4 +98,4 @@ export function useReplacementsPage() {
         onToggleSeeking,
         isTogglingSeeking: seekingMutation.isPending,
     };
-}
+};

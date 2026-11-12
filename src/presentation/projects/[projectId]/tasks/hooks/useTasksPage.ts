@@ -6,7 +6,7 @@ import { useProjectMembersList } from '@/contexts/projectMember';
 import { useTasksList } from '@/contexts/task';
 import { filterTasks, type TaskFilterValues } from '../lib/tasks';
 
-export function useTasksPage(filters: TaskFilterValues) {
+export const useTasksPage = (filters: TaskFilterValues) => {
     const { projectId, project } = useProject();
     const query = useTasksList(projectId);
     const membersQuery = useProjectMembersList(projectId);
@@ -28,4 +28,4 @@ export function useTasksPage(filters: TaskFilterValues) {
             })),
         ],
     };
-}
+};

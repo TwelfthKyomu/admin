@@ -1,11 +1,8 @@
 'use client';
 
-import { useState } from 'react';
 import { SHIFT_CANCEL_REASON_OPTIONS } from '@/shared/labels/team';
-import { runAction } from '@/shared/lib/action-result';
-import { useModalClose } from '@/shared/lib/modal';
-import { ShiftAction, ShiftCancelReason, useChangeShiftStatus } from '@/contexts/employeeShift';
 import { Button, Field, FieldLabel, Modal, Select } from '@/ui/Base';
+import { useShiftCancelModal } from '../hooks/useShiftCancelModal';
 
 interface ShiftCancelModalProps {
     projectId: string;
@@ -14,23 +11,10 @@ interface ShiftCancelModalProps {
 }
 
 export const ShiftCancelModal = ({ projectId, shiftId, employeeName }: ShiftCancelModalProps) => {
-    const close = useModalClose();
-    const [reason, setReason] = useState<ShiftCancelReason>(ShiftCancelReason.SICK);
-    const { mutateAsync, isPending } = useChangeShiftStatus();
-
-    const onConfirm = async () => {
-        const { success } = await runAction(
-            mutateAsync({
-                id: shiftId,
-                projectId,
-                action: ShiftAction.CANCEL,
-                cancelReason: reason,
-            }),
-            { success: 'Смена отменена' },
-        );
-
-        if (success) close();
-    };
+    const { close, reason, setReason, isPending, onConfirm } = useShiftCancelModal(
+        projectId,
+        shiftId,
+    );
 
     return (
         <Modal

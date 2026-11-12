@@ -1,19 +1,10 @@
 'use client';
 
-import { type SubmitHandler, useForm } from 'react-hook-form';
 import { FormDialog } from '@/shared/components/common';
-import { runAction } from '@/shared/lib/action-result';
-import { useModalClose } from '@/shared/lib/modal';
-import {
-    type StockLevelView,
-    TransferStockActionInputSchema,
-    useTransferStock,
-} from '@/contexts/stockMovement';
+import type { StockLevelView } from '@/contexts/stockMovement';
 import type { WarehouseView } from '@/contexts/warehouse';
 import { Input, Select } from '@/ui/Controlled';
-import { zodResolver } from '@hookform/resolvers/zod';
-import type { StockTransferFormValues } from '../form/formData';
-import { warehouseOptions } from '../lib/stockOperation';
+import { useStockTransferSheet } from '../hooks/useStockTransferSheet';
 
 interface StockTransferSheetProps {
     projectId: string;
@@ -22,31 +13,11 @@ interface StockTransferSheetProps {
 }
 
 export const StockTransferSheet = ({ projectId, row, warehouses }: StockTransferSheetProps) => {
-    const close = useModalClose();
-    const { mutateAsync, isPending } = useTransferStock();
-    const options = warehouseOptions(warehouses);
-
-    const form = useForm<StockTransferFormValues>({
-        defaultValues: {
-            projectId,
-            productId: row.productId,
-            variantId: row.variantId ?? null,
-            warehouseId: warehouses[0]?.id ?? '',
-            toWarehouseId: warehouses[1]?.id ?? '',
-            quantity: 1,
-            note: '',
-        },
-        resolver: zodResolver(TransferStockActionInputSchema),
-        mode: 'onChange',
+    const { isPending, options, form, onSubmit } = useStockTransferSheet({
+        projectId,
+        row,
+        warehouses,
     });
-
-    const onSubmit: SubmitHandler<StockTransferFormValues> = async (values) => {
-        const { success } = await runAction(mutateAsync(values), {
-            success: `«${row.name}» перемещён`,
-        });
-
-        if (success) close();
-    };
 
     return (
         <FormDialog

@@ -26,9 +26,9 @@ export type UploadLocation =
       }
     | { kind: 'chat'; channelId: string; filename: string };
 
-export function parseUploadSegments(
+export const parseUploadSegments = (
     segments: readonly string[],
-): UploadLocation | null {
+): UploadLocation | null => {
     if (segments.length === 3 && segments[0] === CHAT_SEGMENT) {
         const [, channelId, filename] = segments;
 
@@ -51,20 +51,20 @@ export function parseUploadSegments(
     if (!contentType) return null;
 
     return { kind: 'project', projectId, filename, contentType };
-}
+};
 
-export function uploadUrl(projectId: string, filename: string): string {
+export const uploadUrl = (projectId: string, filename: string): string => {
     return `${UPLOAD_URL_PREFIX}/${projectId}/${filename}`;
-}
+};
 
-export function parseUploadUrl(url: string): UploadLocation | null {
+export const parseUploadUrl = (url: string): UploadLocation | null => {
     if (!url.startsWith(`${UPLOAD_URL_PREFIX}/`)) return null;
 
     return parseUploadSegments(
         url.slice(UPLOAD_URL_PREFIX.length + 1).split('/'),
     );
-}
+};
 
-export function chatUploadUrl(channelId: string, filename: string): string {
+export const chatUploadUrl = (channelId: string, filename: string): string => {
     return `${UPLOAD_URL_PREFIX}/${CHAT_SEGMENT}/${channelId}/${filename}`;
-}
+};

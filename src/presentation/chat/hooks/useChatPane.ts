@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState, useSyncExternalStore } from 'react';
 import { PAGE_SIZE_DEFAULT, PAGE_SIZE_LIMIT } from '@/shared/constants/default';
 import { toast } from '@/shared/lib/toast';
 import {
@@ -12,29 +12,23 @@ import {
     useMarkChatRead,
 } from '@/contexts/chat';
 import { useMessageScroller, useMessageScrollerScrollable } from '@/ui/Base';
+import {
+    isPageVisible,
+    isPageVisibleOnServer,
+    subscribePageVisibility,
+} from '../lib/pageVisibility';
 import { useChatComposer } from './useChatComposer';
 import { useMessageActions } from './useMessageActions';
 import { useMessageHighlight } from './useMessageHighlight';
 
 const NO_MESSAGES: ChatMessageView[] = [];
 
-function usePageVisible(): boolean {
-    const [visible, setVisible] = useState(
-        () =>
-            typeof document === 'undefined' ||
-            document.visibilityState === 'visible',
+const usePageVisible = (): boolean =>
+    useSyncExternalStore(
+        subscribePageVisibility,
+        isPageVisible,
+        isPageVisibleOnServer,
     );
-
-    useEffect(() => {
-        const sync = () => setVisible(document.visibilityState === 'visible');
-
-        document.addEventListener('visibilitychange', sync);
-
-        return () => document.removeEventListener('visibilitychange', sync);
-    }, []);
-
-    return visible;
-}
 
 interface UseChatPaneOptions {
     organizationId: string;
@@ -46,7 +40,7 @@ interface UseChatPaneOptions {
     onFocusHandled: () => void;
 }
 
-export function useChatPane({
+export const useChatPane = ({
     organizationId,
     target,
     scope,
@@ -54,7 +48,7 @@ export function useChatPane({
     viewer,
     focusMessageId,
     onFocusHandled,
-}: UseChatPaneOptions) {
+}: UseChatPaneOptions) => {
     const [limit, setLimit] = useState(PAGE_SIZE_DEFAULT);
     const [jumpToId, setJumpToId] = useState<string>();
     const [unreadAnchorId, setUnreadAnchorId] = useState<string>();
@@ -201,4 +195,4 @@ export function useChatPane({
         composer,
         actions,
     };
-}
+};

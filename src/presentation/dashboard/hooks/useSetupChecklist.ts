@@ -8,7 +8,7 @@ import {
     subscribeSetupHidden,
 } from '../lib/setup';
 
-export function useSetupChecklist() {
+export const useSetupChecklist = () => {
     const { data = [] } = useProjectSetup();
 
     const hidden = useSyncExternalStore(
@@ -25,4 +25,4 @@ export function useSetupChecklist() {
               );
 
     return { setups, hide: hideSetup };
-}
+};

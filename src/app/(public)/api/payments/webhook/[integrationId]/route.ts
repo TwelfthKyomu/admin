@@ -11,7 +11,7 @@ interface RouteContext {
     params: Promise<{ integrationId: string }>;
 }
 
-export async function POST(request: Request, context: RouteContext) {
+export const POST = async (request: Request, context: RouteContext) => {
     const { integrationId } = await context.params;
 
     const credentials = await getProviderCredentials(integrationId);
@@ -40,4 +40,4 @@ export async function POST(request: Request, context: RouteContext) {
     const outcome = await applyPaymentWebhookEvent(integrationId, event);
 
     return Response.json({ outcome });
-}
+};

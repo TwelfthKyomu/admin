@@ -11,7 +11,7 @@ import type { CreateLookFormValues } from '../form/formData';
 
 const CENTER = LOOK_POINT_MAX / 2;
 
-export function useLookPhotoField(projectId: string) {
+export const useLookPhotoField = (projectId: string) => {
     const [isUploading, setIsUploading] = useState(false);
     const [activeIndex, setActiveIndex] = useState<number>();
     const { control } = useFormContext<CreateLookFormValues>();
@@ -105,4 +105,4 @@ export function useLookPhotoField(projectId: string) {
         place,
         remove,
     };
-}
+};

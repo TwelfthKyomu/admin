@@ -3,10 +3,17 @@ import 'server-only';
 import type { Tx } from '@/infrastructure/database/client';
 import { ApplicationError } from '@/shared/api/errors';
 import { ProductType } from '@/contexts/product/Product.types';
+import { products } from '@/contexts/product/Products.table';
 import { warehouseQuantity } from '@/contexts/warehouse/Warehouse.lib';
+import { warehouseStock } from '@/contexts/warehouse/Warehouses.table';
+import { eq, sum } from 'drizzle-orm';
 import { type LockedStock, lockStock } from './StockLevel.lib';
 import { moveStock } from './StockMovement.lib';
-import { StockMovementReason, type StockTarget } from './StockMovement.types';
+import {
+    averageCost,
+    StockMovementReason,
+    type StockTarget,
+} from './StockMovement.types';
 import { freeInWarehouse } from './StockReservation.lib';
 
 interface StockOperation extends StockTarget {
@@ -16,10 +23,45 @@ interface StockOperation extends StockTarget {
     createdBy: string;
 }
 
-async function lockStockable(
+interface StockReceipt extends StockOperation {
+    costAmount: number | null;
+}
+
+const applyReceiptCost = async (
+    tx: Tx,
+    receipt: StockReceipt,
+): Promise<void> => {
+    if (receipt.costAmount === null) return;
+
+    const [[product], [held]] = await Promise.all([
+        tx
+            .select({ costAmount: products.costAmount })
+            .from(products)
+            .where(eq(products.id, receipt.productId))
+            .limit(1),
+        tx
+            .select({ onHand: sum(warehouseStock.quantity).mapWith(Number) })
+            .from(warehouseStock)
+            .where(eq(warehouseStock.productId, receipt.productId)),
+    ]);
+
+    const costAmount = averageCost({
+        onHand: held?.onHand ?? 0,
+        cost: product?.costAmount ?? null,
+        quantity: receipt.quantity,
+        receiptCost: receipt.costAmount,
+    });
+
+    await tx
+        .update(products)
+        .set({ costAmount })
+        .where(eq(products.id, receipt.productId));
+};
+
+const lockStockable = async (
     tx: Tx,
     target: StockTarget,
-): Promise<LockedStock> {
+): Promise<LockedStock> => {
     const current = await lockStock(tx, target);
 
     if (!current) {
@@ -32,9 +74,9 @@ async function lockStockable(
     }
 
     return current;
-}
+};
 
-async function assertFree(tx: Tx, operation: StockOperation): Promise<void> {
+const assertFree = async (tx: Tx, operation: StockOperation): Promise<void> => {
     const current = await lockStockable(tx, operation);
 
     if (current.stock === null) {
@@ -48,13 +90,14 @@ async function assertFree(tx: Tx, operation: StockOperation): Promise<void> {
             `На складе свободно только ${Math.max(0, free)} шт.`,
         );
     }
-}
+};
 
-export async function receiveStock(
+export const receiveStock = async (
     tx: Tx,
-    operation: StockOperation,
-): Promise<void> {
+    { costAmount, ...operation }: StockReceipt,
+): Promise<void> => {
     await lockStockable(tx, operation);
+    await applyReceiptCost(tx, { ...operation, costAmount });
 
     await moveStock(tx, {
         ...operation,
@@ -62,12 +105,12 @@ export async function receiveStock(
         reason: StockMovementReason.RECEIPT,
         startsTracking: true,
     });
-}
+};
 
-export async function writeOffStock(
+export const writeOffStock = async (
     tx: Tx,
     operation: StockOperation,
-): Promise<void> {
+): Promise<void> => {
     await assertFree(tx, operation);
 
     await moveStock(tx, {
@@ -75,12 +118,12 @@ export async function writeOffStock(
         quantityDelta: -operation.quantity,
         reason: StockMovementReason.WRITE_OFF,
     });
-}
+};
 
-export async function transferStock(
+export const transferStock = async (
     tx: Tx,
     operation: StockOperation & { toWarehouseId: string },
-): Promise<void> {
+): Promise<void> => {
     if (operation.toWarehouseId === operation.warehouseId) {
         throw new ApplicationError('Выберите другой склад');
     }
@@ -101,12 +144,12 @@ export async function transferStock(
         quantityDelta: operation.quantity,
         reason: StockMovementReason.TRANSFER,
     });
-}
+};
 
-export async function countStock(
+export const countStock = async (
     tx: Tx,
     operation: StockOperation,
-): Promise<void> {
+): Promise<void> => {
     await lockStockable(tx, operation);
 
     const onHand = await warehouseQuantity(
@@ -121,4 +164,4 @@ export async function countStock(
         reason: StockMovementReason.MANUAL,
         startsTracking: true,
     });
-}
+};

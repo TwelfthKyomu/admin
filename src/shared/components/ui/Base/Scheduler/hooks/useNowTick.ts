@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 
-export function useNowTick(): Date {
+export const useNowTick = (): Date => {
     const [now, setNow] = useState(() => new Date());
 
     useEffect(() => {
@@ -10,4 +10,4 @@ export function useNowTick(): Date {
     }, []);
 
     return now;
-}
+};

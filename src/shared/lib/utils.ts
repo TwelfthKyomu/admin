@@ -1,8 +1,8 @@
 export { cn } from 'cnfast';
 
-export function mapDefined<T, R>(
+export const mapDefined = <T, R>(
     value: T | undefined,
     map: (value: T) => R,
-): R | undefined {
+): R | undefined => {
     return value === undefined ? undefined : map(value);
-}
+};

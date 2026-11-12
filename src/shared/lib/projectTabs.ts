@@ -112,12 +112,12 @@ export const PROJECT_TAB_META: ProjectTabMeta[] = [
     },
 ];
 
-export function canOpenProjectTab(
+export const canOpenProjectTab = (
     tab: ProjectTabMeta,
     granted: Permission[],
-): boolean {
+): boolean => {
     return hasPermission(granted, tab.permissions);
-}
+};
 
 interface RoleStartTab {
     granted: Permission;
@@ -138,9 +138,9 @@ const ROLE_START_TABS: RoleStartTab[] = [
     },
 ];
 
-export function projectStartTab(
+export const projectStartTab = (
     granted: Permission[],
-): ProjectTabMeta | undefined {
+): ProjectTabMeta | undefined => {
     const preferred = ROLE_START_TABS.find(
         (rule) =>
             granted.includes(rule.granted) && !granted.includes(rule.missing),
@@ -151,16 +151,18 @@ export function projectStartTab(
     );
 
     return available.find((tab) => tab.value === preferred) ?? available[0];
-}
+};
 
-export function groupedProjectTabs(granted: Permission[]): {
+export const groupedProjectTabs = (
+    granted: Permission[],
+): {
     group: TabGroup;
     tabs: ProjectTabMeta[];
-}[] {
+}[] => {
     return TAB_GROUP_ORDER.map((group) => ({
         group,
         tabs: PROJECT_TAB_META.filter(
             (tab) => tab.group === group && canOpenProjectTab(tab, granted),
         ),
     })).filter((section) => section.tabs.length > 0);
-}
+};

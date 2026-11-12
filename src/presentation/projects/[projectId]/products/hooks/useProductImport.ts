@@ -11,7 +11,7 @@ import {
 import { useWarehousesList } from '@/contexts/warehouse';
 import { readImportFile } from '../lib/importFile';
 
-export function useProductImport(projectId: string) {
+export const useProductImport = (projectId: string) => {
     const { mutateAsync, isPending } = useImportProducts();
     const warehouses = useWarehousesList(projectId).data ?? [];
     const [parsed, setParsed] = useState<ParsedImportRow[]>([]);
@@ -54,4 +54,4 @@ export function useProductImport(projectId: string) {
         onFile,
         submit,
     };
-}
+};

@@ -1,16 +1,12 @@
 'use client';
 
-import { useState } from 'react';
-import { ROUTES } from '@/shared/constants';
-import { runAction } from '@/shared/lib/action-result';
-import { type InviteView, useAcceptProjectInvite } from '@/contexts/projectInvite';
+import type { InviteView } from '@/contexts/projectInvite';
 import { Button, InputOTP, InputOTPGroup, InputOTPSlot } from '@/ui/Base';
 import { REGEXP_ONLY_DIGITS } from 'input-otp';
-import { useRouter } from 'next/navigation';
+import { useCodeForm } from '../hooks/useCodeForm';
+import { CODE_LENGTH } from '../lib/code';
 import { PreviewHeader } from './PreviewHeader';
 import { Shell } from './Shell';
-
-const CODE_LENGTH = 6;
 
 interface CodeFormProps {
     token: string;
@@ -18,30 +14,7 @@ interface CodeFormProps {
 }
 
 export const CodeForm = ({ token, preview }: CodeFormProps) => {
-    const router = useRouter();
-    const accept = useAcceptProjectInvite();
-    const [code, setCode] = useState('');
-    const [done, setDone] = useState(false);
-
-    const onAccept = async () => {
-        const { success, response } = await runAction(accept.mutateAsync({ token, code }), {
-            success: 'Вы присоединились к проекту',
-        });
-
-        if (!success) return;
-
-        setDone(true);
-        const projectId = response?.data?.projectId;
-
-        if (projectId) router.push(ROUTES.project(projectId));
-    };
-
-    const ready = code.length === CODE_LENGTH && !accept.isPending && !done;
-
-    let buttonLabel = 'Принять приглашение';
-
-    if (accept.isPending) buttonLabel = 'Принимаем…';
-    else if (done) buttonLabel = 'Готово';
+    const { code, setCode, onAccept, locked, ready, buttonLabel } = useCodeForm(token);
 
     return (
         <Shell>
@@ -56,7 +29,7 @@ export const CodeForm = ({ token, preview }: CodeFormProps) => {
                     pattern={REGEXP_ONLY_DIGITS}
                     value={code}
                     onChange={setCode}
-                    disabled={accept.isPending || done}
+                    disabled={locked}
                 >
                     <InputOTPGroup>
                         {Array.from({ length: CODE_LENGTH }, (_, i) => (

@@ -13,7 +13,7 @@ const ProjectEditSheet = dynamic(() =>
     import('../modal/ProjectEditSheet').then((m) => m.ProjectEditSheet),
 );
 
-export function useProjectsPage() {
+export const useProjectsPage = () => {
     const { organization } = useStaticData();
     const query = useProjectsList(organization.id);
     const { mutateAsync, isPending } = useDeleteProject();
@@ -36,4 +36,4 @@ export function useProjectsPage() {
         });
 
     return { query, onCreate, onEdit, onDelete, isDeleting: isPending };
-}
+};

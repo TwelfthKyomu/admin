@@ -1,21 +1,12 @@
 'use client';
 
+import { copyToClipboard } from '@/shared/lib/clipboard';
 import { useModalClose } from '@/shared/lib/modal';
-import { toast } from '@/shared/lib/toast';
 import { Button, Input, Modal } from '@/ui/Base';
 import { Copy, ExternalLink } from 'lucide-react';
 
 export const LinkReady = ({ url }: { url: string }) => {
     const close = useModalClose();
-
-    const copy = async () => {
-        try {
-            await navigator.clipboard.writeText(url);
-            toast.success('Скопировано');
-        } catch {
-            toast.error('Не удалось скопировать');
-        }
-    };
 
     return (
         <Modal
@@ -36,7 +27,7 @@ export const LinkReady = ({ url }: { url: string }) => {
                         variant="outline"
                         size="icon"
                         aria-label="Скопировать"
-                        onClick={copy}
+                        onClick={() => copyToClipboard(url, 'Скопировано')}
                     >
                         <Copy className="size-4" />
                     </Button>

@@ -29,9 +29,9 @@ type ShippedDelivery = Pick<
     'carrier' | 'trackingNumber' | 'address'
 >;
 
-export function orderLines(
+export const orderLines = (
     mail: MailOrder,
-): Pick<OrderEmailProps, 'items' | 'discount' | 'total'> {
+): Pick<OrderEmailProps, 'items' | 'discount' | 'total'> => {
     const { order, items } = mail;
 
     return {
@@ -46,11 +46,11 @@ export function orderLines(
                 : undefined,
         total: fmtMoney(order.totalAmount, order.currency),
     };
-}
+};
 
-export function customerOrderAction(
+export const customerOrderAction = (
     mail: MailOrder,
-): OrderEmailAction | undefined {
+): OrderEmailAction | undefined => {
     const siteUrl = mail.storefront?.siteUrl;
 
     if (!siteUrl) return undefined;
@@ -59,20 +59,20 @@ export function customerOrderAction(
         label: 'Открыть заказ',
         url: `${siteUrl.replace(/\/+$/, '')}/orders/${mail.order.id}`,
     };
-}
+};
 
-export function customerFooter(projectName: string): string {
+export const customerFooter = (projectName: string): string => {
     return `Вы получили это письмо, потому что оформили заказ в «${projectName}».`;
-}
+};
 
-export function adminOrderUrl(
+export const adminOrderUrl = (
     appUrl: string,
     order: Pick<OrderRecord, 'id' | 'projectId'>,
-): string {
+): string => {
     return `${appUrl.replace(/\/+$/, '')}/projects/${order.projectId}/orders/${order.id}`;
-}
+};
 
-export function teamDetails(order: OrderRecord): string[] {
+export const teamDetails = (order: OrderRecord): string[] => {
     return [
         `Покупатель: ${order.customerName ?? '—'}`,
         order.customerPhone && `Телефон: ${order.customerPhone}`,
@@ -80,9 +80,9 @@ export function teamDetails(order: OrderRecord): string[] {
         `Оплата: ${PAYMENT_STATUS_LABEL[order.paymentStatus]}`,
         order.notes && `Комментарий: ${order.notes}`,
     ].filter((line) => line !== null);
-}
+};
 
-export function readyContent(order: OrderRecord): CustomerMailContent {
+export const readyContent = (order: OrderRecord): CustomerMailContent => {
     const details = readyPaymentDetails(order);
 
     return {
@@ -90,26 +90,26 @@ export function readyContent(order: OrderRecord): CustomerMailContent {
         intro: 'Можно забирать.',
         details: details.length > 0 ? details : undefined,
     };
-}
+};
 
-export function placedContent(order: OrderRecord): CustomerMailContent {
+export const placedContent = (order: OrderRecord): CustomerMailContent => {
     return {
         heading: `Заказ № ${orderNumber(order)} принят`,
         intro: 'Спасибо за заказ! Мы получили его и скоро свяжемся с вами.',
     };
-}
+};
 
-export function paidContent(order: OrderRecord): CustomerMailContent {
+export const paidContent = (order: OrderRecord): CustomerMailContent => {
     return {
         heading: `Заказ № ${orderNumber(order)} оплачен`,
         intro: 'Оплата получена. Мы собираем заказ и напишем, когда отправим его.',
     };
-}
+};
 
-export function shippedContent(
+export const shippedContent = (
     order: OrderRecord,
     delivery: ShippedDelivery,
-): CustomerMailContent {
+): CustomerMailContent => {
     if (!delivery.carrier) {
         return {
             heading: `Заказ № ${orderNumber(order)} в пути`,
@@ -133,4 +133,4 @@ export function shippedContent(
             ? { label: 'Отследить посылку', url: trackUrl }
             : undefined,
     };
-}
+};

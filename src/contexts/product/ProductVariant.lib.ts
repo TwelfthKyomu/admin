@@ -10,13 +10,13 @@ import {
     productVariants,
 } from './Products.table';
 
-export async function saveProductVariants(
+export const saveProductVariants = async (
     tx: Tx,
     product: ProductRef,
     records: NewProductVariantRecord[],
     existing: ProductVariantRecord[],
     createdBy: string,
-): Promise<ManualStockChange[]> {
+): Promise<ManualStockChange[]> => {
     const keptIds = records.flatMap((record) => record.id ?? []);
     const added = records.filter((record) => record.id === undefined);
 
@@ -81,11 +81,11 @@ export async function saveProductVariants(
             createdBy,
         };
     });
-}
+};
 
-export async function loadVariants(
+export const loadVariants = async (
     productIds: string[],
-): Promise<Map<string, ProductVariantRecord[]>> {
+): Promise<Map<string, ProductVariantRecord[]>> => {
     const rows = await db
         .select()
         .from(productVariants)
@@ -93,4 +93,4 @@ export async function loadVariants(
         .orderBy(asc(productVariants.position));
 
     return Map.groupBy(rows, (row) => row.productId);
-}
+};

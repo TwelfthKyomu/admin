@@ -1,5 +1,13 @@
 export const PRIMARY_WAREHOUSE_NAME = 'Основной склад';
 
+export const warehouseNamesById = (
+    warehouses: { id: string; name: string }[],
+): Map<string, string> => {
+    return new Map(
+        warehouses.map((warehouse) => [warehouse.id, warehouse.name]),
+    );
+};
+
 export interface WarehouseFree {
     warehouseId: string;
     free: number;
@@ -10,10 +18,10 @@ export interface WarehouseAllocation {
     quantity: number;
 }
 
-export function allocateAcrossWarehouses(
+export const allocateAcrossWarehouses = (
     quantity: number,
     candidates: WarehouseFree[],
-): WarehouseAllocation[] | null {
+): WarehouseAllocation[] | null => {
     const allocations: WarehouseAllocation[] = [];
     let left = quantity;
 
@@ -29,4 +37,4 @@ export function allocateAcrossWarehouses(
     }
 
     return left === 0 ? allocations : null;
-}
+};

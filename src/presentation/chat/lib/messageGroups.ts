@@ -18,10 +18,10 @@ interface GroupOptions {
     unreadAnchorId?: string;
 }
 
-export function groupMessages(
+export const groupMessages = (
     messages: ChatMessageView[],
     { unreadAnchorId }: GroupOptions = {},
-): ChatMessageGroup[] {
+): ChatMessageGroup[] => {
     const groups: ChatMessageGroup[] = [];
 
     for (const message of messages) {
@@ -60,11 +60,14 @@ export function groupMessages(
     }
 
     return groups;
-}
+};
 
-export function isReadByOthers(createdAt: Date, othersReadAt?: Date): boolean {
+export const isReadByOthers = (
+    createdAt: Date,
+    othersReadAt?: Date,
+): boolean => {
     return (
         !!othersReadAt &&
         new Date(createdAt).getTime() <= new Date(othersReadAt).getTime()
     );
-}
+};

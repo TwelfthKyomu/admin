@@ -11,10 +11,10 @@ import {
 export const CHAT_FILE_ACCEPT =
     '.jpg,.jpeg,.png,.gif,.webp,.pdf,.doc,.docx,.xls,.xlsx,.pptx,.zip,.txt,.csv';
 
-export async function uploadChatFile(
+export const uploadChatFile = async (
     target: ChatTarget,
     file: globalThis.File,
-): Promise<ChatAttachmentView> {
+): Promise<ChatAttachmentView> => {
     const form = new FormData();
 
     form.set('file', file);
@@ -35,9 +35,9 @@ export async function uploadChatFile(
     }
 
     return payload;
-}
+};
 
-export function attachmentIcon(contentType: string) {
+export const attachmentIcon = (contentType: string) => {
     if (contentType.startsWith('image/')) return FileImage;
 
     if (
@@ -60,4 +60,4 @@ export function attachmentIcon(contentType: string) {
     }
 
     return File;
-}
+};

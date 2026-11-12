@@ -10,6 +10,7 @@ import {
     MessageScrollerItem,
 } from '@/ui/Base';
 import type { MessageHandlers } from '../../lib/messageHandlers';
+import { messageStatus } from '../../lib/messageStatus';
 import { ChatAvatar } from '../ChatAvatar';
 import { MessageBody } from './Body';
 import { MessageMarks } from './Marks';
@@ -101,7 +102,7 @@ export const MessageRow = ({
                         own={own}
                         editing={editing}
                         highlighted={highlighted}
-                        status={own && !pending ? (read ? 'read' : 'sent') : undefined}
+                        status={messageStatus(own, Boolean(pending), Boolean(read))}
                         onJumpTo={onJumpTo}
                     />
                     <MessageMarks

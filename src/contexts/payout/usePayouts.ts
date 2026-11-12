@@ -31,9 +31,9 @@ const payrollQueries = {
         ),
 };
 
-export function usePayrollPreview(opts: PreviewOptions) {
+export const usePayrollPreview = (opts: PreviewOptions) => {
     return useQuery(payrollQueries.preview(opts));
-}
+};
 
 export const useRecordPayout = makeMutation(recordPayoutAction);
 export const useDeletePayout = makeMutation(deletePayoutAction);

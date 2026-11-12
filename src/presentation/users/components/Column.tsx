@@ -20,7 +20,7 @@ interface ColumnsProps {
     onOffboard: (member: OrganizationMemberView) => void;
 }
 
-export const getColumns = ({
+export const COLUMNS = ({
     currentUserId,
     canChangeRole,
     onChangeRole,
@@ -101,7 +101,7 @@ export const getColumns = ({
         header: '',
         enableSorting: false,
         cell: ({ row: { original: member } }) =>
-            canOffboard(member) ? (
+            canOffboard(member) && (
                 <div className="flex justify-end">
                     <Button
                         size="sm"
@@ -111,6 +111,6 @@ export const getColumns = ({
                         Уволить
                     </Button>
                 </div>
-            ) : null,
+            ),
     }),
 ];

@@ -26,13 +26,13 @@ interface UseChatCardOptions {
     contacts: ChatContactView[];
 }
 
-export function useChatCard({
+export const useChatCard = ({
     target,
     scope,
     conversation,
     profileUserId,
     contacts,
-}: UseChatCardOptions) {
+}: UseChatCardOptions) => {
     const [broken, setBroken] = useState<ReadonlySet<string>>(new Set());
 
     const links = useChatLinks(scope, target);
@@ -74,4 +74,4 @@ export function useChatCard({
         markBroken: (url: string) =>
             setBroken((previous) => new Set(previous).add(url)),
     };
-}
+};

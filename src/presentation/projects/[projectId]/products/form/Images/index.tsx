@@ -1,6 +1,6 @@
 import { useRef } from 'react';
 import { useImagesField } from '@/presentation/projects/[projectId]/products/hooks/useImagesField';
-import { Button, Field, FieldLabel, TooltipProvider } from '@/ui/Base';
+import { Button, Field, TooltipProvider } from '@/ui/Base';
 import { InputGroupButton, InputGroupField } from '@/ui/Base/InputGroup';
 import { Upload } from 'lucide-react';
 import { ImageThumb } from './Thumb';
@@ -13,7 +13,6 @@ export const ImagesField = ({ projectId }: { projectId: string }) => {
 
     return (
         <Field>
-            <FieldLabel>Картинки</FieldLabel>
             <div className="flex gap-2">
                 <InputGroupField
                     value={url}

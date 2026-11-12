@@ -3,10 +3,10 @@ import { fmtMoney } from '@/shared/format/money';
 import { pluralRu } from '@/shared/format/plural';
 import type { MarginView } from '@/contexts/order';
 
-export function marginHint(
+export const marginHint = (
     margin: MarginView | null | undefined,
     currency: Currency,
-): string {
+): string => {
     if (!margin) return '—';
 
     const cost = `себестоимость ${fmtMoney(margin.costAmount, currency)}`;
@@ -20,4 +20,4 @@ export function marginHint(
     ]);
 
     return `${cost}; ${margin.itemsWithoutCost} ${positions} без закупочной цены`;
-}
+};

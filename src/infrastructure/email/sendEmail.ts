@@ -16,20 +16,20 @@ export type SendEmailInput = EmailEnvelope &
 const UNDELIVERABLE_DOMAIN =
     /@(.+\.)?(example\.(com|net|org)|example|test|invalid|localhost)$/i;
 
-function senderOf(from: string, name?: string): string {
+const senderOf = (from: string, name?: string): string => {
     if (!name) return from;
 
     const address = from.match(/<([^>]+)>/)?.[1] ?? from;
 
     return `"${name.replaceAll('"', '')}" <${address}>`;
-}
+};
 
-export async function sendEmail({
+export const sendEmail = async ({
     to,
     subject,
     fromName,
     ...content
-}: SendEmailInput): Promise<void> {
+}: SendEmailInput): Promise<void> => {
     if (UNDELIVERABLE_DOMAIN.test(to)) {
         console.warn(
             `[email] ${to} — тестовый домен, письмо «${subject}» не отправлено`,
@@ -63,4 +63,4 @@ export async function sendEmail({
     if (error) {
         throw new Error(`Resend error: ${error.message}`);
     }
-}
+};

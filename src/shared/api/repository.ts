@@ -23,16 +23,16 @@ type ProjectScoped = PgTable & {
     deletedAt?: PgColumn;
 };
 
-function alive(table: ProjectScoped) {
+const alive = (table: ProjectScoped) => {
     return table.deletedAt ? isNull(table.deletedAt) : undefined;
-}
+};
 
-export async function findInProject<T extends ProjectScoped>(
+export const findInProject = async <T extends ProjectScoped>(
     table: T,
     id: string,
     projectId: string,
     notFound: string,
-): Promise<InferSelectModel<T>> {
+): Promise<InferSelectModel<T>> => {
     const [row] = (await db
         .select()
         .from(table as PgTable)
@@ -44,15 +44,15 @@ export async function findInProject<T extends ProjectScoped>(
     if (!row) throw new ApplicationError(notFound);
 
     return row;
-}
+};
 
-export async function lockInProject<T extends ProjectScoped>(
+export const lockInProject = async <T extends ProjectScoped>(
     tx: Tx,
     table: T,
     id: string,
     projectId: string,
     notFound: string,
-): Promise<InferSelectModel<T>> {
+): Promise<InferSelectModel<T>> => {
     const [row] = (await tx
         .select()
         .from(table as PgTable)
@@ -65,16 +65,16 @@ export async function lockInProject<T extends ProjectScoped>(
     if (!row) throw new ApplicationError(notFound);
 
     return row;
-}
+};
 
-export async function assertUniqueInProject(opts: {
+export const assertUniqueInProject = async (opts: {
     table: ProjectScoped;
     column: PgColumn;
     value: unknown;
     projectId: string;
     excludeId?: string;
     conflict: string;
-}): Promise<void> {
+}): Promise<void> => {
     const { table, column, value, projectId, excludeId, conflict } = opts;
 
     const [taken] = await db
@@ -91,14 +91,14 @@ export async function assertUniqueInProject(opts: {
         .limit(1);
 
     if (taken) throw new ApplicationError(conflict);
-}
+};
 
-export async function insertOne<T extends PgTable>(
+export const insertOne = async <T extends PgTable>(
     table: T,
     values: InferInsertModel<T>,
     failed: string,
     executor: Executor = db,
-): Promise<InferSelectModel<T>> {
+): Promise<InferSelectModel<T>> => {
     const [row] = (await executor
         .insert(table)
         .values(values as never)
@@ -107,15 +107,15 @@ export async function insertOne<T extends PgTable>(
     if (!row) throw new ApplicationError(failed);
 
     return row;
-}
+};
 
-export async function updateOne<T extends PgTable>(
+export const updateOne = async <T extends PgTable>(
     table: T,
     where: SQL | undefined,
     patch: Partial<InferInsertModel<T>>,
     notFound: string,
     executor: Executor = db,
-): Promise<InferSelectModel<T>> {
+): Promise<InferSelectModel<T>> => {
     const [row] = (await executor
         .update(table)
         .set(patch as never)
@@ -125,16 +125,16 @@ export async function updateOne<T extends PgTable>(
     if (!row) throw new ApplicationError(notFound);
 
     return row;
-}
+};
 
-export function updateInProject<T extends ProjectScoped>(
+export const updateInProject = <T extends ProjectScoped>(
     table: T,
     id: string,
     projectId: string,
     patch: Partial<InferInsertModel<T>>,
     notFound: string,
     executor: Executor = db,
-): Promise<InferSelectModel<T>> {
+): Promise<InferSelectModel<T>> => {
     return updateOne(
         table,
         and(eq(table.id, id), eq(table.projectId, projectId), alive(table)),
@@ -142,14 +142,14 @@ export function updateInProject<T extends ProjectScoped>(
         notFound,
         executor,
     );
-}
+};
 
-export async function softDeleteInProject(
+export const softDeleteInProject = async (
     table: ProjectScoped & { deletedAt: PgColumn },
     id: string,
     projectId: string,
     notFound: string,
-): Promise<{ ok: true }> {
+): Promise<{ ok: true }> => {
     await updateInProject(
         table,
         id,
@@ -159,14 +159,14 @@ export async function softDeleteInProject(
     );
 
     return { ok: true };
-}
+};
 
-export async function deleteInProject(
+export const deleteInProject = async (
     table: ProjectScoped,
     id: string,
     projectId: string,
     notFound: string,
-): Promise<{ ok: true }> {
+): Promise<{ ok: true }> => {
     const [row] = await db
         .delete(table)
         .where(and(eq(table.id, id), eq(table.projectId, projectId)))
@@ -175,12 +175,12 @@ export async function deleteInProject(
     if (!row) throw new ApplicationError(notFound);
 
     return { ok: true };
-}
+};
 
-export function searchFilters(
+export const searchFilters = (
     term: string | undefined | null,
     columns: PgColumn[],
-): SQL[] {
+): SQL[] => {
     const value = term?.trim();
 
     if (!value) return [];
@@ -189,4 +189,4 @@ export function searchFilters(
     const clause = or(...columns.map((column) => ilike(column, pattern)));
 
     return clause ? [clause] : [];
-}
+};

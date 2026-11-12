@@ -16,7 +16,7 @@ const ClientEditSheet = dynamic(() =>
     import('../modal/ClientEditSheet').then((m) => m.ClientEditSheet),
 );
 
-export function useClientsPage() {
+export const useClientsPage = () => {
     const { projectId, currency, can } = useProject();
     const [search, setSearch] = useQueryState('q', parseAsString.withDefault(''));
     const debouncedSearch = useDebouncedValue(search);
@@ -42,4 +42,4 @@ export function useClientsPage() {
         onCreate,
         onEdit: canEdit ? onEdit : undefined,
     };
-}
+};

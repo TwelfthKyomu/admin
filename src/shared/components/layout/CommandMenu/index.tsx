@@ -1,16 +1,10 @@
 'use client';
 
-import { useEffect, useState } from 'react';
-import { useStaticData } from '@/app/providers';
 import { ROUTES } from '@/shared/constants';
 import { fmtMoney } from '@/shared/format/money';
-import { useDebouncedValue } from '@/shared/hooks/useDebouncedValue';
 import { segmentLabel } from '@/shared/labels/navigation';
 import { groupedProjectTabs } from '@/shared/lib/projectTabs';
 import { orderNumber } from '@/contexts/order/Order.types';
-import { canInOrg } from '@/contexts/organizationMember/OrganizationMember.types';
-import { useGlobalSearch } from '@/contexts/search';
-import { navMain } from '@/layout/Sidebar/constants';
 import { Button } from '@/ui/Base';
 import {
     Command,
@@ -23,46 +17,23 @@ import {
 } from '@/ui/Base/Command';
 import { Dialog, DialogContent, DialogTitle } from '@/ui/Base/Modal/primitives';
 import { FolderKanban, Package, Receipt, SearchIcon, UserRound } from 'lucide-react';
-import { useRouter } from 'next/navigation';
-
-function useHotkeyToggle(setOpen: (update: (open: boolean) => boolean) => void) {
-    useEffect(() => {
-        const onKeyDown = (event: KeyboardEvent) => {
-            if (event.key.toLowerCase() !== 'k' || !(event.metaKey || event.ctrlKey)) return;
-
-            event.preventDefault();
-            setOpen((open) => !open);
-        };
-
-        window.addEventListener('keydown', onKeyDown);
-
-        return () => window.removeEventListener('keydown', onKeyDown);
-    }, [setOpen]);
-}
+import { useCommandMenu } from './hooks/useCommandMenu';
+import { projectNameOf, withQuery } from './lib/searchHref';
 
 export const CommandMenu = () => {
-    const [open, setOpen] = useState(false);
-    const [search, setSearch] = useState('');
-    const router = useRouter();
-    const { organization, projects = [], projectPermissions } = useStaticData();
-    const debouncedSearch = useDebouncedValue(search);
-    const { data: found, isFetching } = useGlobalSearch(open ? debouncedSearch : '');
-    const projectName = (id: string) => projects.find((project) => project.id === id)?.name ?? '';
-
-    useHotkeyToggle(setOpen);
-
-    const go = (href: string) => {
-        setOpen(false);
-        setSearch('');
-        router.push(href);
-    };
-
-    const withQuery = (href: string, query: string) =>
-        `${href}?${new URLSearchParams({ q: query })}`;
-
-    const sections = navMain.filter(
-        (item) => !item.permission || canInOrg(organization.role, item.permission),
-    );
+    const {
+        open,
+        setOpen,
+        search,
+        setSearch,
+        found,
+        isFetching,
+        projects,
+        projectPermissions,
+        sections,
+        go,
+        onOpenChange,
+    } = useCommandMenu();
 
     return (
         <>
@@ -78,11 +49,7 @@ export const CommandMenu = () => {
             </Button>
             <Dialog
                 open={open}
-                onOpenChange={(next) => {
-                    setOpen(next);
-
-                    if (!next) setSearch('');
-                }}
+                onOpenChange={onOpenChange}
             >
                 <DialogContent
                     className="overflow-hidden p-0 sm:max-w-lg"
@@ -159,7 +126,8 @@ export const CommandMenu = () => {
                                                 .filter(Boolean)
                                                 .join(' ')}
                                             <CommandShortcut>
-                                                {client.phone ?? projectName(client.projectId)}
+                                                {client.phone ??
+                                                    projectNameOf(projects, client.projectId)}
                                             </CommandShortcut>
                                         </CommandItem>
                                     ))}

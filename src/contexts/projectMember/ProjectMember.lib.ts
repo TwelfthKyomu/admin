@@ -8,10 +8,10 @@ import {
     projectMembers,
 } from './ProjectMembers.table';
 
-export async function findActiveProjectMember(
+export const findActiveProjectMember = async (
     projectId: string,
     userId: string,
-): Promise<Pick<ProjectMemberRecord, 'id' | 'role'> | null> {
+): Promise<Pick<ProjectMemberRecord, 'id' | 'role'> | null> => {
     const [member] = await db
         .select({ id: projectMembers.id, role: projectMembers.role })
         .from(projectMembers)
@@ -25,16 +25,16 @@ export async function findActiveProjectMember(
         .limit(1);
 
     return member ?? null;
-}
+};
 
-export function findProjectMemberInProject(
+export const findProjectMemberInProject = (
     memberId: string,
     projectId: string,
-): Promise<ProjectMemberRecord> {
+): Promise<ProjectMemberRecord> => {
     return findInProject(
         projectMembers,
         memberId,
         projectId,
         'Участник не найден',
     );
-}
+};

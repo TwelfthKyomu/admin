@@ -12,10 +12,10 @@ export interface LockedStock {
     name: string;
 }
 
-export async function lockStock(
+export const lockStock = async (
     tx: Tx,
     target: StockTarget,
-): Promise<LockedStock | undefined> {
+): Promise<LockedStock | undefined> => {
     if (target.variantId) {
         const [variant] = await tx
             .select({
@@ -56,13 +56,13 @@ export async function lockStock(
         .for('update');
 
     return product;
-}
+};
 
-export async function setStock(
+export const setStock = async (
     tx: Tx,
     target: StockTarget,
     stock: number | null,
-): Promise<void> {
+): Promise<void> => {
     if (target.variantId) {
         await tx
             .update(productVariants)
@@ -76,4 +76,4 @@ export async function setStock(
         .update(products)
         .set({ stock })
         .where(eq(products.id, target.productId));
-}
+};

@@ -12,17 +12,17 @@ import {
     warehouses,
 } from './Warehouses.table';
 
-function activeWarehouses(projectId: string) {
+const activeWarehouses = (projectId: string) => {
     return and(
         eq(warehouses.projectId, projectId),
         isNull(warehouses.deletedAt),
     );
-}
+};
 
-function stockLine(
+const stockLine = (
     warehouseId: string,
     target: Pick<StockTarget, 'productId' | 'variantId'>,
-) {
+) => {
     return and(
         eq(warehouseStock.warehouseId, warehouseId),
         eq(warehouseStock.productId, target.productId),
@@ -30,60 +30,85 @@ function stockLine(
             ? eq(warehouseStock.variantId, target.variantId)
             : isNull(warehouseStock.variantId),
     );
-}
+};
 
-export function listWarehouses(
+export const listWarehouses = (
     projectId: string,
     executor: Reader = db,
-): Promise<WarehouseRecord[]> {
+): Promise<WarehouseRecord[]> => {
     return executor
         .select()
         .from(warehouses)
         .where(activeWarehouses(projectId))
         .orderBy(asc(warehouses.position), asc(warehouses.createdAt));
-}
+};
 
-export function findWarehouseInProject(
+export const findWarehouseInProject = (
     id: string,
     projectId: string,
-): Promise<WarehouseRecord> {
+): Promise<WarehouseRecord> => {
     return findInProject(warehouses, id, projectId, 'Склад не найден');
-}
+};
 
-export async function primaryWarehouseId(
+export const primaryWarehouseId = async (
     projectId: string,
     executor: Reader = db,
-): Promise<string> {
+): Promise<string> => {
     const [first] = await listWarehouses(projectId, executor);
 
     if (!first) throw new ApplicationError('В проекте нет склада');
 
     return first.id;
-}
+};
 
-export async function siteWarehouseIds(
+export const siteWarehouseIds = async (
     projectId: string,
     executor: Reader = db,
-): Promise<string[]> {
+): Promise<string[]> => {
     const all = await listWarehouses(projectId, executor);
 
     return all.filter((warehouse) => warehouse.forSite).map(({ id }) => id);
-}
+};
 
-export async function createPrimaryWarehouse(
+export const makePrimaryWarehouse = async (
     tx: Tx,
     projectId: string,
-): Promise<void> {
+    id: string,
+): Promise<WarehouseRecord> => {
+    const all = await listWarehouses(projectId, tx);
+    const primary = all.find((warehouse) => warehouse.id === id);
+
+    if (!primary) throw new ApplicationError('Склад не найден');
+
+    const ordered = [
+        primary,
+        ...all.filter((warehouse) => warehouse.id !== id),
+    ];
+
+    for (const [position, warehouse] of ordered.entries()) {
+        await tx
+            .update(warehouses)
+            .set({ position })
+            .where(eq(warehouses.id, warehouse.id));
+    }
+
+    return primary;
+};
+
+export const createPrimaryWarehouse = async (
+    tx: Tx,
+    projectId: string,
+): Promise<void> => {
     await tx
         .insert(warehouses)
         .values({ projectId, name: PRIMARY_WAREHOUSE_NAME, position: 0 });
-}
+};
 
-export async function warehouseQuantity(
+export const warehouseQuantity = async (
     tx: Tx,
     warehouseId: string,
     target: Pick<StockTarget, 'productId' | 'variantId'>,
-): Promise<number> {
+): Promise<number> => {
     const [row] = await tx
         .select({ quantity: warehouseStock.quantity })
         .from(warehouseStock)
@@ -91,14 +116,14 @@ export async function warehouseQuantity(
         .limit(1);
 
     return row?.quantity ?? 0;
-}
+};
 
-export async function changeWarehouseQuantity(
+export const changeWarehouseQuantity = async (
     tx: Tx,
     warehouseId: string,
     target: StockTarget,
     delta: number,
-): Promise<void> {
+): Promise<void> => {
     const [row] = await tx
         .select({ id: warehouseStock.id, quantity: warehouseStock.quantity })
         .from(warehouseStock)
@@ -125,12 +150,12 @@ export async function changeWarehouseQuantity(
     await tx
         .insert(warehouseStock)
         .values({ ...target, warehouseId, quantity });
-}
+};
 
-export async function clearWarehouseQuantities(
+export const clearWarehouseQuantities = async (
     tx: Tx,
     target: Pick<StockTarget, 'productId' | 'variantId'>,
-): Promise<void> {
+): Promise<void> => {
     await tx
         .delete(warehouseStock)
         .where(
@@ -141,9 +166,9 @@ export async function clearWarehouseQuantities(
                     : isNull(warehouseStock.variantId),
             ),
         );
-}
+};
 
-export function loadWarehouseQuantities(projectId: string) {
+export const loadWarehouseQuantities = (projectId: string) => {
     return db
         .select({
             warehouseId: warehouseStock.warehouseId,
@@ -153,4 +178,4 @@ export function loadWarehouseQuantities(projectId: string) {
         })
         .from(warehouseStock)
         .where(eq(warehouseStock.projectId, projectId));
-}
+};

@@ -10,7 +10,7 @@ import { warehouseStock } from '@/contexts/warehouse/Warehouses.table';
 import { and, count, eq, gt, inArray, isNull } from 'drizzle-orm';
 import { type ProjectSetupView, SetupStep } from './ProjectSetup.types';
 
-function integrationProjects(projectIds: string[], type: IntegrationType) {
+const integrationProjects = (projectIds: string[], type: IntegrationType) => {
     return db
         .selectDistinct({ projectId: projectIntegrations.projectId })
         .from(projectIntegrations)
@@ -21,11 +21,11 @@ function integrationProjects(projectIds: string[], type: IntegrationType) {
                 eq(projectIntegrations.isActive, true),
             ),
         );
-}
+};
 
-export async function loadProjectSetup(
+export const loadProjectSetup = async (
     projectIds: string[],
-): Promise<ProjectSetupView[]> {
+): Promise<ProjectSetupView[]> => {
     const [
         withProducts,
         withStock,
@@ -82,4 +82,4 @@ export async function loadProjectSetup(
             has(withOrders, projectId) && SetupStep.FIRST_SALE,
         ].filter((step) => step !== false),
     }));
-}
+};

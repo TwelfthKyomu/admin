@@ -1,35 +1,11 @@
 'use client';
 
-import { type SubmitHandler, useForm } from 'react-hook-form';
 import { FormDialog } from '@/shared/components/common';
-import { runAction } from '@/shared/lib/action-result';
-import { useModalClose } from '@/shared/lib/modal';
-import { useCreateCoupon } from '@/contexts/coupon';
-import { zodResolver } from '@hookform/resolvers/zod';
 import { CouponForm } from '../form/CouponForm';
-import {
-    COUPON_DEFAULT,
-    CreateCouponFormSchema,
-    type CreateCouponFormValues,
-} from '../form/formData';
+import { useCouponCreateModal } from '../hooks/useCouponCreateModal';
 
 export const CouponCreateModal = ({ projectId }: { projectId: string }) => {
-    const close = useModalClose();
-    const { mutateAsync, isPending } = useCreateCoupon();
-
-    const form = useForm<CreateCouponFormValues>({
-        resolver: zodResolver(CreateCouponFormSchema),
-        defaultValues: { ...COUPON_DEFAULT, projectId },
-        mode: 'onChange',
-    });
-
-    const onSubmit: SubmitHandler<CreateCouponFormValues> = async (values) => {
-        const { success } = await runAction(mutateAsync(values), {
-            success: `Купон ${values.code} создан`,
-        });
-
-        if (success) close();
-    };
+    const { isPending, form, onSubmit } = useCouponCreateModal(projectId);
 
     return (
         <FormDialog

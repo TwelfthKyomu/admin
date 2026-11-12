@@ -1,18 +1,20 @@
 import type { WarehouseView } from '@/contexts/warehouse';
-import { Badge } from '@/ui/Base';
-import { editDeleteColumn } from '@/ui/Base/Table';
+import { ActionTableButton, Badge } from '@/ui/Base';
 import { createColumnHelper } from '@tanstack/react-table';
+import { type WarehouseActionHandlers, warehouseActionItems } from '../lib/warehouseActions';
 
-const { accessor } = createColumnHelper<WarehouseView>();
+const { accessor, display } = createColumnHelper<WarehouseView>();
 
-interface WarehouseColumnsProps {
-    onEdit: (warehouse: WarehouseView) => void;
-    onDelete: (warehouse: WarehouseView) => void;
-    isDeleting: boolean;
-}
-
-export const WAREHOUSE_COLUMNS = (props: WarehouseColumnsProps) => [
-    accessor('name', { header: 'Склад' }),
+export const WAREHOUSE_COLUMNS = (handlers: WarehouseActionHandlers) => [
+    accessor('name', {
+        header: 'Склад',
+        cell: ({ row: { original, index } }) => (
+            <div className="flex items-center gap-2">
+                {original.name}
+                {index === 0 && <Badge variant="secondary">Основной</Badge>}
+            </div>
+        ),
+    }),
     accessor('forSite', {
         header: 'На сайте',
         cell: ({ getValue }) => (
@@ -21,5 +23,12 @@ export const WAREHOUSE_COLUMNS = (props: WarehouseColumnsProps) => [
             </Badge>
         ),
     }),
-    editDeleteColumn(props),
+    display({
+        id: 'actions',
+        header: '',
+        size: 5,
+        cell: ({ row: { original, index } }) => (
+            <ActionTableButton items={warehouseActionItems(original, index === 0, handlers)} />
+        ),
+    }),
 ];

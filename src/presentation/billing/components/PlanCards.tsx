@@ -3,15 +3,13 @@
 import { DEFAULT_CURRENCY } from '@/shared/constants/currency';
 import { fmtBytes } from '@/shared/format/bytes';
 import { fmtMoney } from '@/shared/format/money';
-import { runAction } from '@/shared/lib/action-result';
-import { toast } from '@/shared/lib/toast';
 import {
     BILLING_PERIOD_LABEL,
     type BillingPeriod,
+    BillingProvider,
     LIMITS_BY_PLAN,
     PLAN_CATALOG,
     type SubscriptionPlan,
-    usePurchasePlan,
 } from '@/contexts/subscription';
 import {
     Badge,
@@ -24,14 +22,15 @@ import {
     CardHeader,
     CardTitle,
 } from '@/ui/Base';
-import { useRouter } from 'next/navigation';
+import { usePlanPurchase } from '../hooks/usePlanPurchase';
+import { planActionLabel } from '../lib/planActionLabel';
 
 interface PlanCardsProps {
     plan: SubscriptionPlan;
     period: BillingPeriod;
     currentPlan: SubscriptionPlan;
     isOwner: boolean;
-    billingEnabled: boolean;
+    billingProvider: BillingProvider;
 }
 
 export const PlanCards = ({
@@ -39,33 +38,16 @@ export const PlanCards = ({
     period,
     currentPlan,
     isOwner,
-    billingEnabled,
+    billingProvider,
 }: PlanCardsProps) => {
-    const { refresh } = useRouter();
-    const { mutateAsync, isPending } = usePurchasePlan();
+    const { select, isPending } = usePlanPurchase(plan, period);
     const info = PLAN_CATALOG[plan];
     const limits = LIMITS_BY_PLAN[plan];
     const isCurrent = plan === currentPlan;
     const price = info.price[period];
     const isFree = price === 0;
 
-    const select = async () => {
-        const { success, response } = await runAction(mutateAsync({ plan, period }), {});
-        const result = response?.data;
-
-        if (!success || !result) return;
-
-        if (result.mode === 'redirect') {
-            window.location.assign(result.url);
-
-            return;
-        }
-
-        toast.success(`Тариф изменён на ${info.label}`);
-        refresh();
-    };
-
-    const unavailable = !isFree && !billingEnabled;
+    const isTestPayment = !isFree && billingProvider === BillingProvider.TEST;
 
     return (
         <Card>
@@ -96,15 +78,15 @@ export const PlanCards = ({
                     <Button
                         type="button"
                         variant={isCurrent ? 'outline' : 'default'}
-                        disabled={!isOwner || isPending || unavailable}
+                        disabled={!isOwner || isPending}
                         onClick={select}
                         className="w-full"
                     >
-                        {isFree ? 'Перейти на Free' : isCurrent ? 'Продлить' : 'Оплатить и перейти'}
+                        {planActionLabel(isFree, isCurrent)}
                     </Button>
-                    {unavailable && (
+                    {isTestPayment && (
                         <p className="text-[12px] text-muted-foreground">
-                            Оплата тарифов ещё не настроена
+                            Тестовый режим: деньги не списываются
                         </p>
                     )}
                 </CardFooter>

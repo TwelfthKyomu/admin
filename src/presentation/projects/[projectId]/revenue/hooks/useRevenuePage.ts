@@ -7,7 +7,7 @@ import { useCourierStats } from '@/contexts/delivery';
 import { useEmployeeRevenue, useMargin } from '@/contexts/order';
 import { marginHint } from '../lib/margin';
 
-export function useRevenuePage() {
+export const useRevenuePage = () => {
     const { projectId, currency } = useProject();
     const period = usePeriodParam();
     const { from, to } = period.range;
@@ -61,4 +61,4 @@ export function useRevenuePage() {
         delivered,
         stats,
     };
-}
+};

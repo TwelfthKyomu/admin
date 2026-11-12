@@ -27,9 +27,9 @@ const productQueries = {
         ),
 };
 
-export function useProductsList(opts: ListOptions) {
+export const useProductsList = (opts: ListOptions) => {
     return useQuery(productQueries.list(opts));
-}
+};
 
 export const useCreateProduct = makeMutation(createProductAction);
 export const useUpdateProduct = makeMutation(updateProductAction);

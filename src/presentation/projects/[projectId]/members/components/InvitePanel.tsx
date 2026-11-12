@@ -1,30 +1,13 @@
 'use client';
 
-import { useProject } from '@/app/providers';
-import { ROUTES } from '@/shared/constants';
-import { absoluteUrl } from '@/shared/format/url';
 import { INVITE_STATUS_LABEL } from '@/shared/labels/team';
-import { runAction } from '@/shared/lib/action-result';
-import { toast } from '@/shared/lib/toast';
-import {
-    inviteStatusAt,
-    useProjectInvitesList,
-    useRevokeProjectInvite,
-} from '@/contexts/projectInvite';
+import { inviteStatusAt } from '@/contexts/projectInvite';
 import { Badge, Button } from '@/ui/Base';
+import { useInvitePanel } from '../hooks/useInvitePanel';
+import { copyInviteLink } from '../lib/inviteLink';
 
 export const InvitePanel = ({ onInvite }: { onInvite: () => void }) => {
-    const { projectId } = useProject();
-    const invites = useProjectInvitesList(projectId).data ?? [];
-    const { mutateAsync, isPending } = useRevokeProjectInvite();
-
-    const copy = async (token: string) => {
-        await navigator.clipboard.writeText(absoluteUrl(ROUTES.invite(token))).catch(() => {});
-        toast.success('Ссылка скопирована');
-    };
-
-    const revoke = (inviteId: string) =>
-        runAction(mutateAsync({ id: inviteId, projectId }), { success: 'Приглашение отозвано' });
+    const { invites, isPending, revoke } = useInvitePanel();
 
     return (
         <div className="mt-6 rounded-lg border">
@@ -81,7 +64,7 @@ export const InvitePanel = ({ onInvite }: { onInvite: () => void }) => {
                                     <Button
                                         size="sm"
                                         variant="outline"
-                                        onClick={() => copy(invite.token)}
+                                        onClick={() => copyInviteLink(invite.token)}
                                     >
                                         Копировать
                                     </Button>

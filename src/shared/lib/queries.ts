@@ -8,38 +8,40 @@ type ActionFn<TData> = () => Promise<ActionResponse<TData> | undefined | null>;
 
 const DEFAULT_STALE_TIME = 30_000;
 
-async function unwrap<TData>(actionFn: ActionFn<TData>): Promise<TData | null> {
+const unwrap = async <TData>(
+    actionFn: ActionFn<TData>,
+): Promise<TData | null> => {
     const response = await actionFn();
     const error = extractActionError(response);
 
     if (error) throw new Error(error);
 
     return response?.data ?? null;
-}
+};
 
 interface ItemQueryOptions {
     enabled?: boolean;
     staleTime?: number;
 }
 
-export function itemQuery<TItem>(
+export const itemQuery = <TItem>(
     queryKey: readonly unknown[],
     actionFn: ActionFn<TItem>,
     { enabled = true, staleTime = DEFAULT_STALE_TIME }: ItemQueryOptions = {},
-) {
+) => {
     return queryOptions({
         queryKey,
         queryFn: async () => nullToOptional(await unwrap(actionFn)),
         enabled,
         staleTime,
     });
-}
+};
 
-export function listQuery<TItem>(
+export const listQuery = <TItem>(
     queryKey: readonly unknown[],
     actionFn: ActionFn<TItem[]>,
     options: Partial<UseQueryOptions<NullToOptional<TItem>[], Error>> = {},
-) {
+) => {
     return queryOptions<NullToOptional<TItem>[]>({
         queryKey,
         queryFn: async () =>
@@ -47,4 +49,4 @@ export function listQuery<TItem>(
         staleTime: DEFAULT_STALE_TIME,
         ...options,
     });
-}
+};

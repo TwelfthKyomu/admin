@@ -5,7 +5,7 @@ import { ProductType } from '@/contexts/product/Product.types';
 import type { StorefrontAccess } from './Storefront.types';
 import { loadStorefrontCatalog, publicImageUrl } from './StorefrontCatalog.lib';
 
-export async function loadStorefrontLooks(access: StorefrontAccess) {
+export const loadStorefrontLooks = async (access: StorefrontAccess) => {
     const looks = await loadProjectLooks(access.projectId, true);
 
     const ids = [
@@ -38,4 +38,4 @@ export async function loadStorefrontLooks(access: StorefrontAccess) {
             }),
         })),
     };
-}
+};

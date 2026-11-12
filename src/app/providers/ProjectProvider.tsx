@@ -39,10 +39,10 @@ export const ProjectProvider = ({ children }: PropsWithChildren) => {
     );
 };
 
-export function useProject() {
+export const useProject = () => {
     const ctx = useContext(ProjectContext);
 
     if (!ctx) throw new Error('useProject must be used within <ProjectProvider>');
 
     return ctx;
-}
+};

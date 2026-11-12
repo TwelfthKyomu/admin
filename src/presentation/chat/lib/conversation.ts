@@ -17,12 +17,12 @@ export interface ChatConversation {
     direct: boolean;
 }
 
-export function describeConversation(
+export const describeConversation = (
     target: ChatTarget,
     organizationName: string,
     channels: ChatChannelsView,
     contacts: ChatContactView[],
-): ChatConversation {
+): ChatConversation => {
     if (target.kind === 'direct') {
         const other = channels.directs.find(
             (direct) => direct.id === target.channelId,
@@ -64,10 +64,10 @@ export function describeConversation(
         initials: channelInitials(organizationName),
         direct: false,
     };
-}
+};
 
-export function composerPlaceholder(conversation: ChatConversation): string {
+export const composerPlaceholder = (conversation: ChatConversation): string => {
     return conversation.direct
         ? `Сообщение для ${conversation.title}`
         : `Сообщение в ${conversation.title}`;
-}
+};

@@ -26,6 +26,7 @@ export const CategoriesPage = () => {
                     data={categories}
                     emptyMessage="Категорий пока нет. Добавьте первую."
                     getRowId={(category) => category.id}
+                    onRowClick={(row) => onEdit(row.original)}
                 />
             )}
         </QueryBoundary>

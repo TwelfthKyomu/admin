@@ -6,15 +6,20 @@ import { PAGE_SIZE_LARGE } from '@/shared/constants/default';
 import { variantComboLabel } from '@/contexts/product/Product.types';
 import { products } from '@/contexts/product/Products.table';
 import { loadVariants } from '@/contexts/product/ProductVariant.lib';
-import { CATALOG_READ_PERMISSIONS } from '@/contexts/user/User.types';
+import {
+    CATALOG_READ_PERMISSIONS,
+    ORDER_READ_PERMISSIONS,
+} from '@/contexts/user/User.types';
 import { loadWarehouseQuantities } from '@/contexts/warehouse/Warehouse.lib';
 import { and, asc, desc, eq, isNull } from 'drizzle-orm';
 import {
+    OrderStockActionInputSchema,
     StockMovementsActionInputSchema,
     StockOverviewActionInputSchema,
 } from './StockMovement.schema';
 import { type StockLevelView, stockKey } from './StockMovement.types';
 import { stockMovements } from './StockMovements.table';
+import { loadActiveReservations, loadOrderStock } from './StockReservation.lib';
 
 export const stockOverviewAction = projectReadAction(CATALOG_READ_PERMISSIONS)
     .inputSchema(StockOverviewActionInputSchema)
@@ -36,10 +41,17 @@ export const stockOverviewAction = projectReadAction(CATALOG_READ_PERMISSIONS)
             )
             .orderBy(asc(products.name));
 
-        const [variantsByProduct, quantities] = await Promise.all([
-            loadVariants(rows.map((row) => row.id)),
-            loadWarehouseQuantities(projectId),
-        ]);
+        const [variantsByProduct, quantities, reservations] = await Promise.all(
+            [
+                loadVariants(rows.map((row) => row.id)),
+                loadWarehouseQuantities(projectId),
+                loadActiveReservations(projectId),
+            ],
+        );
+
+        const reserved = new Map(
+            reservations.map((row) => [stockKey(row), row.total]),
+        );
 
         const byWarehouse = new Map<string, Record<string, number>>();
 
@@ -62,6 +74,7 @@ export const stockOverviewAction = projectReadAction(CATALOG_READ_PERMISSIONS)
                         productId: row.id,
                         variantId: null,
                         byWarehouse: byWarehouse.get(row.id) ?? {},
+                        reserved: reserved.get(row.id) ?? 0,
                     },
                 ];
             }
@@ -75,6 +88,7 @@ export const stockOverviewAction = projectReadAction(CATALOG_READ_PERMISSIONS)
                 type: row.type,
                 stock: variant.stock,
                 byWarehouse: byWarehouse.get(variant.id) ?? {},
+                reserved: reserved.get(variant.id) ?? 0,
             }));
         });
     });
@@ -93,3 +107,9 @@ export const stockMovementsAction = projectReadAction(CATALOG_READ_PERMISSIONS)
             .orderBy(desc(stockMovements.occurredAt))
             .limit(PAGE_SIZE_LARGE);
     });
+
+export const orderStockAction = projectReadAction(ORDER_READ_PERMISSIONS)
+    .inputSchema(OrderStockActionInputSchema)
+    .action(({ parsedInput: { projectId, orderId } }) =>
+        loadOrderStock(projectId, orderId),
+    );

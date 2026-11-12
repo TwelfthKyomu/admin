@@ -39,32 +39,51 @@ export interface ReservedLine extends StockLine {
     warehouseId: string;
 }
 
+export interface OrderStockLine extends ReservedLine {
+    reserved: boolean;
+}
+
 export interface StockLevelView
     extends Pick<ProductRecord, 'name' | 'sku' | 'type' | 'stock'> {
     id: string;
     productId: string;
     variantId: string | null;
     byWarehouse: Record<string, number>;
+    reserved: number;
 }
 
-export function stockKey(
+export const averageCost = (input: {
+    onHand: number;
+    cost: number | null;
+    quantity: number;
+    receiptCost: number;
+}): number => {
+    if (input.cost === null || input.onHand <= 0) return input.receiptCost;
+
+    const total =
+        input.onHand * input.cost + input.quantity * input.receiptCost;
+
+    return Math.round(total / (input.onHand + input.quantity));
+};
+
+export const stockKey = (
     target: Pick<StockTarget, 'productId' | 'variantId'>,
-): string {
+): string => {
     return target.variantId ?? target.productId;
-}
+};
 
-export function siteStock(
+export const siteStock = (
     stock: number | null,
     siteFree: number | undefined,
-): number | null {
+): number | null => {
     return stock === null ? null : (siteFree ?? 0);
-}
+};
 
-export function saleAllocations(
+export const saleAllocations = (
     line: StockLine,
     reservations: ReservedLine[],
     fallbackWarehouseId: string,
-): ReservedLine[] {
+): ReservedLine[] => {
     const key = stockKey(line);
     const allocations: ReservedLine[] = [];
     let left = line.quantity;
@@ -88,9 +107,9 @@ export function saleAllocations(
     }
 
     return allocations;
-}
+};
 
-export function mergeStockLines(lines: StockLine[]): StockLine[] {
+export const mergeStockLines = (lines: StockLine[]): StockLine[] => {
     const byKey = new Map<string, StockLine>();
 
     for (const line of lines) {
@@ -105,4 +124,4 @@ export function mergeStockLines(lines: StockLine[]): StockLine[] {
     return [...byKey.entries()]
         .toSorted(([a], [b]) => a.localeCompare(b))
         .map(([, line]) => line);
-}
+};

@@ -28,16 +28,16 @@ const DELIVERY_STATUS_LABEL: Record<DeliveryStatus, string> = {
     [DeliveryStatus.CANCELLED]: 'Отменена',
 };
 
-export function deliveryStatusLabel(
+export const deliveryStatusLabel = (
     kind: DeliveryKind,
     status: DeliveryStatus,
-): string {
+): string => {
     if (kind === DeliveryKind.CARRIER && status === DeliveryStatus.QUEUED) {
         return 'Ожидает отправки';
     }
 
     return DELIVERY_STATUS_LABEL[status];
-}
+};
 
 export const DELIVERY_STATUS_VARIANT: Record<DeliveryStatus, BadgeVariant> = {
     [DeliveryStatus.QUEUED]: 'outline',

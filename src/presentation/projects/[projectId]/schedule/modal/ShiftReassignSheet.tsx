@@ -1,17 +1,9 @@
 'use client';
 
-import { type SubmitHandler, useForm } from 'react-hook-form';
 import { FormDialog } from '@/shared/components/common';
-import { runAction } from '@/shared/lib/action-result';
-import { useModalClose } from '@/shared/lib/modal';
 import type { ProjectEmployeeView } from '@/contexts/employeeAssignment';
-import {
-    ReassignShiftActionInputSchema,
-    type ReassignShiftFormValues,
-    useReassignShift,
-} from '@/contexts/employeeShift';
 import { Input, Select } from '@/ui/Controlled';
-import { zodResolver } from '@hookform/resolvers/zod';
+import { useShiftReassignSheet } from '../hooks/useShiftReassignSheet';
 import { employeeOptions } from '../lib/employees';
 
 interface ShiftReassignSheetProps {
@@ -27,22 +19,7 @@ export const ShiftReassignSheet = ({
     employeeName,
     candidates,
 }: ShiftReassignSheetProps) => {
-    const close = useModalClose();
-    const { mutateAsync, isPending } = useReassignShift();
-
-    const form = useForm<ReassignShiftFormValues>({
-        values: { id: shiftId, projectId, substituteEmployeeId: '', reason: '' },
-        resolver: zodResolver(ReassignShiftActionInputSchema),
-        mode: 'onChange',
-    });
-
-    const onSubmit: SubmitHandler<ReassignShiftFormValues> = async (values) => {
-        const { success } = await runAction(mutateAsync(values), {
-            success: 'Замена назначена: записи и доставки из окна смены перешли замене',
-        });
-
-        if (success) close();
-    };
+    const { isPending, form, onSubmit } = useShiftReassignSheet(projectId, shiftId);
 
     return (
         <FormDialog

@@ -29,9 +29,9 @@ import { and, eq, isNull } from 'drizzle-orm';
 
 const getUserOrganization = cache(findOrganizationByUserId);
 
-export async function requireUserOrganization(
+export const requireUserOrganization = async (
     userId: string,
-): Promise<UserOrganizationView> {
+): Promise<UserOrganizationView> => {
     const org = await getUserOrganization(userId);
 
     if (!org) {
@@ -39,14 +39,14 @@ export async function requireUserOrganization(
     }
 
     return org;
-}
+};
 
 const getProjectAccess = cache(findProjectAccess);
 
-async function requireProjectAccess(
+const requireProjectAccess = async (
     userId: string,
     projectId: string,
-): Promise<ProjectAccess> {
+): Promise<ProjectAccess> => {
     const access = await getProjectAccess(userId, projectId);
 
     if (!access) {
@@ -55,45 +55,48 @@ async function requireProjectAccess(
     }
 
     return access;
-}
+};
 
-function hasAnyProjectAccess(access: ProjectAccess, userId: string): boolean {
+const hasAnyProjectAccess = (
+    access: ProjectAccess,
+    userId: string,
+): boolean => {
     return (
         access.organizationCreatedBy === userId ||
         isOrganizationManager(access.organizationRole) ||
         access.projectRole !== null
     );
-}
+};
 
-export async function canSeeProject(
+export const canSeeProject = async (
     userId: string,
     projectId: string,
-): Promise<boolean> {
+): Promise<boolean> => {
     const access = await getProjectAccess(userId, projectId);
 
     return access !== null && hasAnyProjectAccess(access, userId);
-}
+};
 
-function describe(requirement: PermissionRequirement): string {
+const describe = (requirement: PermissionRequirement): string => {
     return toRequiredPermissions(requirement).join('» или «');
-}
+};
 
-function grantsInProject(
+const grantsInProject = (
     access: ProjectAccess,
     userId: string,
     permission: Permission,
-): boolean {
+): boolean => {
     if (access.organizationCreatedBy === userId) return true;
     if (isOrganizationManager(access.organizationRole)) return true;
     if (!access.projectRole) return false;
 
     return canInProject(access.projectRole, permission);
-}
+};
 
-export function assertOrganizationRoleCan(
+export const assertOrganizationRoleCan = (
     role: OrganizationRole,
     permission: PermissionRequirement,
-): void {
+): void => {
     const granted = toRequiredPermissions(permission).some((item) =>
         canInOrg(role, item),
     );
@@ -103,13 +106,13 @@ export function assertOrganizationRoleCan(
             `Роль «${role}» не позволяет действие «${describe(permission)}»`,
         );
     }
-}
+};
 
-export async function requireProjectPermission(
+export const requireProjectPermission = async (
     userId: string,
     projectId: string,
     permission: PermissionRequirement,
-): Promise<{ organizationId: string }> {
+): Promise<{ organizationId: string }> => {
     const access = await requireProjectAccess(userId, projectId);
 
     const granted = toRequiredPermissions(permission).some((item) =>
@@ -123,13 +126,13 @@ export async function requireProjectPermission(
     }
 
     return { organizationId: access.organizationId };
-}
+};
 
-export async function hasProjectPermission(
+export const hasProjectPermission = async (
     userId: string,
     projectId: string,
     permission: PermissionRequirement,
-): Promise<boolean> {
+): Promise<boolean> => {
     const access = await getProjectAccess(userId, projectId);
 
     if (!access) return false;
@@ -137,14 +140,14 @@ export async function hasProjectPermission(
     return toRequiredPermissions(permission).some((item) =>
         grantsInProject(access, userId, item),
     );
-}
+};
 
-async function ownScope(
+const ownScope = async (
     userId: string,
     projectId: string,
     fullAccess: Permission[],
     notEmployeeMessage: string,
-): Promise<string | null> {
+): Promise<string | null> => {
     const access = await requireProjectAccess(userId, projectId);
 
     if (fullAccess.some((item) => grantsInProject(access, userId, item))) {
@@ -159,7 +162,7 @@ async function ownScope(
     if (!employeeId) throw new ApplicationError(notEmployeeMessage);
 
     return employeeId;
-}
+};
 
 const OWN_SHIFTS_ONLY =
     'Ваша роль даёт доступ только к своим сменам, но вы не числитесь сотрудником организации';
@@ -170,76 +173,76 @@ const OWN_SALES_ONLY =
 const OWN_DELIVERIES_ONLY =
     'Ваша роль даёт доступ только к своим доставкам, но вы не числитесь сотрудником организации';
 
-export function ownShiftsEmployeeId(
+export const ownShiftsEmployeeId = (
     userId: string,
     projectId: string,
-): Promise<string | null> {
+): Promise<string | null> => {
     return ownScope(
         userId,
         projectId,
         [Permission.MANAGE_ORDERS],
         OWN_SHIFTS_ONLY,
     );
-}
+};
 
-export function visibleShiftsEmployeeId(
+export const visibleShiftsEmployeeId = (
     userId: string,
     projectId: string,
-): Promise<string | null> {
+): Promise<string | null> => {
     return ownScope(
         userId,
         projectId,
         [Permission.MANAGE_ORDERS, Permission.VIEW_ORDERS],
         OWN_SHIFTS_ONLY,
     );
-}
+};
 
-export function visibleSalesEmployeeId(
+export const visibleSalesEmployeeId = (
     userId: string,
     projectId: string,
-): Promise<string | null> {
+): Promise<string | null> => {
     return ownScope(
         userId,
         projectId,
         [Permission.VIEW_FINANCES],
         OWN_SALES_ONLY,
     );
-}
+};
 
-export function ownDeliveriesCourierId(
+export const ownDeliveriesCourierId = (
     userId: string,
     projectId: string,
-): Promise<string | null> {
+): Promise<string | null> => {
     return ownScope(
         userId,
         projectId,
         [Permission.MANAGE_DELIVERIES],
         OWN_DELIVERIES_ONLY,
     );
-}
+};
 
-export function visibleDeliveriesCourierId(
+export const visibleDeliveriesCourierId = (
     userId: string,
     projectId: string,
-): Promise<string | null> {
+): Promise<string | null> => {
     return ownScope(
         userId,
         projectId,
         [Permission.MANAGE_DELIVERIES, Permission.VIEW_DELIVERIES],
         OWN_DELIVERIES_ONLY,
     );
-}
+};
 
-export async function assertFullShiftsAccess(
+export const assertFullShiftsAccess = async (
     userId: string,
     projectId: string,
-): Promise<void> {
+): Promise<void> => {
     await requireProjectPermission(userId, projectId, Permission.MANAGE_ORDERS);
-}
+};
 
-export async function listProjectPermissions(
+export const listProjectPermissions = async (
     userId: string,
-): Promise<Record<string, Permission[]>> {
+): Promise<Record<string, Permission[]>> => {
     const organization = await requireUserOrganization(userId);
 
     const projectRows = await db
@@ -272,4 +275,4 @@ export async function listProjectPermissions(
     }
 
     return result;
-}
+};

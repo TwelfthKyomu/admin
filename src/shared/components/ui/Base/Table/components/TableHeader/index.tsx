@@ -45,7 +45,7 @@ export const TableHeader = ({ stickyHeader, className, headerAction }: TableHead
                                     canSort ? header.column.getToggleSortingHandler() : undefined
                                 }
                             >
-                                {header.isPlaceholder ? null : (
+                                {!header.isPlaceholder && (
                                     <span className="flex items-center gap-1.5">
                                         {flexRender(
                                             header.column.columnDef.header,

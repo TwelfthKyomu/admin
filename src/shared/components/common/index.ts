@@ -1,12 +1,14 @@
 export { ColorDot } from './ColorDot';
 export { CreateButton } from './CreateButton';
+export { DetailRow } from './DetailRow';
 export { EmptyState } from './EmptyState';
 export { ErrorState } from './ErrorState';
 export { FormDialog } from './FormDialog';
 export { ModalRoot } from './ModalRoot';
 export { PageHeader } from './PageHeader';
 export { PageLoader } from './PageLoader';
-export { PeriodPicker, usePeriodParam } from './PeriodPicker';
+export { PeriodPicker } from './PeriodPicker';
+export { usePeriodParam } from './PeriodPicker/hooks/usePeriodParam';
 export { PersonCell } from './PersonCell';
 export { QueryBoundary } from './QueryBoundary';
 export { type StatItem, StatsRow } from './StatsRow';

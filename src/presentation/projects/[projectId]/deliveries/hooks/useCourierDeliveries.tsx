@@ -33,7 +33,7 @@ const TAB_VALUES = ['now', 'queue', 'done'] as const;
 
 export type CourierTab = (typeof TAB_VALUES)[number];
 
-export function useCourierDeliveries() {
+export const useCourierDeliveries = () => {
     const { projectId, currency } = useProject();
     const { user } = useStaticData();
     const [tab, setTab] = useQueryState('tab', parseAsStringLiteral(TAB_VALUES).withDefault('now'));
@@ -116,4 +116,4 @@ export function useCourierDeliveries() {
         onDelivered,
         onFailed,
     };
-}
+};

@@ -22,11 +22,11 @@ const cashQueries = {
         ),
 };
 
-export function useCashSummary(projectId: string) {
+export const useCashSummary = (projectId: string) => {
     return useQuery(cashQueries.summary(projectId));
-}
+};
 
-export function useMyCourierCash(projectId: string, enabled = true) {
+export const useMyCourierCash = (projectId: string, enabled = true) => {
     return useQuery(
         itemQuery(
             [...cashQueries.all, 'mine', projectId],
@@ -34,7 +34,7 @@ export function useMyCourierCash(projectId: string, enabled = true) {
             { enabled: enabled && projectId.length > 0 },
         ),
     );
-}
+};
 
 export const useAcceptCourierCash = makeMutation(acceptCourierCashAction);
 

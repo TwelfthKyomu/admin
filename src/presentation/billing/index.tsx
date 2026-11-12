@@ -12,6 +12,7 @@ import { type TabItem, Tabs } from '@/ui/Base';
 import { useSearchParams } from 'next/navigation';
 import { CurrentPlan } from './components/CurrentPlan';
 import { PlanCards } from './components/PlanCards';
+import { useCheckoutReturn } from './hooks/useCheckoutReturn';
 
 const PERIOD_TABS: TabItem<BillingPeriod>[] = [
     { value: BillingPeriod.MONTH, label: 'Помесячно' },
@@ -24,6 +25,8 @@ export const BillingPage = () => {
     const query = useSubscriptionStatus();
     const justPaid = useSearchParams().get('paid') === '1';
     const isOwner = organization.createdBy === user.id;
+
+    useCheckoutReturn();
 
     return (
         <QueryBoundary
@@ -53,7 +56,7 @@ export const BillingPage = () => {
                                 period={period}
                                 currentPlan={status.plan}
                                 isOwner={isOwner}
-                                billingEnabled={status.billingEnabled}
+                                billingProvider={status.billingProvider}
                             />
                         ))}
                     </div>

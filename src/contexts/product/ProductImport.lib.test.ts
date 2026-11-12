@@ -16,7 +16,7 @@ vi.mock('@/infrastructure/database/client', async () => {
 
 let shop: Awaited<ReturnType<typeof seedProject>>;
 
-function row(patch: Partial<ProductImportRow>): ProductImportRow {
+const row = (patch: Partial<ProductImportRow>): ProductImportRow => {
     return {
         name: 'Футболка',
         sku: 'TS-01',
@@ -28,9 +28,9 @@ function row(patch: Partial<ProductImportRow>): ProductImportRow {
         description: null,
         ...patch,
     };
-}
+};
 
-function runImport(rows: ProductImportRow[]) {
+const runImport = (rows: ProductImportRow[]) => {
     return importProducts(
         {
             projectId: shop.project.id,
@@ -40,7 +40,7 @@ function runImport(rows: ProductImportRow[]) {
         },
         rows,
     );
-}
+};
 
 beforeEach(async () => {
     shop = await seedProject();

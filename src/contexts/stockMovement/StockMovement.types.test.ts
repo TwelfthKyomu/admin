@@ -1,10 +1,46 @@
 import { describe, expect, it } from 'vitest';
 import {
+    averageCost,
     mergeStockLines,
     saleAllocations,
     siteStock,
     stockKey,
 } from './StockMovement.types';
+
+describe('averageCost', () => {
+    it('без прежней цены берёт цену приёмки', () => {
+        expect(
+            averageCost({
+                onHand: 5,
+                cost: null,
+                quantity: 2,
+                receiptCost: 300,
+            }),
+        ).toBe(300);
+    });
+
+    it('без остатка берёт цену приёмки', () => {
+        expect(
+            averageCost({
+                onHand: 0,
+                cost: 100,
+                quantity: 2,
+                receiptCost: 300,
+            }),
+        ).toBe(300);
+    });
+
+    it('усредняет по количеству', () => {
+        expect(
+            averageCost({
+                onHand: 3,
+                cost: 100,
+                quantity: 1,
+                receiptCost: 500,
+            }),
+        ).toBe(200);
+    });
+});
 
 describe('siteStock', () => {
     it('показывает свободное на складах для сайта', () => {

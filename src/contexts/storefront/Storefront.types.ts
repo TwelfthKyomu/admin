@@ -17,9 +17,9 @@ export interface StorefrontAccess {
     currency: Currency;
 }
 
-export function toMajorUnits(amount: number): number {
+export const toMajorUnits = (amount: number): number => {
     return amount / 100;
-}
+};
 
 export const CatalogSort = {
     FEATURED: 'featured',

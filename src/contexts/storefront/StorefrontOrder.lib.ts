@@ -58,10 +58,10 @@ import { type StorefrontAccess, toMajorUnits } from './Storefront.types';
 const CLIENT_ORDERS_LIMIT = 50;
 const ORDER_ID_PLACEHOLDER = '{orderId}';
 
-async function priceStorefrontItems(
+const priceStorefrontItems = async (
     access: StorefrontAccess,
     items: StorefrontOrderInput['items'],
-): Promise<OrderItemInput[]> {
+): Promise<OrderItemInput[]> => {
     const productIds = [...new Set(items.map((item) => item.productId))];
 
     const [productRows, variantsByProduct] = await Promise.all([
@@ -118,12 +118,12 @@ async function priceStorefrontItems(
             quantity: item.quantity,
         };
     });
-}
+};
 
-export async function previewStorefrontCoupon(
+export const previewStorefrontCoupon = async (
     access: StorefrontAccess,
     input: StorefrontCouponPreviewInput,
-) {
+) => {
     const items = (await priceStorefrontItems(access, input.items)).map(
         (item) => ({
             productId: item.productId ?? null,
@@ -138,12 +138,12 @@ export async function previewStorefrontCoupon(
         discountAmount: toMajorUnits(discount),
         totalAmount: toMajorUnits(subtotal - discount),
     };
-}
+};
 
-export async function createStorefrontOrder(
+export const createStorefrontOrder = async (
     access: StorefrontAccess,
     input: StorefrontOrderInput,
-) {
+) => {
     const [providerId, pricedItems] = await Promise.all([
         input.payment ? findActiveProviderId(access.projectId) : null,
         priceStorefrontItems(access, input.items),
@@ -255,9 +255,9 @@ export async function createStorefrontOrder(
             paymentError: getErrorMessage(error) ?? undefined,
         };
     }
-}
+};
 
-function toStorefrontOrder(order: OrderRecord, items: OrderItemRecord[]) {
+const toStorefrontOrder = (order: OrderRecord, items: OrderItemRecord[]) => {
     return {
         id: order.id,
         status: order.status,
@@ -279,12 +279,12 @@ function toStorefrontOrder(order: OrderRecord, items: OrderItemRecord[]) {
             totalAmount: toMajorUnits(item.totalAmount),
         })),
     };
-}
+};
 
-export async function loadClientOrders(
+export const loadClientOrders = async (
     access: StorefrontAccess,
     clientId: string,
-) {
+) => {
     const rows = await findClientOrders(
         access.projectId,
         clientId,
@@ -292,12 +292,12 @@ export async function loadClientOrders(
     );
 
     return rows.map(({ order, items }) => toStorefrontOrder(order, items));
-}
+};
 
-export async function loadStorefrontOrder(
+export const loadStorefrontOrder = async (
     access: StorefrontAccess,
     orderId: string,
-) {
+) => {
     const [[order], items] = await Promise.all([
         db
             .select()
@@ -315,4 +315,4 @@ export async function loadStorefrontOrder(
     if (!order) throw new StorefrontNotFoundError('Заказ не найден');
 
     return toStorefrontOrder(order, items);
-}
+};

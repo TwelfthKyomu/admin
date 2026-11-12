@@ -21,6 +21,11 @@ export const env = createEnv({
         S3_BUCKET: z.optional(z.string()),
         RESEND_API_KEY: z.optional(z.string().check(z.minLength(1))),
         EMAIL_FROM: z.optional(z.string().check(z.minLength(1))),
+        BILLING_PROVIDER: z.optional(z.enum(['test', 'stripe', 'yookassa'])),
+        BILLING_YOOKASSA_SHOP_ID: z.optional(z.string().check(z.minLength(1))),
+        BILLING_YOOKASSA_SECRET_KEY: z.optional(
+            z.string().check(z.minLength(1)),
+        ),
         BILLING_STRIPE_SECRET_KEY: z.optional(z.string().check(z.minLength(1))),
         BILLING_STRIPE_WEBHOOK_SECRET: z.optional(
             z.string().check(z.minLength(1)),
@@ -35,6 +40,9 @@ export const env = createEnv({
         NEXT_PUBLIC_APP_URL: z.url(),
         NEXT_PUBLIC_API_URL: z.optional(z.url()),
         NEXT_PUBLIC_APP_VERSION: z.optional(z.string()),
+        NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY: z.optional(
+            z.string().check(z.minLength(1)),
+        ),
     },
 
     experimental__runtimeEnv: {
@@ -42,6 +50,8 @@ export const env = createEnv({
         NEXT_PUBLIC_API_URL:
             process.env.NEXT_PUBLIC_API_URL || process.env.NEXT_PUBLIC_APP_URL,
         NEXT_PUBLIC_APP_VERSION: process.env.NEXT_PUBLIC_APP_VERSION,
+        NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY:
+            process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY,
     },
 
     skipValidation: !!process.env.SKIP_ENV_VALIDATION,

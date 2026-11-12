@@ -50,11 +50,11 @@ interface InboxSource {
     draftOf: (scope: string) => string;
 }
 
-function lastMessagePreview(
+const lastMessagePreview = (
     last: ChatLastMessageView | undefined,
     viewerId: string,
     isDirect: boolean,
-): string {
+): string => {
     if (!last) return 'Сообщений пока нет';
 
     const body = last.body || ATTACHMENT_ONLY_BODY;
@@ -63,13 +63,13 @@ function lastMessagePreview(
     if (isDirect || !last.authorName) return body;
 
     return `${last.authorName.split(' ')[0]}: ${body}`;
-}
+};
 
-function inboxRow(
+const inboxRow = (
     source: InboxSource,
     target: ChatTarget,
     channel: Pick<InboxRow, 'title' | 'initials' | 'image' | 'userId'>,
-): InboxRow {
+): InboxRow => {
     const scope = chatScopeKey(source.organizationId, target);
     const last = source.channels.lastMessages[scope];
 
@@ -91,9 +91,9 @@ function inboxRow(
               ),
         hasDraft: draft.length > 0,
     };
-}
+};
 
-export function buildInboxRows(source: InboxSource): InboxRow[] {
+export const buildInboxRows = (source: InboxSource): InboxRow[] => {
     const { channels, organizationName } = source;
 
     const rows = [
@@ -132,44 +132,44 @@ export function buildInboxRows(source: InboxSource): InboxRow[] {
     return rows.toSorted(
         (a, b) => (b.lastAt?.getTime() ?? 0) - (a.lastAt?.getTime() ?? 0),
     );
-}
+};
 
-function inFolder(row: InboxRow, folder: InboxFolder): boolean {
+const inFolder = (row: InboxRow, folder: InboxFolder): boolean => {
     if (folder === 'unread') return row.unread > 0;
     if (folder === 'channels') return row.target.kind !== 'direct';
     if (folder === 'direct') return row.target.kind === 'direct';
 
     return true;
-}
+};
 
-export function filterInboxRows(
+export const filterInboxRows = (
     rows: InboxRow[],
     folder: InboxFolder,
     query: string,
     hitScopes: ReadonlySet<string>,
-): InboxRow[] {
+): InboxRow[] => {
     return rows.filter(
         (row) =>
             inFolder(row, folder) &&
             (matchesSearch(query, row.title) || hitScopes.has(row.scope)),
     );
-}
+};
 
-export function countInboxFolders(
+export const countInboxFolders = (
     rows: InboxRow[],
-): Record<InboxFolder, number> {
+): Record<InboxFolder, number> => {
     return {
         all: rows.length,
         unread: rows.filter((row) => inFolder(row, 'unread')).length,
         channels: rows.filter((row) => inFolder(row, 'channels')).length,
         direct: rows.filter((row) => inFolder(row, 'direct')).length,
     };
-}
+};
 
-export function inboxTime(date?: Date): string {
+export const inboxTime = (date?: Date): string => {
     if (!date) return '';
 
     const value = new Date(date);
 
     return isSameDay(value, new Date()) ? fmtTime(value) : fmtDateShort(value);
-}
+};

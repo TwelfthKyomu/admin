@@ -9,10 +9,8 @@ import { fromNone, NONE } from '@/shared/lib/none';
 import { useCreateOrder } from '@/contexts/order';
 import {
     ProductType,
-    type ProductView,
     SELLABLE_PRODUCT_STATUSES,
     useProductsList,
-    variantComboLabel,
 } from '@/contexts/product';
 import { useWarehousesList } from '@/contexts/warehouse';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -23,51 +21,10 @@ import {
     type CreateSaleFormValues,
 } from '../form/formData';
 import { READY_TIME_DEFAULT, readyByOf } from '../lib/readyBy';
+import { stockLabel } from '../lib/saleStock';
+import { sellablesOf } from '../lib/sellables';
 
-interface Sellable {
-    key: string;
-    productId: string;
-    variantId?: string;
-    name: string;
-    type: ProductType;
-    price: number;
-    currency: ProductView['currency'];
-    sku?: string;
-    barcode?: string;
-}
-
-function sellablesOf(product: ProductView): Sellable[] {
-    const variants = product.variants.filter((variant) => variant.isActive);
-
-    if (variants.length === 0) {
-        return [
-            {
-                key: product.id,
-                productId: product.id,
-                name: product.name,
-                type: product.type,
-                price: product.price,
-                currency: product.currency,
-                sku: product.sku,
-                barcode: product.barcode,
-            },
-        ];
-    }
-
-    return variants.map((variant) => ({
-        key: `${product.id}:${variant.id}`,
-        productId: product.id,
-        variantId: variant.id,
-        name: `${product.name} (${variantComboLabel(variant.optionValues)})`,
-        type: product.type,
-        price: variant.price ?? product.price,
-        currency: product.currency,
-        sku: variant.sku ?? product.sku,
-        barcode: variant.barcode ?? product.barcode,
-    }));
-}
-
-export function useCreateSale(projectId: string) {
+export const useCreateSale = (projectId: string) => {
     const close = useModalClose();
     const router = useRouter();
     const { mutateAsync, isPending } = useCreateOrder();
@@ -105,7 +62,13 @@ export function useCreateSale(projectId: string) {
 
     const productOptions = sellables.map((item) => ({
         value: item.key,
-        label: `${item.name} · ${fmtMoney(item.price, item.currency)}`,
+        label: [
+            item.name,
+            fmtMoney(item.price, item.currency),
+            stockLabel(item.stock),
+        ]
+            .filter(Boolean)
+            .join(' · '),
         keywords: [item.sku, item.barcode].filter((code) => code !== undefined),
     }));
 
@@ -190,4 +153,4 @@ export function useCreateSale(projectId: string) {
         onItemChange,
         submit,
     };
-}
+};

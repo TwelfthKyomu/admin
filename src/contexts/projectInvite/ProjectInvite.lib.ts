@@ -16,9 +16,9 @@ import {
 } from './ProjectInvite.types';
 import { projectInvites } from './ProjectInvites.table';
 
-export async function resolveInviteContext(
+export const resolveInviteContext = async (
     token: string,
-): Promise<InviteStateView> {
+): Promise<InviteStateView> => {
     const [row] = await db
         .select({
             invite: projectInvites,
@@ -107,4 +107,4 @@ export async function resolveInviteContext(
     }
 
     return { state: 'ready', token, preview };
-}
+};

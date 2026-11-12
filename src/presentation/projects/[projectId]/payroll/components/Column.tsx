@@ -100,7 +100,7 @@ export const COLUMNS = ({
         header: '',
         enableSorting: false,
         cell: ({ row: { original } }) =>
-            canManage ? (
+            canManage && (
                 <Button
                     size="sm"
                     variant="ghost"
@@ -108,6 +108,6 @@ export const COLUMNS = ({
                 >
                     Ставки
                 </Button>
-            ) : null,
+            ),
     }),
 ];

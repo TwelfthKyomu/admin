@@ -20,21 +20,21 @@ if (!globalForRealtime.__scopeListeners) {
 
 const listeners = globalForRealtime.__scopeListeners;
 
-export function publishScopeEvent(
+export const publishScopeEvent = (
     scopeId: string,
     event: ScopeEvent = { type: 'sync' },
-): void {
+): void => {
     const set = listeners.get(scopeId);
 
     if (!set) return;
 
     for (const notify of set) notify(event);
-}
+};
 
-export function subscribeToScope(
+export const subscribeToScope = (
     scopeId: string,
     listener: Listener,
-): () => void {
+): (() => void) => {
     let set = listeners.get(scopeId);
 
     if (!set) {
@@ -53,4 +53,4 @@ export function subscribeToScope(
 
         if (current.size === 0) listeners.delete(scopeId);
     };
-}
+};

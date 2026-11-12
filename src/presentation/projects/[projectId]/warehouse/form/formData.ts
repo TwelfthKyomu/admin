@@ -1,5 +1,5 @@
 import type {
-    CountStockActionInputSchema,
+    ReceiveStockActionInputSchema,
     TransferStockActionInputSchema,
 } from '@/contexts/stockMovement';
 import type {
@@ -9,7 +9,7 @@ import type {
 import type * as z from 'zod/mini';
 
 export type StockOperationFormValues = z.input<
-    typeof CountStockActionInputSchema
+    typeof ReceiveStockActionInputSchema
 >;
 
 export type StockTransferFormValues = z.input<

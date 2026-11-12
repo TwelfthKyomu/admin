@@ -2,8 +2,6 @@
 
 import { Fragment } from 'react';
 import { useStaticData } from '@/app/providers';
-import { HOME_LABEL, ORDER_LABEL, segmentLabel } from '@/shared/labels/navigation';
-import { orderNumber } from '@/contexts/order/Order.types';
 import {
     Breadcrumb,
     BreadcrumbItem,
@@ -14,25 +12,11 @@ import {
 } from '@/ui/Base';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
+import { breadcrumbItems } from './breadcrumbs';
 
 export const Slug = () => {
     const { projects } = useStaticData();
-    const projectName = (segment: string) => projects?.find((item) => item.id === segment)?.name;
-
-    const pathname = usePathname();
-    const segments = pathname.split('/').filter(Boolean);
-
-    const items = [
-        { label: HOME_LABEL, href: '/' },
-        ...segments.map((segment, index) => ({
-            label:
-                projectName(segment) ??
-                (segments[index - 1] === 'orders'
-                    ? `${ORDER_LABEL} ${orderNumber({ id: segment })}`
-                    : segmentLabel(segment)),
-            href: `/${segments.slice(0, index + 1).join('/')}`,
-        })),
-    ];
+    const items = breadcrumbItems(usePathname(), projects ?? []);
 
     if (items.length === 0) return null;
 

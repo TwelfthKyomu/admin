@@ -20,6 +20,7 @@ export * from './Chat.actions';
 export * from './Chat.schema';
 export * from './Chat.types';
 export * from './ChatMessage.actions';
+export * from './ChatPending.types';
 export * from './ChatText.types';
 export * from './useChatSend';
 export * from './useChats';

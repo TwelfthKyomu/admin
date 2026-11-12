@@ -1,7 +1,7 @@
+import { DetailRow } from '@/shared/components/common';
 import { fmtDateFull } from '@/shared/format/date';
 import { DELIVERY_KIND_LABEL } from '@/shared/labels/delivery';
 import { DeliveryKind, DeliveryStatus, type DeliveryView } from '@/contexts/delivery';
-import { DetailRow } from '../DetailRow';
 import { CarrierDetails } from './CarrierDetails';
 import { CourierDetails } from './CourierDetails';
 

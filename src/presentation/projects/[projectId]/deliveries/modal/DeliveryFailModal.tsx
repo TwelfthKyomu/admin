@@ -1,13 +1,10 @@
 'use client';
 
-import { useForm } from 'react-hook-form';
 import { FormDialog } from '@/shared/components/common';
-import { runAction } from '@/shared/lib/action-result';
-import { useModalClose } from '@/shared/lib/modal';
-import { type DeliveryView, useFailDelivery } from '@/contexts/delivery';
+import type { DeliveryView } from '@/contexts/delivery';
 import { Input } from '@/ui/Controlled';
-import { zodResolver } from '@hookform/resolvers/zod';
-import { FailDeliveryFormSchema, type FailDeliveryFormValues } from '../form/formData';
+import type { FailDeliveryFormValues } from '../form/formData';
+import { useDeliveryFailModal } from '../hooks/useDeliveryFailModal';
 
 interface FailDeliveryModalProps {
     projectId: string;
@@ -15,22 +12,7 @@ interface FailDeliveryModalProps {
 }
 
 export const DeliveryFailModal = ({ projectId, delivery }: FailDeliveryModalProps) => {
-    const close = useModalClose();
-    const { mutateAsync, isPending } = useFailDelivery();
-
-    const form = useForm<FailDeliveryFormValues>({
-        resolver: zodResolver(FailDeliveryFormSchema),
-        defaultValues: { reason: '' },
-    });
-
-    const submit = async (values: FailDeliveryFormValues) => {
-        const { success } = await runAction(
-            mutateAsync({ projectId, id: delivery.id, reason: values.reason.trim() }),
-            { success: 'Отметили: не доставлено. Диспетчер решит, что дальше' },
-        );
-
-        if (success) close();
-    };
+    const { isPending, form, submit } = useDeliveryFailModal(projectId, delivery);
 
     return (
         <FormDialog

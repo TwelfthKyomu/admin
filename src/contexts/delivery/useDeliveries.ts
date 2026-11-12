@@ -42,19 +42,19 @@ const deliveryQueries = {
         ),
 };
 
-export function useDeliveries(opts: {
+export const useDeliveries = (opts: {
     projectId: string;
     from?: Date;
     to?: Date;
-}) {
+}) => {
     return useQuery(deliveryQueries.list(opts.projectId, opts.from, opts.to));
-}
+};
 
-export function useCourierStats(opts: {
+export const useCourierStats = (opts: {
     projectId: string;
     from: Date;
     to: Date;
-}) {
+}) => {
     return useQuery(
         listQuery(
             [
@@ -67,11 +67,11 @@ export function useCourierStats(opts: {
             () => courierStatsAction(opts),
         ),
     );
-}
+};
 
-export function useOrderDelivery(projectId: string, orderId: string) {
+export const useOrderDelivery = (projectId: string, orderId: string) => {
     return useQuery(deliveryQueries.order(projectId, orderId));
-}
+};
 
 export const useCreateDelivery = makeMutation(createDeliveryAction);
 export const useUpdateDelivery = makeMutation(updateDeliveryAction);

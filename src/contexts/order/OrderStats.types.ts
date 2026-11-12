@@ -52,9 +52,9 @@ export interface DashboardStatsView {
     recentOrders: RecentOrderView[];
 }
 
-export function rollUpRevenueByCurrency(
+export const rollUpRevenueByCurrency = (
     byProject: ProjectRevenueView[],
-): CurrencyTotalsView[] {
+): CurrencyTotalsView[] => {
     const byCurrency = new Map<Currency, CurrencyTotalsView>();
 
     for (const row of byProject) {
@@ -83,7 +83,7 @@ export function rollUpRevenueByCurrency(
                     : 0,
         }))
         .sort((a, b) => b.revenueAmount - a.revenueAmount);
-}
+};
 
 export interface EmployeeRevenueView {
     employeeId: string | null;
@@ -125,14 +125,16 @@ export interface MyDayView {
     tasks: MyTaskView[];
 }
 
-export function salesTotal(orders: Pick<OrderRecord, 'totalAmount'>[]): number {
+export const salesTotal = (
+    orders: Pick<OrderRecord, 'totalAmount'>[],
+): number => {
     return orders.reduce((sum, order) => sum + order.totalAmount, 0);
-}
+};
 
-export function summarizeSales(
+export const summarizeSales = (
     rows: SellerRevenueRow[],
     rates: { commissionRate: number; siteCommissionRate: number },
-): SalesSummaryView {
+): SalesSummaryView => {
     const revenueOf = (source: OrderSource) =>
         rows
             .filter((row) => row.source === source)
@@ -148,7 +150,7 @@ export function summarizeSales(
         storeEarned: commissionOf(storeRevenue, rates.commissionRate),
         siteEarned: commissionOf(siteRevenue, rates.siteCommissionRate),
     };
-}
+};
 
 export interface MarginItem {
     totalAmount: number;
@@ -163,7 +165,7 @@ export interface MarginView {
     itemsWithoutCost: number;
 }
 
-export function summarizeMargin(items: MarginItem[]): MarginView {
+export const summarizeMargin = (items: MarginItem[]): MarginView => {
     const withCost = items.filter((item) => item.unitCostAmount !== null);
 
     const revenueAmount = withCost.reduce(
@@ -182,4 +184,4 @@ export function summarizeMargin(items: MarginItem[]): MarginView {
         marginAmount: revenueAmount - costAmount,
         itemsWithoutCost: items.length - withCost.length,
     };
-}
+};

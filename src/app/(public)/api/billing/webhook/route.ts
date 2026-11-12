@@ -2,13 +2,13 @@ import { HTTP } from '@/shared/constants/http';
 import { getErrorMessage } from '@/shared/lib/errors';
 import { applyBillingWebhook } from '@/contexts/subscription/SubscriptionBilling.lib';
 
-export async function POST(request: Request) {
+export const POST = async (request: Request) => {
     const rawBody = await request.text();
 
     try {
         const outcome = await applyBillingWebhook(
             rawBody,
-            request.headers.get('stripe-signature') ?? undefined,
+            request.headers.get('stripe-signature'),
         );
 
         return Response.json({ outcome });
@@ -17,4 +17,4 @@ export async function POST(request: Request) {
             status: HTTP.BAD_REQUEST,
         });
     }
-}
+};

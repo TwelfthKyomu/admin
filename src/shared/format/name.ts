@@ -4,25 +4,25 @@ interface ClientNameProps {
     middleName?: string;
 }
 
-export function clientDisplayName(client: ClientNameProps): string {
+export const clientDisplayName = (client: ClientNameProps): string => {
     return [client.lastName, client.firstName, client.middleName]
         .map((part) => part?.trim())
         .filter(Boolean)
         .join(' ');
-}
+};
 
 interface ClientContactProps extends ClientNameProps {
     email?: string;
     phone?: string;
 }
 
-export function clientLabel(client: ClientContactProps): string {
+export const clientLabel = (client: ClientContactProps): string => {
     return (
         clientDisplayName(client) || client.email || client.phone || 'Без имени'
     );
-}
+};
 
-export function getInitials(name: string): string {
+export const getInitials = (name: string): string => {
     return (
         name
             .split(/\s+/)
@@ -31,4 +31,4 @@ export function getInitials(name: string): string {
             .map((part) => part[0]?.toUpperCase() ?? '')
             .join('') || '?'
     );
-}
+};

@@ -1,13 +1,9 @@
 'use client';
 
-import { type SubmitHandler, useForm } from 'react-hook-form';
 import { FormDialog } from '@/shared/components/common';
-import { runAction } from '@/shared/lib/action-result';
-import { useModalClose } from '@/shared/lib/modal';
-import { type CouponView, useUpdateCoupon } from '@/contexts/coupon';
-import { zodResolver } from '@hookform/resolvers/zod';
+import type { CouponView } from '@/contexts/coupon';
 import { CouponForm } from '../form/CouponForm';
-import { UpdateCouponFormSchema, type UpdateCouponFormValues } from '../form/formData';
+import { useCouponEditSheet } from '../hooks/useCouponEditSheet';
 
 interface CouponEditSheetProps {
     projectId: string;
@@ -15,22 +11,7 @@ interface CouponEditSheetProps {
 }
 
 export const CouponEditSheet = ({ projectId, coupon }: CouponEditSheetProps) => {
-    const close = useModalClose();
-    const { mutateAsync, isPending } = useUpdateCoupon();
-
-    const form = useForm<UpdateCouponFormValues>({
-        resolver: zodResolver(UpdateCouponFormSchema),
-        values: { ...coupon, projectId },
-        mode: 'onChange',
-    });
-
-    const onSubmit: SubmitHandler<UpdateCouponFormValues> = async (values) => {
-        const { success } = await runAction(mutateAsync(values), {
-            success: `Купон ${coupon.code} обновлён`,
-        });
-
-        if (success) close();
-    };
+    const { isPending, form, onSubmit } = useCouponEditSheet(projectId, coupon);
 
     return (
         <FormDialog

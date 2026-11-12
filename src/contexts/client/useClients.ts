@@ -31,9 +31,9 @@ const clientQueries = {
         ),
 };
 
-export function useClientsList(opts: ListOptions) {
+export const useClientsList = (opts: ListOptions) => {
     return useQuery(clientQueries.list(opts));
-}
+};
 
 export const useCreateClient = makeMutation(createClientAction);
 export const useUpdateClient = makeMutation(updateClientAction);

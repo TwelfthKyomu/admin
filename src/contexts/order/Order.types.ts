@@ -28,9 +28,9 @@ export type OrderStatus = (typeof OrderStatus)[keyof typeof OrderStatus];
 
 export const ORDER_STATUS_VALUES = enumValues(OrderStatus);
 
-export function isOrderStatus(value: string): value is OrderStatus {
+export const isOrderStatus = (value: string): value is OrderStatus => {
     return ORDER_STATUS_VALUES.some((status) => status === value);
-}
+};
 
 export const ORDER_CANCELLED_STATUSES: readonly OrderStatus[] = [
     OrderStatus.CANCELLED,
@@ -41,13 +41,13 @@ export const ORDER_TERMINAL_STATUSES: readonly OrderStatus[] = [
     ...ORDER_CANCELLED_STATUSES,
 ];
 
-export function isOrderCancelled(status: OrderStatus): boolean {
+export const isOrderCancelled = (status: OrderStatus): boolean => {
     return ORDER_CANCELLED_STATUSES.includes(status);
-}
+};
 
-export function isOrderTerminal(status: OrderStatus): boolean {
+export const isOrderTerminal = (status: OrderStatus): boolean => {
     return ORDER_TERMINAL_STATUSES.includes(status);
-}
+};
 
 const ORDER_STATUS_TRANSITIONS: Record<OrderStatus, OrderStatus[]> = {
     [OrderStatus.PENDING]: [OrderStatus.CONFIRMED, OrderStatus.CANCELLED],
@@ -67,16 +67,16 @@ const ORDER_STATUS_TRANSITIONS: Record<OrderStatus, OrderStatus[]> = {
     [OrderStatus.CANCELLED]: [],
 };
 
-export function getNextOrderStatuses(
+export const getNextOrderStatuses = (
     current: OrderStatus,
     options: { hasDelivery: boolean },
-): OrderStatus[] {
+): OrderStatus[] => {
     const next = ORDER_STATUS_TRANSITIONS[current];
 
     if (!options.hasDelivery) return next;
 
     return next.filter((status) => status !== OrderStatus.READY);
-}
+};
 
 const READY_PENDING_STATUSES: readonly OrderStatus[] = [
     OrderStatus.PENDING,
@@ -84,17 +84,17 @@ const READY_PENDING_STATUSES: readonly OrderStatus[] = [
     OrderStatus.IN_PROGRESS,
 ];
 
-export function isReadyOverdue(
+export const isReadyOverdue = (
     order: { readyBy?: Date | null; status: OrderStatus },
     now: Date,
-): boolean {
+): boolean => {
     if (!order.readyBy) return false;
 
     return (
         new Date(order.readyBy) < now &&
         READY_PENDING_STATUSES.includes(order.status)
     );
-}
+};
 
 export const PaymentStatus = {
     UNPAID: 'unpaid',
@@ -112,7 +112,7 @@ export type OrderMoney = Pick<
     'totalAmount' | 'paidAmount' | 'refundedAmount'
 >;
 
-export function recomputePaymentStatus(money: OrderMoney): PaymentStatus {
+export const recomputePaymentStatus = (money: OrderMoney): PaymentStatus => {
     const net = money.paidAmount - money.refundedAmount;
 
     if (money.totalAmount === 0 && net === 0) return PaymentStatus.UNPAID;
@@ -121,29 +121,29 @@ export function recomputePaymentStatus(money: OrderMoney): PaymentStatus {
     if (net < money.totalAmount) return PaymentStatus.PARTIAL;
 
     return PaymentStatus.PAID;
-}
+};
 
-export function readyPaymentDetails(
+export const readyPaymentDetails = (
     order: OrderMoney & Pick<OrderRecord, 'currency'>,
-): string[] {
+): string[] => {
     const due = orderAmountDue(order);
 
     if (due === 0) return [];
 
     return [`К оплате при получении: ${fmtMoney(due, order.currency)}`];
-}
+};
 
-export function orderAmountDue(money: OrderMoney): number {
+export const orderAmountDue = (money: OrderMoney): number => {
     return Math.max(
         0,
         money.totalAmount - (money.paidAmount - money.refundedAmount),
     );
-}
+};
 
-export function orderAfterPayment(
+export const orderAfterPayment = (
     money: OrderMoney,
     amount: number,
-): Pick<OrderRecord, 'paidAmount' | 'paymentStatus'> {
+): Pick<OrderRecord, 'paidAmount' | 'paymentStatus'> => {
     const paidAmount = money.paidAmount + amount;
 
     if (paidAmount - money.refundedAmount > money.totalAmount) {
@@ -154,12 +154,12 @@ export function orderAfterPayment(
         paidAmount,
         paymentStatus: recomputePaymentStatus({ ...money, paidAmount }),
     };
-}
+};
 
-export function orderAfterRefund(
+export const orderAfterRefund = (
     money: OrderMoney,
     amount: number,
-): Pick<OrderRecord, 'refundedAmount' | 'paymentStatus'> {
+): Pick<OrderRecord, 'refundedAmount' | 'paymentStatus'> => {
     const refundedAmount = money.refundedAmount + amount;
 
     if (refundedAmount > money.paidAmount) {
@@ -170,67 +170,67 @@ export function orderAfterRefund(
         refundedAmount,
         paymentStatus: recomputePaymentStatus({ ...money, refundedAmount }),
     };
-}
+};
 
-function orderNetPaid(money: OrderMoney): number {
+const orderNetPaid = (money: OrderMoney): number => {
     return Math.max(money.paidAmount - money.refundedAmount, 0);
-}
+};
 
-export function orderRevenueShare(money: OrderMoney): number {
+export const orderRevenueShare = (money: OrderMoney): number => {
     return Math.min(orderNetPaid(money), money.totalAmount);
-}
+};
 
-export function confirmationSeller(
+export const confirmationSeller = (
     order: Pick<OrderRecord, 'source' | 'sellerId'>,
     confirmerId: string | null,
-): string | null {
+): string | null => {
     if (order.sellerId || order.source !== OrderSource.STOREFRONT) {
         return order.sellerId;
     }
 
     return confirmerId;
-}
+};
 
-export function maskSeller<T extends Pick<OrderRecord, 'sellerId'>>(
+export const maskSeller = <T extends Pick<OrderRecord, 'sellerId'>>(
     order: T,
     ownEmployeeId: string | null,
-): T {
+): T => {
     if (!ownEmployeeId || order.sellerId === ownEmployeeId) return order;
 
     return { ...order, sellerId: null };
-}
+};
 
-export function paidShareOf(
+export const paidShareOf = (
     item: Pick<OrderItemRecord, 'totalAmount'>,
     order: OrderMoney & Pick<OrderRecord, 'subtotalAmount'>,
-): number {
+): number => {
     if (order.subtotalAmount === 0) return 0;
 
     const paid = Math.min(orderNetPaid(order), order.totalAmount);
 
     return (item.totalAmount * paid) / order.subtotalAmount;
-}
+};
 
 export interface ResolvedOrderItem extends OrderItemInput {
     unitCostAmount: number | null;
 }
 
-export function orderItemTotal(
+export const orderItemTotal = (
     item: Pick<OrderItemInput, 'unitPriceAmount' | 'quantity'>,
-): number {
+): number => {
     return item.unitPriceAmount * item.quantity;
-}
+};
 
-export function sumOrderItems(items: OrderItemInput[]): number {
+export const sumOrderItems = (items: OrderItemInput[]): number => {
     return items.reduce((sum, item) => sum + orderItemTotal(item), 0);
-}
+};
 
-export function stockLinesFromOrderItems(
+export const stockLinesFromOrderItems = (
     items: Pick<
         OrderItemRecord,
         'productId' | 'variantId' | 'type' | 'quantity'
     >[],
-): StockLine[] {
+): StockLine[] => {
     return items.flatMap((item) =>
         item.productId && item.type !== ProductType.SERVICE
             ? [
@@ -242,7 +242,7 @@ export function stockLinesFromOrderItems(
               ]
             : [],
     );
-}
+};
 
 export const OrderEventType = {
     CREATED: 'created',
@@ -269,18 +269,18 @@ export const ORDER_ITEM_QUANTITY_MAX = 10_000;
 
 export type OrderListView = OrderRecord & { itemsCount: number };
 
-export function orderNumber(order: Pick<OrderRecord, 'id'>): string {
+export const orderNumber = (order: Pick<OrderRecord, 'id'>): string => {
     return order.id.slice(0, 8).toUpperCase();
-}
+};
 
-export function isScheduledSale(order: {
+export const isScheduledSale = (order: {
     sellerId?: string | null;
     soldAt?: Date | null;
     status: OrderStatus;
-}): boolean {
+}): boolean => {
     return (
         Boolean(order.sellerId) &&
         Boolean(order.soldAt) &&
         order.status !== OrderStatus.CANCELLED
     );
-}
+};

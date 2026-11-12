@@ -27,11 +27,11 @@ interface ImportTarget {
     createdBy: string;
 }
 
-function uniqueSlug(
+const uniqueSlug = (
     base: string,
     fallback: string,
     taken: Set<string>,
-): string {
+): string => {
     const root = slugify(base, 130) || fallback.toLowerCase();
     let slug = root;
 
@@ -40,15 +40,15 @@ function uniqueSlug(
     taken.add(slug);
 
     return slug;
-}
+};
 
-function failureOf(error: unknown): string {
+const failureOf = (error: unknown): string => {
     if (isApplicationError(error)) return error.message;
 
     return constraintErrorMessage(error) ?? 'Не удалось сохранить строку';
-}
+};
 
-async function loadImportState(projectId: string, skus: string[]) {
+const loadImportState = async (projectId: string, skus: string[]) => {
     const [existing, slugs, categories] = await Promise.all([
         db
             .select({ id: products.id, sku: products.sku })
@@ -104,12 +104,12 @@ async function loadImportState(projectId: string, skus: string[]) {
         categorySlugs: new Set(categories.map((row) => row.slug)),
         variantProductIds: new Set(withVariants.map((row) => row.productId)),
     };
-}
+};
 
-export async function importProducts(
+export const importProducts = async (
     target: ImportTarget,
     rows: ProductImportRow[],
-): Promise<ProductImportResult> {
+): Promise<ProductImportResult> => {
     const { projectId } = target;
 
     const state = await loadImportState(
@@ -231,4 +231,4 @@ export async function importProducts(
     }
 
     return result;
-}
+};

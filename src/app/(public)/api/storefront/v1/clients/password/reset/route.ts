@@ -6,7 +6,7 @@ import {
 import { StorefrontPasswordResetInputSchema } from '@/contexts/storefront/Storefront.schema';
 import { resetStorefrontPassword } from '@/contexts/storefront/StorefrontClient.lib';
 
-export function POST(request: Request) {
+export const POST = (request: Request) => {
     return storefrontResponse(async () =>
         resetStorefrontPassword(
             await authenticateStorefront(request, 'storefront:read'),
@@ -16,4 +16,4 @@ export function POST(request: Request) {
             ),
         ),
     );
-}
+};

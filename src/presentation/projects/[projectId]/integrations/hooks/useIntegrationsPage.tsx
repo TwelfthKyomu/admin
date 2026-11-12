@@ -23,7 +23,7 @@ const IntegrationCreateModal = dynamic(() =>
     import('../modal/IntegrationCreateModal').then((m) => m.IntegrationCreateModal),
 );
 
-export function useIntegrationsPage() {
+export const useIntegrationsPage = () => {
     const { projectId } = useProject();
     const [issuedKey, setIssuedKey] = useState<string>();
     const query = useIntegrationsList(projectId);
@@ -74,4 +74,4 @@ export function useIntegrationsPage() {
         onRevoke,
         isRevoking: revoke.isPending,
     };
-}
+};

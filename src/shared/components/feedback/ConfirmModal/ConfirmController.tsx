@@ -1,7 +1,8 @@
 'use client';
 
-import { type ReactNode, useState } from 'react';
+import type { ReactNode } from 'react';
 import { ConfirmModal } from '@/shared/components/feedback';
+import { useConfirmController } from './hooks/useConfirmController';
 
 export interface ConfirmOptions {
     title: string;
@@ -18,14 +19,7 @@ interface ConfirmControllerProps {
 }
 
 export const ConfirmController = ({ opts, onResolve }: ConfirmControllerProps) => {
-    const [open, setOpen] = useState(true);
-    const [pending, setPending] = useState(false);
-
-    const close = (result: boolean) => {
-        setOpen(false);
-
-        setTimeout(() => onResolve(result), 150);
-    };
+    const { open, pending, setPending, close } = useConfirmController(onResolve);
 
     return (
         <ConfirmModal

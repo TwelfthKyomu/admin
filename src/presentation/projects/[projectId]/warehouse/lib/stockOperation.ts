@@ -1,6 +1,7 @@
 import type { Option } from '@/shared/types';
 import {
     CountStockActionInputSchema,
+    ReceiveStockActionInputSchema,
     StockOperationActionInputSchema,
 } from '@/contexts/stockMovement';
 import type { WarehouseView } from '@/contexts/warehouse';
@@ -46,14 +47,14 @@ export const STOCK_OPERATION_TEXT: Record<
 };
 
 export const STOCK_OPERATION_SCHEMA = {
-    [StockOperationType.RECEIPT]: StockOperationActionInputSchema,
+    [StockOperationType.RECEIPT]: ReceiveStockActionInputSchema,
     [StockOperationType.WRITE_OFF]: StockOperationActionInputSchema,
     [StockOperationType.COUNT]: CountStockActionInputSchema,
 };
 
-export function warehouseOptions(warehouses: WarehouseView[]): Option[] {
+export const warehouseOptions = (warehouses: WarehouseView[]): Option[] => {
     return warehouses.map((warehouse) => ({
         value: warehouse.id,
         label: warehouse.name,
     }));
-}
+};

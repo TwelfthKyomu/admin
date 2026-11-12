@@ -1,11 +1,11 @@
 'use client';
 
-import { useRef } from 'react';
 import { pluralRu } from '@/shared/format/plural';
 import type { ChatMessageView } from '@/contexts/chat';
 import { Button, InputGroup, InputGroupAddon } from '@/ui/Base';
 import { ArrowRight, Paperclip, Pencil } from 'lucide-react';
 import type { PendingAttachment } from '../../hooks/useChatComposer';
+import { useComposer } from '../../hooks/useComposer';
 import { CHAT_FILE_ACCEPT } from '../../lib/attachments';
 import { ATTACHMENT_ONLY_BODY, CHARS_PLURAL, DELETED_AUTHOR } from '../../lib/text';
 import { ComposerBanner } from './Banner';
@@ -47,18 +47,14 @@ export const Composer = ({
     onCancelEdit,
     placeholder,
 }: ComposerProps) => {
-    const fileInput = useRef<HTMLInputElement>(null);
-
-    const handleChange = (next: string) => {
-        onChange(next);
-
-        if (next.length > 0) onTyping?.();
-    };
-
-    let cancel: (() => void) | undefined;
-
-    if (editing) cancel = onCancelEdit;
-    else if (replyTo) cancel = onCancelReply;
+    const { fileInput, handleChange, cancel } = useComposer({
+        onChange,
+        onTyping,
+        replyTo,
+        onCancelReply,
+        editing,
+        onCancelEdit,
+    });
 
     return (
         <footer className="shrink-0 border-t border-border bg-card/15 px-3.5 pt-2.5 pb-3">

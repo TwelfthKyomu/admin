@@ -16,9 +16,9 @@ const FILE_KEY = Buffer.from(hkdfSync('sha256', KEY, '', 'flowsy-files', 32));
 const FILE_MAGIC = Buffer.from('FLW1');
 const FILE_HEADER_BYTES = FILE_MAGIC.length + IV_BYTES + AUTH_TAG_BYTES;
 
-export function encryptCredentials(
+export const encryptCredentials = (
     payload: Record<string, unknown>,
-): Record<string, unknown> {
+): Record<string, unknown> => {
     const iv = randomBytes(IV_BYTES);
     const cipher = createCipheriv(ALGORITHM, KEY, iv);
 
@@ -32,11 +32,11 @@ export function encryptCredentials(
         iv: iv.toString('base64'),
         authTag: cipher.getAuthTag().toString('base64'),
     };
-}
+};
 
-export function decryptCredentials(
+export const decryptCredentials = (
     stored: Record<string, unknown>,
-): Record<string, unknown> {
+): Record<string, unknown> => {
     const decipher = createDecipheriv(
         ALGORITHM,
         KEY,
@@ -51,17 +51,17 @@ export function decryptCredentials(
     ]);
 
     return JSON.parse(plaintext.toString('utf8'));
-}
+};
 
-export function encryptFile(data: Uint8Array): Buffer {
+export const encryptFile = (data: Uint8Array): Buffer => {
     const iv = randomBytes(IV_BYTES);
     const cipher = createCipheriv(ALGORITHM, FILE_KEY, iv);
     const body = Buffer.concat([cipher.update(data), cipher.final()]);
 
     return Buffer.concat([FILE_MAGIC, iv, cipher.getAuthTag(), body]);
-}
+};
 
-export function decryptFile(data: Uint8Array): Uint8Array {
+export const decryptFile = (data: Uint8Array): Uint8Array => {
     const file = Buffer.from(data.buffer, data.byteOffset, data.byteLength);
 
     if (!file.subarray(0, FILE_MAGIC.length).equals(FILE_MAGIC)) return data;
@@ -77,4 +77,4 @@ export function decryptFile(data: Uint8Array): Uint8Array {
         decipher.update(file.subarray(FILE_HEADER_BYTES)),
         decipher.final(),
     ]);
-}
+};

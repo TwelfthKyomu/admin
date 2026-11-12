@@ -1,13 +1,11 @@
 'use client';
 
-import { ROUTES } from '@/shared/constants';
-import { signOut } from '@/shared/lib/auth-client';
 import type { InviteStateView } from '@/contexts/projectInvite';
-import { Button } from '@/ui/Base';
-import { useRouter } from 'next/navigation';
 import { AuthTabs } from './components/AuthTabs';
 import { CodeForm } from './components/CodeForm';
 import { InfoScreen } from './components/InfoScreen';
+import { OpenProjectButton } from './components/OpenProjectButton';
+import { SwitchAccountButton } from './components/SwitchAccountButton';
 
 interface AcceptInvitePageProps {
     token: string;
@@ -15,17 +13,6 @@ interface AcceptInvitePageProps {
 }
 
 export const AcceptInvitePage = ({ token, context }: AcceptInvitePageProps) => {
-    const { push } = useRouter();
-
-    const projectAction = (projectId: string) => (
-        <Button
-            className="w-full"
-            onClick={() => push(ROUTES.project(projectId))}
-        >
-            Открыть проект
-        </Button>
-    );
-
     switch (context.state) {
         case 'ready':
             return (
@@ -49,7 +36,7 @@ export const AcceptInvitePage = ({ token, context }: AcceptInvitePageProps) => {
                 <InfoScreen
                     title="Вы уже состоите в этом проекте"
                     description="Повторно принимать приглашение не нужно."
-                    action={projectAction(context.projectId)}
+                    action={<OpenProjectButton projectId={context.projectId} />}
                 />
             );
 
@@ -58,21 +45,7 @@ export const AcceptInvitePage = ({ token, context }: AcceptInvitePageProps) => {
                 <InfoScreen
                     title="Приглашение для другого аккаунта"
                     description={`Приглашение оформлено на ${context.invitedEmail}, а вы вошли как ${context.currentEmail}. Выйдите и войдите нужным аккаунтом.`}
-                    action={
-                        <Button
-                            className="w-full"
-                            variant="outline"
-                            onClick={async () => {
-                                await signOut();
-
-                                push(
-                                    `${ROUTES.auth}?callbackUrl=${encodeURIComponent(ROUTES.invite(token))}`,
-                                );
-                            }}
-                        >
-                            Выйти и сменить аккаунт
-                        </Button>
-                    }
+                    action={<SwitchAccountButton token={token} />}
                 />
             );
 

@@ -70,16 +70,16 @@ const PROJECT_ROLE_PERMISSIONS: Record<ProjectRole, ReadonlySet<Permission>> = {
     ]),
 };
 
-export function canInProject(
+export const canInProject = (
     role: ProjectRole,
     permission: Permission,
-): boolean {
+): boolean => {
     return PROJECT_ROLE_PERMISSIONS[role].has(permission);
-}
+};
 
-export function projectRolePermissions(role: ProjectRole): Permission[] {
+export const projectRolePermissions = (role: ProjectRole): Permission[] => {
     return [...PROJECT_ROLE_PERMISSIONS[role]];
-}
+};
 
 export interface ProjectAccess {
     organizationId: string;

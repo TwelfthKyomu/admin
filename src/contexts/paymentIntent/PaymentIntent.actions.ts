@@ -23,7 +23,9 @@ import { PaymentProvider } from './PaymentIntent.types';
 import { refundUnappliedIntent } from './PaymentIntentRefund.lib';
 import { type PaymentIntentView, paymentIntents } from './PaymentIntents.table';
 
-function unappliedRefundDate(metadata: Record<string, unknown>): Date | null {
+const unappliedRefundDate = (
+    metadata: Record<string, unknown>,
+): Date | null => {
     const refund = metadata.refund;
 
     if (typeof refund !== 'object' || refund === null || !('at' in refund)) {
@@ -31,7 +33,7 @@ function unappliedRefundDate(metadata: Record<string, unknown>): Date | null {
     }
 
     return typeof refund.at === 'string' ? new Date(refund.at) : null;
-}
+};
 
 export const paymentIntentsAction = projectReadAction(Permission.VIEW_FINANCES)
     .inputSchema(PaymentIntentsActionInputSchema)

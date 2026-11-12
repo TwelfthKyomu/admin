@@ -40,7 +40,7 @@ export interface StockMove
     startsTracking?: boolean;
 }
 
-export async function moveStock(tx: Tx, move: StockMove): Promise<void> {
+export const moveStock = async (tx: Tx, move: StockMove): Promise<void> => {
     if (move.quantityDelta === 0) return;
 
     const current = await lockStock(tx, move);
@@ -74,9 +74,9 @@ export async function moveStock(tx: Tx, move: StockMove): Promise<void> {
     );
 
     await setStock(tx, move, (current.stock ?? 0) + move.quantityDelta);
-}
+};
 
-async function soldKeys(tx: Tx, orderId: string): Promise<Set<string>> {
+const soldKeys = async (tx: Tx, orderId: string): Promise<Set<string>> => {
     const rows = await tx
         .select({
             productId: stockMovements.productId,
@@ -91,12 +91,12 @@ async function soldKeys(tx: Tx, orderId: string): Promise<Set<string>> {
         );
 
     return new Set(rows.map(stockKey));
-}
+};
 
-export async function applyStockSale(
+export const applyStockSale = async (
     tx: Tx,
     input: OrderStockInput & { lines: StockLine[] },
-): Promise<void> {
+): Promise<void> => {
     const [sold, reservations, fallbackWarehouseId] = await Promise.all([
         soldKeys(tx, input.orderId),
         orderReservations(tx, input.orderId),
@@ -139,12 +139,12 @@ export async function applyStockSale(
     }
 
     await releaseOrderStock(tx, input.orderId);
-}
+};
 
-export async function applyStockReturn(
+export const applyStockReturn = async (
     tx: Tx,
     input: OrderStockInput,
-): Promise<void> {
+): Promise<void> => {
     const sales = await tx
         .select({
             productId: stockMovements.productId,
@@ -173,12 +173,12 @@ export async function applyStockReturn(
     }
 
     await releaseOrderStock(tx, input.orderId);
-}
+};
 
-export async function applyCatalogStockChanges(
+export const applyCatalogStockChanges = async (
     tx: Tx,
     changes: ManualStockChange[],
-): Promise<void> {
+): Promise<void> => {
     const changed = changes.filter(
         (change) => (change.after ?? 0) !== (change.before ?? 0),
     );
@@ -214,4 +214,4 @@ export async function applyCatalogStockChanges(
             createdBy: change.createdBy,
         });
     }
-}
+};

@@ -60,25 +60,28 @@ export const FINISHED_DELIVERY_STATUSES: readonly DeliveryStatus[] = [
     DeliveryStatus.FAILED,
 ];
 
-export function isActiveDelivery(status: DeliveryStatus): boolean {
+export const isActiveDelivery = (status: DeliveryStatus): boolean => {
     return ACTIVE_DELIVERY_STATUSES.includes(status);
-}
+};
 
-export function isOpenDelivery(status: DeliveryStatus): boolean {
+export const isOpenDelivery = (status: DeliveryStatus): boolean => {
     return OPEN_DELIVERY_STATUSES.includes(status);
-}
+};
 
-export function assertDeliveryWindow(windowStart: Date, windowEnd: Date): void {
+export const assertDeliveryWindow = (
+    windowStart: Date,
+    windowEnd: Date,
+): void => {
     if (windowEnd <= windowStart) {
         throw new ApplicationError('Конец окна раньше начала');
     }
-}
+};
 
-export function deliveryTimeOf(
+export const deliveryTimeOf = (
     delivery: Pick<DeliveryRecord, 'windowStart' | 'createdAt'>,
-): Date {
+): Date => {
     return delivery.windowStart ?? delivery.createdAt;
-}
+};
 
 export const DeliveryCarrier = {
     CDEK: 'cdek',
@@ -108,14 +111,14 @@ const DELIVERY_TRACK_URL: Record<
     other: () => undefined,
 };
 
-export function deliveryTrackUrl(delivery: {
+export const deliveryTrackUrl = (delivery: {
     carrier?: DeliveryCarrier | null;
     trackingNumber?: string | null;
-}): string | undefined {
+}): string | undefined => {
     if (!delivery.carrier || !delivery.trackingNumber) return undefined;
 
     return DELIVERY_TRACK_URL[delivery.carrier](delivery.trackingNumber);
-}
+};
 
 export const CARRIER_SETTABLE_STATUSES = [
     DeliveryStatus.QUEUED,

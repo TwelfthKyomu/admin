@@ -11,7 +11,7 @@ interface RouteContext {
     params: Promise<{ filename: string }>;
 }
 
-export async function GET(request: Request, context: RouteContext) {
+export const GET = async (request: Request, context: RouteContext) => {
     await connection();
 
     try {
@@ -43,4 +43,4 @@ export async function GET(request: Request, context: RouteContext) {
     } catch (error) {
         return storefrontErrorResponse(error);
     }
-}
+};

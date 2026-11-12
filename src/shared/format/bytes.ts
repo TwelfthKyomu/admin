@@ -1,6 +1,6 @@
 const UNITS = ['Б', 'КБ', 'МБ', 'ГБ'] as const;
 
-export function fmtBytes(bytes: number): string {
+export const fmtBytes = (bytes: number): string => {
     let value = bytes;
     let unit = 0;
 
@@ -12,4 +12,4 @@ export function fmtBytes(bytes: number): string {
     const digits = unit === 0 || value >= 10 ? 0 : 1;
 
     return `${value.toLocaleString('ru-RU', { maximumFractionDigits: digits })} ${UNITS[unit]}`;
-}
+};

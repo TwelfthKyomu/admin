@@ -3,7 +3,6 @@ import { textField } from '@/shared/validation';
 import {
     entityInProjectSchema,
     idSchema,
-    nonNegativeIntSchema,
     projectScopeSchema,
 } from '@/shared/validation/base';
 import * as z from 'zod/mini';
@@ -23,7 +22,8 @@ export const UpdateWarehouseActionInputSchema = z.object({
     projectId: idSchema,
     name: z.optional(NameSchema),
     forSite: z.optional(z.boolean()),
-    position: z.optional(nonNegativeIntSchema),
 });
 
 export const DeleteWarehouseActionInputSchema = entityInProjectSchema;
+
+export const MakePrimaryWarehouseActionInputSchema = entityInProjectSchema;

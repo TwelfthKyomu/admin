@@ -66,9 +66,9 @@ export interface ClosedCashShiftView {
     note: string | null;
 }
 
-export function expectedCashOf(
+export const expectedCashOf = (
     totals: Omit<CashShiftTotalsView, 'expectedCash'>,
-): number {
+): number => {
     return (
         totals.openingAmount +
         totals.registerCharges -
@@ -76,4 +76,4 @@ export function expectedCashOf(
         totals.handovers -
         totals.collections
     );
-}
+};

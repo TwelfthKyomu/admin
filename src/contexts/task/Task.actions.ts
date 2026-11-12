@@ -29,21 +29,21 @@ import {
 import type { TaskSubtask } from './Task.types';
 import { tasks } from './Tasks.table';
 
-function withSubtaskIds(subtasks: TaskSubtask[]): TaskSubtask[] {
+const withSubtaskIds = (subtasks: TaskSubtask[]): TaskSubtask[] => {
     return subtasks.map((subtask) =>
         subtask.id ? subtask : { ...subtask, id: crypto.randomUUID() },
     );
-}
+};
 
-async function assertAssigneeInProject(
+const assertAssigneeInProject = async (
     projectId: string,
     assigneeUserId: string | null | undefined,
-): Promise<void> {
+): Promise<void> => {
     if (!assigneeUserId) return;
     if (!(await findActiveProjectMember(projectId, assigneeUserId))) {
         throw new ApplicationError('Исполнитель не участвует в проекте');
     }
-}
+};
 
 export const tasksAction = projectReadAction(Permission.VIEW_MEMBERS)
     .inputSchema(TasksActionInputSchema)

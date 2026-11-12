@@ -1,7 +1,8 @@
 'use client';
 
 import type { ComponentProps, ReactNode } from 'react';
-import { InputGroup, InputGroupAddon, InputGroupInput, InputGroupText } from './primitives';
+import { AddonContent } from './components/AddonContent';
+import { InputGroup, InputGroupAddon, InputGroupInput } from './primitives';
 
 export * from './primitives';
 
@@ -10,10 +11,6 @@ type InputGroupFieldProps = ComponentProps<typeof InputGroupInput> & {
     endAddon?: ReactNode;
     groupClassName?: string;
 };
-
-function renderAddon(content: ReactNode) {
-    return typeof content === 'string' ? <InputGroupText>{content}</InputGroupText> : content;
-}
 
 export const InputGroupField = ({
     startAddon,
@@ -25,14 +22,18 @@ export const InputGroupField = ({
     return (
         <InputGroup className={groupClassName}>
             {startAddon != null && (
-                <InputGroupAddon align="inline-start">{renderAddon(startAddon)}</InputGroupAddon>
+                <InputGroupAddon align="inline-start">
+                    <AddonContent content={startAddon} />
+                </InputGroupAddon>
             )}
             <InputGroupInput
                 className={className}
                 {...props}
             />
             {endAddon != null && (
-                <InputGroupAddon align="inline-end">{renderAddon(endAddon)}</InputGroupAddon>
+                <InputGroupAddon align="inline-end">
+                    <AddonContent content={endAddon} />
+                </InputGroupAddon>
             )}
         </InputGroup>
     );

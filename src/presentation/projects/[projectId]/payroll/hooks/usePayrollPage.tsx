@@ -13,7 +13,7 @@ const RatesEditSheet = dynamic(() =>
     import('../modal/RatesEditSheet').then((m) => m.RatesEditSheet),
 );
 
-export function usePayrollPage() {
+export const usePayrollPage = () => {
     const { projectId, currency, can } = useProject();
     const period = usePeriodParam();
     const { kind, setKind, matches } = useKindParam();
@@ -53,4 +53,4 @@ export function usePayrollPage() {
         canManage: can(Permission.MANAGE_FINANCES),
         onOpenRates,
     };
-}
+};

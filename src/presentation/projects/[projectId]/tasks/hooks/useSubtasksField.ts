@@ -4,7 +4,7 @@ import { useState } from 'react';
 import { useFieldArray, useFormContext } from 'react-hook-form';
 import type { TaskFormValues } from '../form/formData';
 
-export function useSubtasksField() {
+export const useSubtasksField = () => {
     const [title, setTitle] = useState('');
     const { control } = useFormContext<TaskFormValues>();
 
@@ -23,4 +23,4 @@ export function useSubtasksField() {
     };
 
     return { fields, title, setTitle, add, remove };
-}
+};

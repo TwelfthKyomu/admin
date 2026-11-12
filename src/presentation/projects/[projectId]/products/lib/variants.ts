@@ -9,10 +9,10 @@ type VariantFormValue = NonNullable<
     CreateProductFormValues['variants']
 >[number];
 
-export function buildVariants(
+export const buildVariants = (
     options: ProductOption[],
     variants: VariantFormValue[],
-): VariantFormValue[] {
+): VariantFormValue[] => {
     const existingByKey = new Map(
         variants.map((variant) => [
             variantComboKey(variant.optionValues),
@@ -33,4 +33,4 @@ export function buildVariants(
             position,
         };
     });
-}
+};

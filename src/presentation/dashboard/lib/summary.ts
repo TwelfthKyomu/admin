@@ -19,7 +19,9 @@ export interface DashboardSummary {
     facts: string[];
 }
 
-export function dashboardSummary(stats: DashboardStatsView): DashboardSummary {
+export const dashboardSummary = (
+    stats: DashboardStatsView,
+): DashboardSummary => {
     const [main = EMPTY_TOTALS, ...others] = stats.totals;
     const { ordersCount, paidOrdersCount, refundedAmount, currency } = main;
 
@@ -40,4 +42,4 @@ export function dashboardSummary(stats: DashboardStatsView): DashboardSummary {
             ),
         ],
     };
-}
+};

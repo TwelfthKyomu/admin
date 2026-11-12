@@ -1,6 +1,7 @@
 'use client';
 
-import { type ComponentProps, type ReactNode, useState } from 'react';
+import type { ComponentProps, ReactNode } from 'react';
+import { useDismissible } from '@/shared/hooks/useDismissible';
 import { DialogClose, DialogFooter } from '@/ui/Base';
 import {
     Dialog,
@@ -33,20 +34,12 @@ const ModalBase = ({
     busy = false,
     children,
 }: ModalProps) => {
-    const [open, setOpen] = useState(true);
-
-    const close = () => {
-        setOpen(false);
-        onClose?.();
-    };
+    const { open, close, onOpenChange } = useDismissible({ onClose, canClose, busy });
 
     return (
         <Dialog
             open={open}
-            onOpenChange={async (next) => {
-                if (next || busy) return;
-                if (!canClose || (await canClose())) close();
-            }}
+            onOpenChange={onOpenChange}
         >
             <DialogContent
                 className={className}

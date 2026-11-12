@@ -8,13 +8,11 @@ import {
     AttachmentContent,
     AttachmentDescription,
     AttachmentGroup,
-    AttachmentMedia,
     AttachmentTitle,
-    Spinner,
 } from '@/ui/Base';
 import { X } from 'lucide-react';
 import type { PendingAttachment } from '../../hooks/useChatComposer';
-import { attachmentIcon } from '../../lib/attachments';
+import { PendingMedia } from './PendingMedia';
 
 interface PendingAttachmentsProps {
     items: PendingAttachment[];
@@ -51,35 +49,5 @@ export const PendingAttachments = ({ items, onRemove }: PendingAttachmentsProps)
                 </Attachment>
             ))}
         </AttachmentGroup>
-    );
-};
-
-const PendingMedia = ({ item }: { item: PendingAttachment }) => {
-    if (item.status === 'uploading') {
-        return (
-            <AttachmentMedia>
-                <Spinner />
-            </AttachmentMedia>
-        );
-    }
-
-    if (item.attachment && item.contentType.startsWith('image/')) {
-        return (
-            <AttachmentMedia variant="image">
-                {/* biome-ignore lint/performance/noImgElement: файл отдаёт /files с проверкой доступа, next/image его не оптимизирует */}
-                <img
-                    src={item.attachment.url}
-                    alt=""
-                />
-            </AttachmentMedia>
-        );
-    }
-
-    const Icon = attachmentIcon(item.contentType);
-
-    return (
-        <AttachmentMedia>
-            <Icon />
-        </AttachmentMedia>
     );
 };

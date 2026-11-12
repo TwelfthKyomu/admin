@@ -11,7 +11,9 @@ import { projects } from '@/contexts/project/Projects.table';
 import { projectFiles } from '@/contexts/projectFile/ProjectFiles.table';
 import { env } from '@/env';
 import { and, eq, notExists, sum } from 'drizzle-orm';
+import { hasStripeBillingKeys } from './BillingStripe.lib';
 import {
+    BillingProvider,
     LIMITS_BY_PLAN,
     type OrganizationSubscriptionStatus,
     PLAN_CATALOG,
@@ -19,26 +21,24 @@ import {
     SubscriptionPlan,
 } from './Subscription.types';
 
-export function billingKeys(): {
-    secretKey: string;
-    webhookSecret: string;
-} | null {
-    const secretKey = env.BILLING_STRIPE_SECRET_KEY;
-    const webhookSecret = env.BILLING_STRIPE_WEBHOOK_SECRET;
+export const billingProvider = (): BillingProvider => {
+    if (env.BILLING_PROVIDER) return env.BILLING_PROVIDER;
 
-    return secretKey && webhookSecret ? { secretKey, webhookSecret } : null;
-}
+    return hasStripeBillingKeys()
+        ? BillingProvider.STRIPE
+        : BillingProvider.TEST;
+};
 
-function effectivePlan(row: {
+const effectivePlan = (row: {
     plan: SubscriptionPlan;
     planExpiresAt: Date | null;
-}): SubscriptionPlan {
+}): SubscriptionPlan => {
     return row.planExpiresAt && row.planExpiresAt <= new Date()
         ? SubscriptionPlan.FREE
         : row.plan;
-}
+};
 
-async function loadOrganizationPlan(organizationId: string) {
+const loadOrganizationPlan = async (organizationId: string) => {
     const [row] = await db
         .select({
             plan: organizations.plan,
@@ -49,17 +49,17 @@ async function loadOrganizationPlan(organizationId: string) {
         .limit(1);
 
     return row ?? { plan: SubscriptionPlan.FREE, planExpiresAt: null };
-}
+};
 
-async function getOrganizationPlan(
+const getOrganizationPlan = async (
     organizationId: string,
-): Promise<SubscriptionPlan> {
+): Promise<SubscriptionPlan> => {
     return effectivePlan(await loadOrganizationPlan(organizationId));
-}
+};
 
-export async function getOrganizationSubscriptionStatus(
+export const getOrganizationSubscriptionStatus = async (
     organizationId: string,
-): Promise<OrganizationSubscriptionStatus> {
+): Promise<OrganizationSubscriptionStatus> => {
     const [row, projectsUsed, storageUsedBytes] = await Promise.all([
         loadOrganizationPlan(organizationId),
         countOrganizationProjects(organizationId),
@@ -72,18 +72,18 @@ export async function getOrganizationSubscriptionStatus(
     return {
         plan,
         planExpiresAt: plan === row.plan ? row.planExpiresAt : null,
-        billingEnabled: billingKeys() !== null,
+        billingProvider: billingProvider(),
         projectsUsed,
         projectLimit: limits.projects,
         canCreateProject: projectsUsed < limits.projects,
         storageUsedBytes,
         storageLimitBytes: limits.storageBytes,
     };
-}
+};
 
-async function sumOrganizationStorageBytes(
+const sumOrganizationStorageBytes = async (
     organizationId: string,
-): Promise<number> {
+): Promise<number> => {
     const ownStorage = db
         .select({ id: projectIntegrations.id })
         .from(projectIntegrations)
@@ -107,12 +107,12 @@ async function sumOrganizationStorageBytes(
         );
 
     return Number(row?.total ?? 0);
-}
+};
 
-export async function storageQuotaError(
+export const storageQuotaError = async (
     organizationId: string,
     addedBytes: number,
-): Promise<string | undefined> {
+): Promise<string | undefined> => {
     const [plan, usedBytes] = await Promise.all([
         getOrganizationPlan(organizationId),
         sumOrganizationStorageBytes(organizationId),
@@ -123,14 +123,14 @@ export async function storageQuotaError(
     if (usedBytes + addedBytes <= limitBytes) return undefined;
 
     return `Хранилище организации на тарифе «${PLAN_CATALOG[plan].label}» — ${fmtBytes(limitBytes)}, уже занято ${fmtBytes(usedBytes)}.`;
-}
+};
 
-export async function assertPlanLimit(
+export const assertPlanLimit = async (
     organizationId: string,
     limitKey: keyof PlanLimits,
     used: number,
     subject: string,
-): Promise<void> {
+): Promise<void> => {
     const plan = await getOrganizationPlan(organizationId);
     const limit = LIMITS_BY_PLAN[plan][limitKey];
 
@@ -139,4 +139,4 @@ export async function assertPlanLimit(
     throw new ApplicationError(
         `Лимит ${subject} на тарифе «${plan}» — ${limit}. Обновите тариф, чтобы добавлять больше ${subject}.`,
     );
-}
+};

@@ -1,34 +1,11 @@
 'use client';
 
-import { type SubmitHandler, useForm } from 'react-hook-form';
 import { FormDialog } from '@/shared/components/common';
-import { runAction } from '@/shared/lib/action-result';
-import { useModalClose } from '@/shared/lib/modal';
-import {
-    RecordCashCollectionActionInputSchema,
-    useRecordCashCollection,
-} from '@/contexts/cashShift';
 import { Input, Money } from '@/ui/Controlled';
-import { zodResolver } from '@hookform/resolvers/zod';
-import type { RecordCashCollectionFormValues } from '../form/formData';
+import { useCashCollectSheet } from '../hooks/useCashCollectSheet';
 
 export const CashCollectSheet = ({ projectId }: { projectId: string }) => {
-    const close = useModalClose();
-    const { mutateAsync, isPending } = useRecordCashCollection();
-
-    const form = useForm<RecordCashCollectionFormValues>({
-        resolver: zodResolver(RecordCashCollectionActionInputSchema),
-        values: { projectId, amount: 0, note: '' },
-        mode: 'onChange',
-    });
-
-    const onSubmit: SubmitHandler<RecordCashCollectionFormValues> = async (values) => {
-        const { success } = await runAction(mutateAsync(values), {
-            success: 'Инкассация записана',
-        });
-
-        if (success) close();
-    };
+    const { isPending, form, onSubmit } = useCashCollectSheet(projectId);
 
     return (
         <FormDialog

@@ -57,15 +57,15 @@ export interface ParsedImportRow {
     error?: string;
 }
 
-function fieldOf(header: string): string | undefined {
+const fieldOf = (header: string): string | undefined => {
     const normalized = header.trim().toLowerCase();
 
     return Object.entries(IMPORT_COLUMNS).find(([, aliases]) =>
         aliases.includes(normalized),
     )?.[0];
-}
+};
 
-export function parseAmount(text: string): number | null | undefined {
+export const parseAmount = (text: string): number | null | undefined => {
     const normalized = text.replace(/[\s ₽]/g, '').replace(',', '.');
 
     if (!normalized) return null;
@@ -75,9 +75,9 @@ export function parseAmount(text: string): number | null | undefined {
     return Number.isFinite(value) && value >= 0
         ? Math.round(value * 100)
         : undefined;
-}
+};
 
-export function parseQuantity(text: string): number | null | undefined {
+export const parseQuantity = (text: string): number | null | undefined => {
     const normalized = text.replace(/\s/g, '');
 
     if (!normalized) return null;
@@ -85,13 +85,13 @@ export function parseQuantity(text: string): number | null | undefined {
     const value = Number(normalized);
 
     return Number.isInteger(value) && value >= 0 ? value : undefined;
-}
+};
 
-function textOrNull(value: string | undefined): string | null {
+const textOrNull = (value: string | undefined): string | null => {
     return value?.trim() || null;
-}
+};
 
-function codeError(values: Record<string, string>): string | undefined {
+const codeError = (values: Record<string, string>): string | undefined => {
     const sku = values.sku?.trim().toUpperCase() ?? '';
     const barcode = values.barcode?.trim() ?? '';
 
@@ -113,9 +113,9 @@ function codeError(values: Record<string, string>): string | undefined {
     }
 
     return undefined;
-}
+};
 
-function rowError(values: Record<string, string>): string | undefined {
+const rowError = (values: Record<string, string>): string | undefined => {
     const name = values.name?.trim() ?? '';
 
     if (!name) return 'Нет названия';
@@ -134,12 +134,12 @@ function rowError(values: Record<string, string>): string | undefined {
     }
 
     return undefined;
-}
+};
 
-export function parseImportRecord(
+export const parseImportRecord = (
     record: Record<string, string>,
     line: number,
-): ParsedImportRow {
+): ParsedImportRow => {
     const values: Record<string, string> = {};
 
     for (const [header, value] of Object.entries(record)) {
@@ -165,4 +165,4 @@ export function parseImportRecord(
             description: textOrNull(values.description),
         },
     };
-}
+};

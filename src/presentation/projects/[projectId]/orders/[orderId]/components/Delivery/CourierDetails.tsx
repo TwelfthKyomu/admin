@@ -1,7 +1,7 @@
+import { DetailRow } from '@/shared/components/common';
 import { fmtDateTime, fmtTime } from '@/shared/format/date';
 import { fmtMoney } from '@/shared/format/money';
 import type { DeliveryView } from '@/contexts/delivery';
-import { DetailRow } from '../DetailRow';
 
 export const CourierDetails = ({ delivery }: { delivery: DeliveryView }) => (
     <>

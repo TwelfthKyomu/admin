@@ -5,6 +5,7 @@ import { uploadUrl } from '@/infrastructure/storage/uploadUrls';
 import { requireProjectPermission } from '@/shared/api/permission';
 import { HTTP } from '@/shared/constants/http';
 import { getErrorMessage } from '@/shared/lib/errors';
+import { isBodyTooLarge } from '@/shared/security/bodySize';
 import { enforceRateLimit } from '@/shared/security/rate-limit';
 import { findProjectBucket } from '@/contexts/integration/Integration.lib';
 import { createProjectFile } from '@/contexts/projectFile/ProjectFile.lib';
@@ -15,7 +16,7 @@ import { NextResponse } from 'next/server';
 
 const MAX_BYTES = 5 * 1024 * 1024;
 
-export async function POST(request: Request) {
+export const POST = async (request: Request) => {
     const session = await getServerSession();
 
     if (!session?.user) {
@@ -33,6 +34,13 @@ export async function POST(request: Request) {
             { status: HTTP.TOO_MANY_REQUESTS },
         );
     }
+
+    const tooLarge = NextResponse.json(
+        { error: `Файл слишком большой (макс. ${MAX_BYTES / 1024 / 1024}MB)` },
+        { status: HTTP.PAYLOAD_TOO_LARGE },
+    );
+
+    if (isBodyTooLarge(request, MAX_BYTES)) return tooLarge;
 
     const form = await request.formData().catch(() => null);
     const file = form?.get('file');
@@ -52,14 +60,7 @@ export async function POST(request: Request) {
         );
     }
 
-    if (file.size > MAX_BYTES) {
-        return NextResponse.json(
-            {
-                error: `Файл слишком большой (макс. ${MAX_BYTES / 1024 / 1024}MB)`,
-            },
-            { status: HTTP.PAYLOAD_TOO_LARGE },
-        );
-    }
+    if (file.size > MAX_BYTES) return tooLarge;
 
     let organizationId: string;
 
@@ -120,4 +121,4 @@ export async function POST(request: Request) {
         size: file.size,
         contentType: fileType.contentType,
     });
-}
+};

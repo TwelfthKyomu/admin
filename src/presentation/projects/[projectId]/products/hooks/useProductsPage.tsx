@@ -4,8 +4,10 @@ import { useProject } from '@/app/providers';
 import { useDebouncedValue } from '@/shared/hooks/useDebouncedValue';
 import { confirmDestructive, modal } from '@/shared/lib/modal';
 import { type ProductView, useDeleteProduct, useProductsList } from '@/contexts/product';
+import { useCategoriesList } from '@/contexts/projectCategory';
 import dynamic from 'next/dynamic';
 import { parseAsString, useQueryState } from 'nuqs';
+import { exportProducts } from '../lib/exportProducts';
 
 const ProductCreateModal = dynamic(() =>
     import('../modal/ProductCreateModal').then((m) => m.ProductCreateModal),
@@ -19,16 +21,23 @@ const ProductEditSheet = dynamic(() =>
     import('../modal/ProductEditSheet').then((m) => m.ProductEditSheet),
 );
 
-export function useProductsPage() {
+export const useProductsPage = () => {
     const { projectId } = useProject();
     const [search, setSearch] = useQueryState('q', parseAsString.withDefault(''));
     const debouncedSearch = useDebouncedValue(search);
     const query = useProductsList({ projectId, search: debouncedSearch });
     const { mutateAsync, isPending } = useDeleteProduct();
+    const categoriesQuery = useCategoriesList({ projectId, includeInactive: true });
 
     const onCreate = () => modal.open(<ProductCreateModal projectId={projectId} />);
 
     const onImport = () => modal.open(<ProductImportModal projectId={projectId} />);
+
+    const onExport = () =>
+        exportProducts(
+            query.data ?? [],
+            new Map((categoriesQuery.data ?? []).map((category) => [category.id, category.name])),
+        );
 
     const onEdit = (product: ProductView) =>
         modal.open(
@@ -70,9 +79,11 @@ export function useProductsPage() {
         setSearch,
         onCreate,
         onImport,
+        onExport,
+        canExport: (query.data?.length ?? 0) > 0,
         onEdit,
         onDelete,
         onBulkDelete,
         isDeleting: isPending,
     };
-}
+};

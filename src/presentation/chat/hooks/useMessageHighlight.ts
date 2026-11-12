@@ -5,7 +5,7 @@ import { useMessageScroller } from '@/ui/Base';
 
 const HIGHLIGHT_MS = 1_600;
 
-export function useMessageHighlight() {
+export const useMessageHighlight = () => {
     const { scrollToMessage } = useMessageScroller();
     const [highlightId, setHighlightId] = useState<string>();
 
@@ -29,4 +29,4 @@ export function useMessageHighlight() {
     };
 
     return { highlightId, jumpTo };
-}
+};

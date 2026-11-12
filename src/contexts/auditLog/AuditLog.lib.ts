@@ -13,7 +13,9 @@ import {
 } from './AuditLog.types';
 import { auditLogs } from './AuditLogs.table';
 
-export async function recordAudit(input: RecordAuditLogInput): Promise<void> {
+export const recordAudit = async (
+    input: RecordAuditLogInput,
+): Promise<void> => {
     try {
         await db.insert(auditLogs).values({
             organizationId: input.organizationId,
@@ -28,12 +30,12 @@ export async function recordAudit(input: RecordAuditLogInput): Promise<void> {
     } catch (error) {
         console.error('Audit log write failed:', getErrorMessage(error));
     }
-}
+};
 
-export async function listAuditLogByOrganization(
+export const listAuditLogByOrganization = async (
     organizationId: string,
     options?: { limit?: number },
-): Promise<AuditLogView[]> {
+): Promise<AuditLogView[]> => {
     const limit = Math.min(options?.limit ?? PAGE_SIZE_LARGE, PAGE_SIZE_LIMIT);
 
     const rows = await db
@@ -58,4 +60,4 @@ export async function listAuditLogByOrganization(
             },
         ];
     });
-}
+};

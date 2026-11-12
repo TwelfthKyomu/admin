@@ -8,16 +8,10 @@ import {
     PAYMENT_STATUS_LABEL,
     PAYMENT_STATUS_VARIANT,
 } from '@/shared/labels/order';
-import { runAction } from '@/shared/lib/action-result';
-import { confirmDestructive } from '@/shared/lib/modal';
-import {
-    getNextOrderStatuses,
-    OrderStatus,
-    type OrderView,
-    useChangeOrderStatus,
-} from '@/contexts/order';
+import type { OrderView } from '@/contexts/order';
 import { Badge, Button } from '@/ui/Base';
 import { ReadyBy } from '../../components/ReadyBy';
+import { useStatusSection } from '../hooks/useStatusSection';
 import { Section } from './Section';
 
 interface StatusSectionProps {
@@ -28,26 +22,7 @@ interface StatusSectionProps {
 }
 
 export const StatusSection = ({ order, projectId, canEdit, hasDelivery }: StatusSectionProps) => {
-    const { mutateAsync, isPending } = useChangeOrderStatus();
-    const next = getNextOrderStatuses(order.status, { hasDelivery });
-
-    const onTransition = (status: OrderStatus) => {
-        const input = { id: order.id, projectId, nextStatus: status };
-        const success = `Статус: ${ORDER_STATUS_LABEL[status]}`;
-        const isCancel = status === OrderStatus.CANCELLED;
-
-        if (isCancel) {
-            return confirmDestructive({
-                title: 'Отменить заказ?',
-                description: 'Вернуть прежний статус будет нельзя.',
-                confirmLabel: 'Отменить',
-                success,
-                onConfirm: () => mutateAsync(input),
-            });
-        }
-
-        return runAction(mutateAsync(input), { success });
-    };
+    const { isPending, next, onTransition } = useStatusSection({ order, projectId, hasDelivery });
 
     return (
         <Section

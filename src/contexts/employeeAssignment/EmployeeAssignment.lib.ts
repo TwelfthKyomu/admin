@@ -23,17 +23,17 @@ import {
     employeeAssignments,
 } from './EmployeeAssignments.table';
 
-function kindForRole(role: ProjectRole | null): EmployeeKind {
+const kindForRole = (role: ProjectRole | null): EmployeeKind => {
     return role === ProjectRole.COURIER
         ? EmployeeKind.COURIER
         : EmployeeKind.SPECIALIST;
-}
+};
 
-async function resolvePosition(input: {
+const resolvePosition = async (input: {
     organizationId: string;
     projectId: string;
     userId: string;
-}): Promise<{ position: string; kind: EmployeeKind }> {
+}): Promise<{ position: string; kind: EmployeeKind }> => {
     const projectMember = await findActiveProjectMember(
         input.projectId,
         input.userId,
@@ -63,13 +63,13 @@ async function resolvePosition(input: {
             ORGANIZATION_ROLE_LABEL[member?.role ?? OrganizationRole.MEMBER],
         kind: EmployeeKind.SPECIALIST,
     };
-}
+};
 
-export async function findActiveAssignment(
+export const findActiveAssignment = async (
     employeeId: string,
     projectId: string,
     executor: Reader = db,
-): Promise<Pick<EmployeeAssignmentRecord, 'id' | 'kind'> | null> {
+): Promise<Pick<EmployeeAssignmentRecord, 'id' | 'kind'> | null> => {
     const [assignment] = await executor
         .select({
             id: employeeAssignments.id,
@@ -86,11 +86,11 @@ export async function findActiveAssignment(
         .limit(1);
 
     return assignment ?? null;
-}
+};
 
-export function findActiveAssignmentsOfEmployee(
+export const findActiveAssignmentsOfEmployee = (
     employeeId: string,
-): Promise<EmployeeAssignmentRecord[]> {
+): Promise<EmployeeAssignmentRecord[]> => {
     return db
         .select()
         .from(employeeAssignments)
@@ -100,12 +100,12 @@ export function findActiveAssignmentsOfEmployee(
                 isNull(employeeAssignments.endedAt),
             ),
         );
-}
+};
 
-export async function assertActiveAssignments(
+export const assertActiveAssignments = async (
     projectId: string,
     employeeIds: (string | null | undefined)[],
-): Promise<void> {
+): Promise<void> => {
     const ids = [
         ...new Set(employeeIds.filter((id): id is string => Boolean(id))),
     ];
@@ -128,13 +128,13 @@ export async function assertActiveAssignments(
             'Сотрудник не работает в этом проекте — добавьте его в расписание',
         );
     }
-}
+};
 
-export async function ensureEmployeeAssigned(input: {
+export const ensureEmployeeAssigned = async (input: {
     organizationId: string;
     projectId: string;
     userId: string;
-}): Promise<void> {
+}): Promise<void> => {
     const employeeId = await findMemberIdByUserId(
         input.organizationId,
         input.userId,
@@ -152,9 +152,9 @@ export async function ensureEmployeeAssigned(input: {
         position,
         kind,
     });
-}
+};
 
-export async function syncAssignmentKindWithRole(
+export const syncAssignmentKindWithRole = async (
     input: {
         organizationId: string;
         projectId: string;
@@ -163,7 +163,7 @@ export async function syncAssignmentKindWithRole(
         to: ProjectRole;
     },
     executor: Pick<Tx, 'update'> = db,
-): Promise<void> {
+): Promise<void> => {
     const after = kindForRole(input.to);
 
     if (kindForRole(input.from) === after) return;
@@ -188,12 +188,12 @@ export async function syncAssignmentKindWithRole(
                 isNull(employeeAssignments.endedAt),
             ),
         );
-}
+};
 
-export async function assertNoOpenWork(
+export const assertNoOpenWork = async (
     executor: Reader,
     input: { employeeId: string; projectId?: string },
-): Promise<void> {
+): Promise<void> => {
     const { employeeId, projectId } = input;
 
     const [[shifts], [deliveryRows]] = await Promise.all([
@@ -235,16 +235,16 @@ export async function assertNoOpenWork(
     throw new ApplicationError(
         `За сотрудником ещё ${parts.join(', ')}. Передайте их другому сотруднику или отмените, затем повторите.`,
     );
-}
+};
 
-export async function endEmployeeAssignment(
+export const endEmployeeAssignment = async (
     input: {
         organizationId: string;
         projectId?: string;
         userId: string;
     },
     executor: Pick<Tx, 'select' | 'update' | 'delete'> = db,
-): Promise<void> {
+): Promise<void> => {
     const [member] = await executor
         .select({ id: organizationMembers.id })
         .from(organizationMembers)
@@ -274,4 +274,4 @@ export async function endEmployeeAssignment(
                 isNull(employeeAssignments.endedAt),
             ),
         );
-}
+};

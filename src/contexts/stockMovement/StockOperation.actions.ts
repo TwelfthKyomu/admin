@@ -6,6 +6,7 @@ import { Permission } from '@/contexts/user/User.types';
 import { findWarehouseInProject } from '@/contexts/warehouse/Warehouse.lib';
 import {
     CountStockActionInputSchema,
+    ReceiveStockActionInputSchema,
     StockOperationActionInputSchema,
     TransferStockActionInputSchema,
 } from './StockMovement.schema';
@@ -25,7 +26,7 @@ interface OperationInput {
     note?: string;
 }
 
-async function operationOf(input: OperationInput, createdBy: string) {
+const operationOf = async (input: OperationInput, createdBy: string) => {
     const warehouse = await findWarehouseInProject(
         input.warehouseId,
         input.projectId,
@@ -40,16 +41,21 @@ async function operationOf(input: OperationInput, createdBy: string) {
         note: input.note || null,
         createdBy,
     };
-}
+};
 
 export const receiveStockAction = projectMutationAction(
     Permission.MANAGE_CATALOG,
 )
-    .inputSchema(StockOperationActionInputSchema)
+    .inputSchema(ReceiveStockActionInputSchema)
     .action(async ({ parsedInput, ctx: { userId } }) => {
         const operation = await operationOf(parsedInput, userId);
 
-        await db.transaction((tx) => receiveStock(tx, operation));
+        await db.transaction((tx) =>
+            receiveStock(tx, {
+                ...operation,
+                costAmount: parsedInput.costAmount ?? null,
+            }),
+        );
 
         return { ok: true };
     });

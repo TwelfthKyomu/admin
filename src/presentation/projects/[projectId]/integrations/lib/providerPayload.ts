@@ -1,9 +1,9 @@
 import { PaymentProvider } from '@/contexts/paymentIntent';
 import type { ConnectPaymentProviderFormValues } from '../form/formData';
 
-export function buildProviderPayload(
+export const buildProviderPayload = (
     values: ConnectPaymentProviderFormValues,
-): Record<string, string> {
+): Record<string, string> => {
     if (values.provider === PaymentProvider.STRIPE) {
         const webhookSecret = values.webhookSecret?.trim();
 
@@ -17,4 +17,4 @@ export function buildProviderPayload(
         shopId: values.shopId?.trim() ?? '',
         secretKey: values.secretKey.trim(),
     };
-}
+};

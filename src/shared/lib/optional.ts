@@ -18,15 +18,15 @@ export type NullToOptional<T> = T extends Date
           >
         : T;
 
-function isPlainObject(value: unknown): value is Record<string, unknown> {
+const isPlainObject = (value: unknown): value is Record<string, unknown> => {
     if (typeof value !== 'object' || value === null) return false;
 
     const prototype = Object.getPrototypeOf(value);
 
     return prototype === Object.prototype || prototype === null;
-}
+};
 
-function dropNulls(value: unknown): unknown {
+const dropNulls = (value: unknown): unknown => {
     if (Array.isArray(value)) return value.map(dropNulls);
     if (!isPlainObject(value)) return value;
 
@@ -37,8 +37,8 @@ function dropNulls(value: unknown): unknown {
     }
 
     return result;
-}
+};
 
-export function nullToOptional<T>(value: T): NullToOptional<T> {
+export const nullToOptional = <T>(value: T): NullToOptional<T> => {
     return dropNulls(value) as NullToOptional<T>;
-}
+};

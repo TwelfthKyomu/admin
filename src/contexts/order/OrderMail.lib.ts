@@ -39,9 +39,9 @@ import { type OrderRecord, orderEvents, orders } from './Orders.table';
 
 const PLATFORM_NAME = 'Flowsy';
 
-async function findOrderStorefront(
+const findOrderStorefront = async (
     orderId: string,
-): Promise<MailOrder['storefront']> {
+): Promise<MailOrder['storefront']> => {
     const [created] = await db
         .select({ payload: orderEvents.payload })
         .from(orderEvents)
@@ -69,9 +69,11 @@ async function findOrderStorefront(
         .limit(1);
 
     return { siteUrl: integration?.siteUrl ?? null };
-}
+};
 
-async function loadMailOrder(orderId: string): Promise<MailOrder | undefined> {
+const loadMailOrder = async (
+    orderId: string,
+): Promise<MailOrder | undefined> => {
     const [row] = await db
         .select({ order: orders, projectName: projects.name })
         .from(orders)
@@ -87,11 +89,11 @@ async function loadMailOrder(orderId: string): Promise<MailOrder | undefined> {
     ]);
 
     return { ...row, items, storefront };
-}
+};
 
-async function findOrderManagerEmails(
+const findOrderManagerEmails = async (
     order: Pick<OrderRecord, 'projectId' | 'organizationId'>,
-): Promise<string[]> {
+): Promise<string[]> => {
     const [organizationRows, projectRows] = await Promise.all([
         db
             .select({ email: users.email, role: organizationMembers.role })
@@ -130,25 +132,25 @@ async function findOrderManagerEmails(
                 .map((row) => row.email),
         ]),
     ];
-}
+};
 
-function sendOrderEmail(
+const sendOrderEmail = (
     to: string,
     fromName: string,
     props: OrderEmailProps,
-): Promise<void> {
+): Promise<void> => {
     return sendEmail({
         to,
         subject: `${props.heading} — ${props.brand}`,
         fromName,
         react: createElement(OrderEmail, props),
     });
-}
+};
 
-async function notifyCustomer(
+const notifyCustomer = async (
     mail: MailOrder,
     content: CustomerMailContent,
-): Promise<void> {
+): Promise<void> => {
     if (!mail.order.customerEmail) return;
 
     await sendOrderEmail(mail.order.customerEmail, mail.projectName, {
@@ -160,9 +162,9 @@ async function notifyCustomer(
         action: content.action ?? customerOrderAction(mail),
         footer: customerFooter(mail.projectName),
     });
-}
+};
 
-async function notifyTeam(mail: MailOrder, heading: string): Promise<void> {
+const notifyTeam = async (mail: MailOrder, heading: string): Promise<void> => {
     const emails = await findOrderManagerEmails(mail.order);
 
     const props: OrderEmailProps = {
@@ -180,17 +182,17 @@ async function notifyTeam(mail: MailOrder, heading: string): Promise<void> {
     await Promise.all(
         emails.map((email) => sendOrderEmail(email, PLATFORM_NAME, props)),
     );
-}
+};
 
-async function safely(task: () => Promise<void>): Promise<void> {
+const safely = async (task: () => Promise<void>): Promise<void> => {
     try {
         await task();
     } catch (error) {
         console.error('Order mail failed:', getErrorMessage(error));
     }
-}
+};
 
-export function mailOrderPlaced(orderId: string): Promise<void> {
+export const mailOrderPlaced = (orderId: string): Promise<void> => {
     return safely(async () => {
         const mail = await loadMailOrder(orderId);
 
@@ -201,9 +203,9 @@ export function mailOrderPlaced(orderId: string): Promise<void> {
             notifyTeam(mail, `Новый заказ № ${orderNumber(mail.order)}`),
         ]);
     });
-}
+};
 
-export function mailOrderPaid(orderId: string): Promise<void> {
+export const mailOrderPaid = (orderId: string): Promise<void> => {
     return safely(async () => {
         const mail = await loadMailOrder(orderId);
 
@@ -219,9 +221,9 @@ export function mailOrderPaid(orderId: string): Promise<void> {
                 : undefined,
         ]);
     });
-}
+};
 
-export function mailOrderShipped(deliveryId: string): Promise<void> {
+export const mailOrderShipped = (deliveryId: string): Promise<void> => {
     return safely(async () => {
         const [delivery] = await db
             .select()
@@ -237,9 +239,9 @@ export function mailOrderShipped(deliveryId: string): Promise<void> {
 
         await notifyCustomer(mail, shippedContent(mail.order, delivery));
     });
-}
+};
 
-export function mailOrderReady(orderId: string): Promise<void> {
+export const mailOrderReady = (orderId: string): Promise<void> => {
     return safely(async () => {
         const mail = await loadMailOrder(orderId);
 
@@ -247,4 +249,4 @@ export function mailOrderReady(orderId: string): Promise<void> {
 
         await notifyCustomer(mail, readyContent(mail.order));
     });
-}
+};

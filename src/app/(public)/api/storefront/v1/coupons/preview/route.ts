@@ -6,7 +6,7 @@ import {
 import { StorefrontCouponPreviewInputSchema } from '@/contexts/storefront/Storefront.schema';
 import { previewStorefrontCoupon } from '@/contexts/storefront/StorefrontOrder.lib';
 
-export function POST(request: Request) {
+export const POST = (request: Request) => {
     return storefrontResponse(async () => {
         const access = await authenticateStorefront(
             request,
@@ -21,4 +21,4 @@ export function POST(request: Request) {
             ),
         );
     });
-}
+};

@@ -32,7 +32,11 @@ vi.mock('@/infrastructure/database/client', async () => {
 
 let shop: Awaited<ReturnType<typeof seedProject>>;
 
-function operation(productId: string, warehouseId: string, quantity: number) {
+const operation = (
+    productId: string,
+    warehouseId: string,
+    quantity: number,
+) => {
     return {
         projectId: shop.project.id,
         productId,
@@ -42,17 +46,26 @@ function operation(productId: string, warehouseId: string, quantity: number) {
         note: null,
         createdBy: shop.user.id,
     };
-}
+};
 
-async function createWarehouse(name: string) {
+const receipt = (
+    productId: string,
+    warehouseId: string,
+    quantity: number,
+    costAmount: number | null = null,
+) => {
+    return { ...operation(productId, warehouseId, quantity), costAmount };
+};
+
+const createWarehouse = async (name: string) => {
     return insertOne(
         warehouses,
         { projectId: shop.project.id, name, position: 1 },
         'Не удалось создать склад',
     );
-}
+};
 
-async function createProduct(quantity: number | null, warehouseId?: string) {
+const createProduct = async (quantity: number | null, warehouseId?: string) => {
     const product = await insertOne(
         products,
         {
@@ -68,36 +81,32 @@ async function createProduct(quantity: number | null, warehouseId?: string) {
         await testDb.transaction((tx) =>
             receiveStock(
                 tx,
-                operation(
-                    product.id,
-                    warehouseId ?? shop.warehouse.id,
-                    quantity,
-                ),
+                receipt(product.id, warehouseId ?? shop.warehouse.id, quantity),
             ),
         );
     }
 
     return product;
-}
+};
 
-async function createOrder() {
+const createOrder = async () => {
     return insertOne(
         orders,
         { projectId: shop.project.id, organizationId: shop.organization.id },
         'Не удалось создать заказ',
     );
-}
+};
 
-async function stockOf(productId: string) {
+const stockOf = async (productId: string) => {
     const [product] = await testDb
         .select({ stock: products.stock })
         .from(products)
         .where(eq(products.id, productId));
 
     return product?.stock;
-}
+};
 
-async function quantityIn(warehouseId: string, productId: string) {
+const quantityIn = async (warehouseId: string, productId: string) => {
     const [row] = await testDb
         .select({ quantity: warehouseStock.quantity })
         .from(warehouseStock)
@@ -109,14 +118,14 @@ async function quantityIn(warehouseId: string, productId: string) {
         );
 
     return row?.quantity ?? 0;
-}
+};
 
-function reserve(
+const reserve = (
     orderId: string,
     productId: string,
     quantity: number,
     warehouseIds: string[],
-) {
+) => {
     return testDb.transaction((tx) =>
         reserveOrderStock(tx, {
             orderId,
@@ -126,11 +135,11 @@ function reserve(
             warehouseIds,
         }),
     );
-}
+};
 
-function orderInput(orderId: string) {
+const orderInput = (orderId: string) => {
     return { orderId, projectId: shop.project.id, createdBy: shop.user.id };
-}
+};
 
 beforeEach(async () => {
     shop = await seedProject();
@@ -155,7 +164,7 @@ describe('бронь остатка', () => {
         const order = await createOrder();
 
         await testDb.transaction((tx) =>
-            receiveStock(tx, operation(product.id, store.id, 3)),
+            receiveStock(tx, receipt(product.id, store.id, 3)),
         );
 
         await reserve(order.id, product.id, 4, [shop.warehouse.id, store.id]);
@@ -256,6 +265,26 @@ describe('продажа и возврат', () => {
 });
 
 describe('складские операции', () => {
+    it('приёмка с ценой ставит среднюю закупочную цену', async () => {
+        const product = await createProduct(null);
+
+        for (const costAmount of [10_000, 20_000]) {
+            await testDb.transaction((tx) =>
+                receiveStock(
+                    tx,
+                    receipt(product.id, shop.warehouse.id, 2, costAmount),
+                ),
+            );
+        }
+
+        const [row] = await testDb
+            .select({ costAmount: products.costAmount })
+            .from(products)
+            .where(eq(products.id, product.id));
+
+        expect(row?.costAmount).toBe(15_000);
+    });
+
     it('перемещение переносит товар между складами', async () => {
         const store = await createWarehouse('Магазин');
         const product = await createProduct(5);

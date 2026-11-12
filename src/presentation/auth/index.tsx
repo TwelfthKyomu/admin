@@ -1,6 +1,7 @@
 import { Suspense } from 'react';
 import { AuthShell } from './components/AuthShell';
-import { CallbackLoginTabs, LoginTabs } from './components/LoginTabs';
+import { CallbackLoginTabs } from './components/CallbackLoginTabs';
+import { LoginTabs } from './components/LoginTabs';
 
 export const AuthPage = () => (
     <AuthShell

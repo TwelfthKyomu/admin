@@ -40,21 +40,21 @@ export class StorefrontNotFoundError extends Error {}
 
 class StorefrontValidationError extends Error {}
 
-function storefrontSignature(value: string): string {
+const storefrontSignature = (value: string): string => {
     return createHmac('sha256', env.AUTH_SECRET).update(value).digest('hex');
-}
+};
 
-export function isValidStorefrontSignature(
+export const isValidStorefrontSignature = (
     value: string,
     signature: string,
-): boolean {
+): boolean => {
     return constantTimeEqual(storefrontSignature(value), signature);
-}
+};
 
-export function storefrontImageUrl(
+export const storefrontImageUrl = (
     projectId: string,
     filename: string,
-): string {
+): string => {
     const params = new URLSearchParams({
         projectId,
         signature: storefrontSignature(`${projectId}:${filename}`),
@@ -66,12 +66,12 @@ export function storefrontImageUrl(
     );
 
     return `${apiUrl}${STOREFRONT_IMAGES_PATH}/${filename}?${params}`;
-}
+};
 
-export async function authenticateStorefront(
+export const authenticateStorefront = async (
     request: Request,
     rateLimit: RateLimitKey,
-): Promise<StorefrontAccess> {
+): Promise<StorefrontAccess> => {
     const header = request.headers.get('authorization') ?? '';
 
     const token = header.startsWith(BEARER_PREFIX)
@@ -113,9 +113,11 @@ export async function authenticateStorefront(
     enforceRateLimit(rateLimit, access.integrationId);
 
     return access;
-}
+};
 
-export async function revalidateStorefronts(projectId: string): Promise<void> {
+export const revalidateStorefronts = async (
+    projectId: string,
+): Promise<void> => {
     const sites = await db
         .select({
             siteUrl: projectIntegrations.siteUrl,
@@ -146,12 +148,12 @@ export async function revalidateStorefronts(projectId: string): Promise<void> {
             );
         }),
     );
-}
+};
 
-export async function parseStorefrontBody<T>(
+export const parseStorefrontBody = async <T>(
     request: Request,
     schema: z.ZodMiniType<T>,
-): Promise<T> {
+): Promise<T> => {
     let body: unknown;
 
     try {
@@ -167,24 +169,24 @@ export async function parseStorefrontBody<T>(
     }
 
     return parsed.data;
-}
+};
 
-export function storefrontErrorResponse(error: unknown): Response {
+const storefrontErrorStatus = (error: unknown): number | null => {
+    if (error instanceof StorefrontAuthError) return HTTP.UNAUTHORIZED;
+    if (error instanceof RateLimitError) return HTTP.TOO_MANY_REQUESTS;
+    if (error instanceof StorefrontNotFoundError) return HTTP.NOT_FOUND;
+    if (error instanceof StorefrontValidationError) {
+        return HTTP.UNPROCESSABLE_ENTITY;
+    }
+    if (isApplicationError(error)) return HTTP.BAD_REQUEST;
+
+    return null;
+};
+
+export const storefrontErrorResponse = (error: unknown): Response => {
     unstable_rethrow(error);
     const message = getErrorMessage(error);
-
-    const status =
-        error instanceof StorefrontAuthError
-            ? HTTP.UNAUTHORIZED
-            : error instanceof RateLimitError
-              ? HTTP.TOO_MANY_REQUESTS
-              : error instanceof StorefrontNotFoundError
-                ? HTTP.NOT_FOUND
-                : error instanceof StorefrontValidationError
-                  ? HTTP.UNPROCESSABLE_ENTITY
-                  : isApplicationError(error)
-                    ? HTTP.BAD_REQUEST
-                    : null;
+    const status = storefrontErrorStatus(error);
 
     if (status !== null) {
         return Response.json({ error: message }, { status });
@@ -196,23 +198,23 @@ export function storefrontErrorResponse(error: unknown): Response {
         { error: 'Внутренняя ошибка' },
         { status: HTTP.INTERNAL_SERVER_ERROR },
     );
-}
+};
 
-export async function storefrontResponse(
+export const storefrontResponse = async (
     work: () => Promise<unknown>,
     successStatus: number = HTTP.OK,
-): Promise<Response> {
+): Promise<Response> => {
     try {
         return Response.json(await work(), { status: successStatus });
     } catch (error) {
         return storefrontErrorResponse(error);
     }
-}
+};
 
-export async function storefrontImageResponse(
+export const storefrontImageResponse = async (
     projectId: string,
     filename: string,
-): Promise<Response> {
+): Promise<Response> => {
     const location = parseUploadSegments([projectId, filename]);
 
     const project =
@@ -228,4 +230,4 @@ export async function storefrontImageResponse(
         filename,
         location.contentType,
     );
-}
+};

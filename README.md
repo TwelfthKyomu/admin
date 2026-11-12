@@ -59,11 +59,11 @@ realtime-канал (SSE), вебхуки платежей и тарифов, AP
 
 ## Запуск
 
-Нужны [Bun](https://bun.sh) и Docker.
+Нужен [Bun](https://bun.sh). Локальная база не нужна: для разработки — своя
+ветка в Neon от `production`, тесты склада и импорта идут на PGlite.
 
 ```bash
 bun install
-bun run docker:up
 bun run db:migrate
 bun dev
 ```
@@ -72,10 +72,25 @@ bun dev
 
 ```bash
 NEXT_PUBLIC_APP_URL=http://localhost:3000
-DATABASE_URL=postgresql://postgres:postgres@localhost:55432/adminpanel
+DATABASE_URL=
 AUTH_SECRET=
 ENCRYPTION_KEY=
 ```
+
+`DATABASE_URL` — строка подключения к ветке Neon (консоль Neon →
+Branches → Create branch, затем Connect).
+
+Оплата тарифов — переменная `BILLING_PROVIDER`:
+
+| Значение | Что нужно | Как платят |
+| --- | --- | --- |
+| `stripe` | `BILLING_STRIPE_SECRET_KEY`, `NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY`, для вебхука `BILLING_STRIPE_WEBHOOK_SECRET` | форма Stripe в модалке, вебхук `/api/billing/webhook` |
+| `yookassa` | `BILLING_YOOKASSA_SHOP_ID`, `BILLING_YOOKASSA_SECRET_KEY` | переход на страницу ЮKassa, уведомление на тот же вебхук |
+| `test` | ничего | модалка «тестовая оплата», деньги не списываются |
+
+Без `BILLING_PROVIDER` работает Stripe, если заданы оба его ключа, иначе
+тестовая оплата. `NEXT_PUBLIC_*` подставляется при сборке — ключ должен быть
+в окружении до `bun run build`.
 
 `AUTH_SECRET` — `openssl rand -base64 32`, `ENCRYPTION_KEY` — ровно 32 символа
 (`openssl rand -hex 16`).

@@ -35,9 +35,9 @@ export const AUDIT_ACTION_LABEL: Record<AuditAction, string> = {
     [AuditAction.PayoutDeleted]: 'Отменена выплата',
 };
 
-export function isAuditAction(value: string): value is AuditAction {
+export const isAuditAction = (value: string): value is AuditAction => {
     return AUDIT_ACTION_VALUES.some((action) => action === value);
-}
+};
 
 export const AuditTargetType = {
     OrganizationMember: 'organization_member',
@@ -54,9 +54,9 @@ export type AuditTargetType =
 
 const AUDIT_TARGET_TYPE_VALUES = enumValues(AuditTargetType);
 
-export function isAuditTargetType(value: string): value is AuditTargetType {
+export const isAuditTargetType = (value: string): value is AuditTargetType => {
     return AUDIT_TARGET_TYPE_VALUES.some((type) => type === value);
-}
+};
 
 export type AuditMetadata = Record<string, string | number | boolean | null>;
 

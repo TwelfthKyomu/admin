@@ -15,10 +15,10 @@ export interface TopItemRow extends TopOrderItemView {
     share: number;
 }
 
-export function projectShareRows(
+export const projectShareRows = (
     byProject: ProjectRevenueView[],
     projects: ProjectView[],
-): ProjectShareRow[] {
+): ProjectShareRow[] => {
     const projectById = new Map(
         projects.map((project) => [project.id, project]),
     );
@@ -53,9 +53,9 @@ export function projectShareRows(
                         : 0,
             };
         });
-}
+};
 
-export function topItemRows(items: TopOrderItemView[]): TopItemRow[] {
+export const topItemRows = (items: TopOrderItemView[]): TopItemRow[] => {
     const peakByCurrency = new Map<Currency, number>();
 
     for (const item of items) {
@@ -76,4 +76,4 @@ export function topItemRows(items: TopOrderItemView[]): TopItemRow[] {
             share: peak > 0 ? Math.round((item.revenueAmount / peak) * 100) : 0,
         };
     });
-}
+};

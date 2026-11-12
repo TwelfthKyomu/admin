@@ -8,7 +8,7 @@ export type { ConfirmOptions };
 
 const ModalCloseContext = createContext<(() => void) | null>(null);
 
-export function useModalClose(): () => void {
+export const useModalClose = (): (() => void) => {
     const close = useContext(ModalCloseContext);
 
     if (!close) {
@@ -18,7 +18,7 @@ export function useModalClose(): () => void {
     }
 
     return close;
-}
+};
 
 export const modal = {
     confirm(opts: ConfirmOptions): Promise<boolean> {
@@ -63,13 +63,13 @@ export const modal = {
     },
 };
 
-export async function confirmDestructive(opts: {
+export const confirmDestructive = async (opts: {
     title: string;
     description: ReactNode;
     confirmLabel?: string;
     success?: string;
     onConfirm: () => Promise<unknown>;
-}): Promise<boolean> {
+}): Promise<boolean> => {
     let confirmed = false;
 
     await modal.confirm({
@@ -93,4 +93,4 @@ export async function confirmDestructive(opts: {
     if (confirmed && opts.success) toast.success(opts.success);
 
     return confirmed;
-}
+};
