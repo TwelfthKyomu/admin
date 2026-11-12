@@ -24,13 +24,13 @@ interface UseInboxOptions {
     activeScope: string;
 }
 
-export function useInbox({
+export const useInbox = ({
     organizationId,
     organizationName,
     channels,
     viewerId,
     activeScope,
-}: UseInboxOptions) {
+}: UseInboxOptions) => {
     const [folder, setFolder] = useState<InboxFolder>('all');
     const [query, setQuery] = useState('');
     const searchRef = useRef<HTMLInputElement>(null);
@@ -81,4 +81,4 @@ export function useInbox({
         hits,
         hitsPending: search.isFetching,
     };
-}
+};

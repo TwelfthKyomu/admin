@@ -41,7 +41,7 @@ export interface MemberRow extends ProjectMemberView {
     employee?: ProjectEmployeeView;
 }
 
-export function useMembersPage() {
+export const useMembersPage = () => {
     const { projectId, currency, can } = useProject();
     const { user } = useStaticData();
     const [search, setSearch] = useQueryState('q', parseAsString.withDefault(''));
@@ -166,4 +166,4 @@ export function useMembersPage() {
         onAddToSchedule,
         onDetach,
     };
-}
+};

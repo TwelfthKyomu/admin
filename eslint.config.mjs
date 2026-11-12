@@ -39,6 +39,7 @@ export default [
         plugins: { '@stylistic': stylistic },
         rules: {
             'no-nested-ternary': 'error',
+            'func-style': ['error', 'expression'],
             'no-restricted-syntax': ['error', ...NO_NULL_TERNARY],
             '@stylistic/padding-line-between-statements': [
                 'error',

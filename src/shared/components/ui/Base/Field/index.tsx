@@ -4,6 +4,8 @@ import type { ComponentProps } from 'react';
 import { cn } from '@/shared/lib/utils';
 import { cva, type VariantProps } from 'class-variance-authority';
 import { Label } from '../Label';
+import { ErrorMessages } from './components/ErrorMessages';
+import { uniqueErrorMessages } from './lib/errorMessages';
 
 const FieldGroup = ({ className, ...props }: ComponentProps<'div'>) => {
     return (
@@ -96,35 +98,9 @@ const FieldError = ({
 }: ComponentProps<'div'> & {
     errors?: Array<{ message?: string } | undefined>;
 }) => {
-    const content = renderContent();
+    const messages = uniqueErrorMessages(errors);
 
-    function renderContent() {
-        if (children) {
-            return children;
-        }
-
-        if (!errors?.length) {
-            return null;
-        }
-
-        const uniqueErrors = [...new Map(errors.map((error) => [error?.message, error])).values()];
-
-        if (uniqueErrors?.length === 1) {
-            return uniqueErrors[0]?.message;
-        }
-
-        return (
-            <ul className="ml-4 flex list-disc flex-col gap-1">
-                {uniqueErrors.map(
-                    (error, index) => error?.message && <li key={index}>{error.message}</li>,
-                )}
-            </ul>
-        );
-    }
-
-    if (!content) {
-        return null;
-    }
+    if (!children && messages.length === 0) return null;
 
     return (
         <div
@@ -133,7 +109,7 @@ const FieldError = ({
             className={cn('text-sm font-normal text-destructive', className)}
             {...props}
         >
-            {content}
+            {children || <ErrorMessages messages={messages} />}
         </div>
     );
 };

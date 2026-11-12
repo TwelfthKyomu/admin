@@ -43,7 +43,7 @@ interface SidebarContextProps {
 
 const SidebarContext = createContext<SidebarContextProps | null>(null);
 
-function useSidebar() {
+const useSidebar = () => {
     const context = useContext(SidebarContext);
 
     if (!context) {
@@ -51,7 +51,7 @@ function useSidebar() {
     }
 
     return context;
-}
+};
 
 const SidebarProvider = ({
     defaultOpen = true,

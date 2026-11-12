@@ -5,14 +5,14 @@ interface ShortcutEvent {
     metaKey: boolean;
 }
 
-export function isLetterShortcut(
+export const isLetterShortcut = (
     event: ShortcutEvent,
     letter: string,
-): boolean {
+): boolean => {
     if (!(event.metaKey || event.ctrlKey)) return false;
 
     return (
         event.code === `Key${letter.toUpperCase()}` ||
         event.key.toLowerCase() === letter
     );
-}
+};

@@ -165,17 +165,17 @@ describe('переходы статусов заказа', () => {
 });
 
 describe('rollUpRevenueByCurrency', () => {
-    function row(overrides: Partial<ProjectRevenueView>): ProjectRevenueView {
-        return {
-            projectId: 'p',
-            currency: 'RUB',
-            revenueAmount: 0,
-            refundedAmount: 0,
-            ordersCount: 0,
-            paidOrdersCount: 0,
-            ...overrides,
-        };
-    }
+    const row = (
+        overrides: Partial<ProjectRevenueView>,
+    ): ProjectRevenueView => ({
+        projectId: 'p',
+        currency: 'RUB',
+        revenueAmount: 0,
+        refundedAmount: 0,
+        ordersCount: 0,
+        paidOrdersCount: 0,
+        ...overrides,
+    });
 
     it('суммирует проекты по валютам и не смешивает валюты', () => {
         const totals = rollUpRevenueByCurrency([

@@ -18,13 +18,13 @@ const midnight = new Date();
 
 midnight.setHours(0, 0, 0, 0);
 
-function at(hour: number, minute = 0): Date {
+const at = (hour: number, minute = 0): Date => {
     const d = new Date(midnight);
 
     d.setHours(hour, minute, 0, 0);
 
     return d;
-}
+};
 
 const INITIAL: Appt[] = [
     {
@@ -93,7 +93,7 @@ const columns: ScheduleColumn<Appt>[] = [
     },
 ];
 
-function renderItem(ctx: ItemRenderContext<Appt>) {
+const renderItem = (ctx: ItemRenderContext<Appt>) => {
     const { item, selected, dragging, conflict, override, lane, lanes, pxPerMin } = ctx;
     const startMin = override?.startMin ?? item.start.getHours() * 60 + item.start.getMinutes();
     const durationMin = override?.dur ?? (item.end.getTime() - item.start.getTime()) / 60_000;
@@ -124,7 +124,7 @@ function renderItem(ctx: ItemRenderContext<Appt>) {
             />
         </div>
     );
-}
+};
 
 const ApptScheduler = Scheduler<Appt>;
 

@@ -25,9 +25,9 @@ import {
     employeeShifts,
 } from './EmployeeShifts.table';
 
-export async function listReplacementShifts(
+export const listReplacementShifts = async (
     projectId: string,
-): Promise<ReplacementShiftView[]> {
+): Promise<ReplacementShiftView[]> => {
     const rows = await db
         .select({
             shift: employeeShifts,
@@ -71,12 +71,12 @@ export async function listReplacementShifts(
             };
         }),
     );
-}
+};
 
-async function assertEligibleSubstitute(
+const assertEligibleSubstitute = async (
     shift: EmployeeShiftRecord,
     substituteId: string,
-): Promise<void> {
+): Promise<void> => {
     if (shift.employeeId === substituteId) {
         throw new ApplicationError(
             'Замещающий совпадает с текущим сотрудником',
@@ -125,13 +125,13 @@ async function assertEligibleSubstitute(
             'Заменить можно только сотрудником того же вида работы',
         );
     }
-}
+};
 
-export async function replaceShiftEmployee(
+export const replaceShiftEmployee = async (
     shift: EmployeeShiftRecord,
     substituteId: string,
     input: { note: string; byUserId: string },
-): Promise<{ shift: EmployeeShiftRecord; transferredDeliveries: number }> {
+): Promise<{ shift: EmployeeShiftRecord; transferredDeliveries: number }> => {
     if (!OPEN_SHIFT_STATUSES.includes(shift.status)) {
         throw new ApplicationError(
             'Заменить можно только активную (запланированную или текущую) смену',
@@ -188,4 +188,4 @@ export async function replaceShiftEmployee(
 
         return { shift: created, transferredDeliveries };
     });
-}
+};
