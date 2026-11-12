@@ -23,7 +23,7 @@ export const metadata: Metadata = {
         default: 'Flowsy',
         template: '%s | Flowsy',
     },
-    description: 'Заказы, записи, смены, касса и зарплата в одной админке',
+    description: 'Заказы, смены, касса и зарплата в одной админке',
     formatDetection: {
         email: false,
         address: false,
@@ -36,7 +36,7 @@ export const metadata: Metadata = {
     ),
     openGraph: {
         title: 'Flowsy',
-        description: 'Заказы, записи, смены, касса и зарплата в одной админке',
+        description: 'Заказы, смены, касса и зарплата в одной админке',
         type: 'website',
         locale: 'ru_RU',
         siteName: 'Flowsy',
@@ -49,16 +49,7 @@ export const viewport: Viewport = {
     initialScale: 1,
     maximumScale: 5,
     userScalable: true,
-    themeColor: [
-        {
-            media: '(prefers-color-scheme: light)',
-            color: '#ffffff',
-        },
-        {
-            media: '(prefers-color-scheme: dark)',
-            color: '#0a0a0a',
-        },
-    ],
+    themeColor: '#0a0a0a',
 };
 
 const RootLayout = ({ children }: PropsWithChildren) => (

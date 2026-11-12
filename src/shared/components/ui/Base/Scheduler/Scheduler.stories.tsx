@@ -27,19 +27,33 @@ function at(hour: number, minute = 0): Date {
 }
 
 const INITIAL: Appt[] = [
-    { id: 'a1', title: 'Стрижка', employeeId: 'm1', start: at(10), end: at(11), color: '#3b82f6' },
+    {
+        id: 'a1',
+        title: 'Ремонт молнии',
+        employeeId: 'm1',
+        start: at(10),
+        end: at(11),
+        color: '#3b82f6',
+    },
     {
         id: 'a2',
-        title: 'Окрашивание',
+        title: 'Подгонка брюк',
         employeeId: 'm1',
         start: at(12, 30),
         end: at(14),
         color: '#10b981',
     },
-    { id: 'a3', title: 'Маникюр', employeeId: 'm2', start: at(11), end: at(12), color: '#f59e0b' },
+    {
+        id: 'a3',
+        title: 'Замена подкладки',
+        employeeId: 'm2',
+        start: at(11),
+        end: at(12),
+        color: '#f59e0b',
+    },
     {
         id: 'a4',
-        title: 'Педикюр',
+        title: 'Чистка обуви',
         employeeId: 'm2',
         start: at(13),
         end: at(14, 30),
@@ -47,7 +61,7 @@ const INITIAL: Appt[] = [
     },
     {
         id: 'a5',
-        title: 'Массаж',
+        title: 'Примерка',
         employeeId: 'm3',
         start: at(15),
         end: at(16, 30),

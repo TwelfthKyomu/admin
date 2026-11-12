@@ -10,6 +10,7 @@ import {
     useState,
 } from 'react';
 import { useIsMobile } from '@/shared/hooks/useMobile';
+import { isLetterShortcut } from '@/shared/lib/hotkey';
 import { cn } from '@/shared/lib/utils';
 import { Button, Tooltip, TooltipContent, TooltipTrigger } from '@/ui/Base';
 import {
@@ -92,7 +93,7 @@ const SidebarProvider = ({
 
     useEffect(() => {
         const handleKeyDown = (event: KeyboardEvent) => {
-            if (event.key === SIDEBAR_KEYBOARD_SHORTCUT && (event.metaKey || event.ctrlKey)) {
+            if (isLetterShortcut(event, SIDEBAR_KEYBOARD_SHORTCUT)) {
                 event.preventDefault();
                 toggleSidebar();
             }

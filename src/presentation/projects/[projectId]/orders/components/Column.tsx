@@ -1,3 +1,4 @@
+import { ROUTES } from '@/shared/constants';
 import { fmtDateTime } from '@/shared/format/date';
 import { fmtMoney } from '@/shared/format/money';
 import {
@@ -9,6 +10,7 @@ import {
 import { type OrderView, orderNumber } from '@/contexts/order';
 import { Badge } from '@/ui/Base';
 import { createColumnHelper } from '@tanstack/react-table';
+import Link from 'next/link';
 import { sellerLabel } from '../lib/sellers';
 import { ReadyBy } from './ReadyBy';
 
@@ -23,7 +25,13 @@ export const COLUMNS = ({ sellerNames }: ColumnsProps) => [
         id: 'number',
         header: '№',
         cell: ({ row: { original } }) => (
-            <span className="font-mono text-muted-foreground text-xs">{orderNumber(original)}</span>
+            <Link
+                href={ROUTES.project(original.projectId, 'orders', original.id)}
+                className="font-mono text-muted-foreground text-xs"
+                onClick={(event) => event.stopPropagation()}
+            >
+                {orderNumber(original)}
+            </Link>
         ),
     }),
     display({

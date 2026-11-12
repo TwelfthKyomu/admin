@@ -1,15 +1,12 @@
 'use client';
 
 import { type Dispatch, type SetStateAction, useEffect } from 'react';
+import { isLetterShortcut } from '@/shared/lib/hotkey';
 
 export const useHotkeyToggle = (setOpen: Dispatch<SetStateAction<boolean>>) => {
     useEffect(() => {
         const onKeyDown = (event: KeyboardEvent) => {
-            if (
-                event.key.toLowerCase() !== 'k' ||
-                !(event.metaKey || event.ctrlKey)
-            )
-                return;
+            if (!isLetterShortcut(event, 'k')) return;
 
             event.preventDefault();
             setOpen((open) => !open);

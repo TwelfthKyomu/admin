@@ -4,7 +4,7 @@ import { DeliveryStatus, type DeliveryView } from '@/contexts/delivery';
 export const PayBadge = ({ delivery }: { delivery: DeliveryView }) => {
     if (delivery.status === DeliveryStatus.DELIVERED) {
         return (
-            <span className="rounded-full bg-green-100 px-2 py-0.5 text-[12px] font-medium text-green-800">
+            <span className="rounded-full bg-green-100 px-2 py-0.5 text-[12px] font-medium text-green-800 dark:bg-green-950 dark:text-green-200">
                 Доставлено
             </span>
         );
@@ -12,14 +12,14 @@ export const PayBadge = ({ delivery }: { delivery: DeliveryView }) => {
 
     if (delivery.cashDue > 0) {
         return (
-            <span className="rounded-full bg-amber-100 px-2 py-0.5 text-[12px] font-medium text-amber-900">
+            <span className="rounded-full bg-amber-100 px-2 py-0.5 text-[12px] font-medium text-amber-900 dark:bg-amber-950 dark:text-amber-200">
                 {fmtMoney(delivery.cashDue, delivery.currency)} у двери
             </span>
         );
     }
 
     return (
-        <span className="rounded-full bg-green-100 px-2 py-0.5 text-[12px] font-medium text-green-800">
+        <span className="rounded-full bg-green-100 px-2 py-0.5 text-[12px] font-medium text-green-800 dark:bg-green-950 dark:text-green-200">
             Оплачено
         </span>
     );

@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from 'react';
 import { SEARCH_QUERY_MIN } from '@/shared/constants/default';
+import { isLetterShortcut } from '@/shared/lib/hotkey';
 import {
     type ChatChannelsView,
     chatScopeKey,
@@ -39,11 +40,7 @@ export function useInbox({
 
     useEffect(() => {
         const onKeyDown = (event: KeyboardEvent) => {
-            const isShortcut =
-                (event.metaKey || event.ctrlKey) &&
-                event.key.toLowerCase() === 'k';
-
-            if (!isShortcut) return;
+            if (!isLetterShortcut(event, 'k')) return;
 
             event.preventDefault();
             searchRef.current?.focus();

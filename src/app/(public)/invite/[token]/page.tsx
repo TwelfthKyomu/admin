@@ -1,6 +1,9 @@
 import { nullToOptional } from '@/shared/lib/optional';
 import { resolveInviteContext } from '@/contexts/projectInvite/ProjectInvite.lib';
 import { AcceptInvitePage } from '@/presentation/invite';
+import type { Metadata } from 'next';
+
+export const metadata: Metadata = { title: 'Приглашение' };
 
 export const instant = false;
 

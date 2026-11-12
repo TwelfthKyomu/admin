@@ -6,7 +6,7 @@ import type { KindFilterValue } from '../hooks/useKindParam';
 
 const KIND_TABS: TabItem<KindFilterValue>[] = [
     { value: 'all', label: 'Все' },
-    { value: EmployeeKind.SPECIALIST, label: 'Мастера' },
+    { value: EmployeeKind.SPECIALIST, label: 'Сотрудники' },
     { value: EmployeeKind.COURIER, label: 'Курьеры' },
 ];
 
@@ -16,7 +16,7 @@ interface KindFilterProps {
 }
 
 export const KindFilter = ({ value, onChange }: KindFilterProps) => (
-    <Tabs<KindFilterValue>
+    <Tabs
         items={KIND_TABS}
         value={value}
         onValueChange={onChange}

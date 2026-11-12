@@ -110,7 +110,7 @@ export function useMembersPage() {
         {
             label: 'В проекте',
             value: membersQuery.data?.length ?? 0,
-            hint: `${activeEmployees.length - couriers} мастеров · ${couriers} курьеров`,
+            hint: `${activeEmployees.length - couriers} сотрудников · ${couriers} курьеров`,
         },
         {
             label: 'На смене сейчас',

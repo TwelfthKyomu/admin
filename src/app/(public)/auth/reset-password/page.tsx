@@ -2,6 +2,9 @@ import { Suspense } from 'react';
 import { AuthShell } from '@/presentation/auth/components/AuthShell';
 import { ResetPasswordPage } from '@/presentation/auth/reset-password';
 import { Spinner } from '@/ui/Base';
+import type { Metadata } from 'next';
+
+export const metadata: Metadata = { title: 'Новый пароль' };
 
 const ResetPassword = () => (
     <AuthShell

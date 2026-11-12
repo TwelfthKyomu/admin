@@ -28,7 +28,7 @@ export const PayrollPage = () => {
         <>
             <PageHeader
                 title="Расчёты"
-                description="Мастерам — смены и процент с выручки, курьерам — смены и ставка за каждую доставку."
+                description="Сотрудникам — смены и процент с выручки, курьерам — смены и ставка за каждую доставку."
             />
             <div className="mb-4 flex flex-wrap items-center gap-3">
                 <PeriodPicker state={period} />

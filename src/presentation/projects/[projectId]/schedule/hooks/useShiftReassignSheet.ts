@@ -27,8 +27,7 @@ export const useShiftReassignSheet = (projectId: string, shiftId: string) => {
 
     const onSubmit: SubmitHandler<ReassignShiftFormValues> = async (values) => {
         const { success } = await runAction(mutateAsync(values), {
-            success:
-                'Замена назначена: записи и доставки из окна смены перешли замене',
+            success: 'Замена назначена: доставки из окна смены перешли замене',
         });
 
         if (success) close();

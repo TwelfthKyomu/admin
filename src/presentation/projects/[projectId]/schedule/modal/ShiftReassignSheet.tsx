@@ -25,7 +25,7 @@ export const ShiftReassignSheet = ({
         <FormDialog
             surface="sheet"
             title="Назначить замену"
-            description={`Смену сотрудника «${employeeName}», его записи и доставки в окне смены передадим выбранному коллеге.`}
+            description={`Смену сотрудника «${employeeName}» и его доставки в окне смены передадим выбранному коллеге.`}
             form={form}
             onSubmit={onSubmit}
             submitLabel="Назначить"

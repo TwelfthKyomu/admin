@@ -122,7 +122,7 @@ async function assertEligibleSubstitute(
     }
     if (original && original.kind !== active.kind) {
         throw new ApplicationError(
-            'Заменить можно только сотрудником того же вида работы: курьера — курьером, мастера — мастером',
+            'Заменить можно только сотрудником того же вида работы',
         );
     }
 }
