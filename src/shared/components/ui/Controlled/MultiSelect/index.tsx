@@ -1,7 +1,8 @@
-import { type FieldPath, type FieldValues, useController, useFormContext } from 'react-hook-form';
+import type { FieldPath, FieldValues } from 'react-hook-form';
 import type { Option } from '@/shared/types';
 import { Button } from '@/ui/Base';
 import { ControlledField } from '../Field';
+import { useControlledField } from '../useControlledField';
 import { toggleValue } from './lib/toggle';
 
 interface MultiSelectControlledProps<
@@ -25,12 +26,7 @@ const MultiSelect = <
     options,
     emptyText = 'Нет доступных вариантов',
 }: MultiSelectControlledProps<TFieldValues, TName>) => {
-    const { control } = useFormContext<TFieldValues>();
-
-    const {
-        field,
-        fieldState: { error },
-    } = useController({ name, control });
+    const { field, error } = useControlledField<TFieldValues, TName>(name);
 
     const selected = (field.value as string[] | undefined) ?? [];
 

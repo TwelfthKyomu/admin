@@ -39,6 +39,11 @@ export const DELIVERY_READ_PERMISSIONS: Permission[] = [
     Permission.VIEW_DELIVERIES,
 ];
 
+export const DELIVERY_STAFF_PERMISSIONS: Permission[] = [
+    Permission.MANAGE_DELIVERIES,
+    Permission.VIEW_DELIVERIES,
+];
+
 export const SHIFT_WRITE_PERMISSIONS: Permission[] = [
     Permission.MANAGE_ORDERS,
     Permission.MANAGE_OWN_DELIVERIES,

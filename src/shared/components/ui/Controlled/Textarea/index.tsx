@@ -1,7 +1,8 @@
 import type { ComponentProps } from 'react';
-import { type FieldPath, type FieldValues, useController, useFormContext } from 'react-hook-form';
+import type { FieldPath, FieldValues } from 'react-hook-form';
 import { Textarea as BaseTextarea } from '@/ui/Base';
 import { ControlledField } from '../Field';
+import { useControlledField } from '../useControlledField';
 
 interface TextareaControlledProps<
     TFieldValues extends FieldValues,
@@ -21,12 +22,7 @@ const Textarea = <
     description,
     ...props
 }: TextareaControlledProps<TFieldValues, TName>) => {
-    const { control } = useFormContext<TFieldValues>();
-
-    const {
-        field,
-        fieldState: { error, invalid },
-    } = useController({ name, control });
+    const { field, error, invalid } = useControlledField<TFieldValues, TName>(name);
 
     return (
         <ControlledField

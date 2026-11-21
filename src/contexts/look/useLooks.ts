@@ -1,8 +1,6 @@
 'use client';
 
-import { makeMutation } from '@/shared/lib/mutations';
-import { listQuery } from '@/shared/lib/queries';
-import { useQuery } from '@tanstack/react-query';
+import { defineResource } from '@/shared/lib/resource';
 import {
     createLookAction,
     deleteLookAction,
@@ -10,20 +8,21 @@ import {
     updateLookAction,
 } from './Look.actions';
 
-const lookQueries = {
-    all: ['looks'] as const,
-    list: (projectId: string) =>
-        listQuery(
-            [...lookQueries.all, 'list', projectId],
-            () => looksAction({ projectId }),
-            { enabled: projectId.length > 0 },
-        ),
-};
+const looks = defineResource({
+    key: ['looks'],
+    list: {
+        action: looksAction,
+        input: (projectId: string) => ({ projectId }),
+        enabled: (projectId) => projectId.length > 0,
+    },
+    mutations: {
+        useCreateLook: createLookAction,
+        useUpdateLook: updateLookAction,
+        useDeleteLook: deleteLookAction,
+    },
+});
 
-export const useLooksList = (projectId: string) => {
-    return useQuery(lookQueries.list(projectId));
-};
-
-export const useCreateLook = makeMutation(createLookAction);
-export const useUpdateLook = makeMutation(updateLookAction);
-export const useDeleteLook = makeMutation(deleteLookAction);
+export const {
+    useList: useLooksList,
+    mutations: { useCreateLook, useUpdateLook, useDeleteLook },
+} = looks;

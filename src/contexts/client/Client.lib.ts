@@ -1,16 +1,11 @@
 import 'server-only';
 
 import type { Tx } from '@/infrastructure/database/client';
-import { findInProject, insertOne } from '@/shared/api/repository';
+import { inProjectFinder, insertOne } from '@/shared/api/repository';
 import { and, eq } from 'drizzle-orm';
 import { type ClientRecord, type ClientView, clients } from './Clients.table';
 
-export const findClientInProject = (
-    id: string,
-    projectId: string,
-): Promise<ClientRecord> => {
-    return findInProject(clients, id, projectId, 'Клиент не найден');
-};
+export const findClientInProject = inProjectFinder(clients, 'Клиент не найден');
 
 export const toClientView = ({
     passwordHash: _passwordHash,

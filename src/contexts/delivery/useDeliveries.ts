@@ -1,7 +1,7 @@
 'use client';
 
-import { makeMutation } from '@/shared/lib/mutations';
-import { itemQuery, listQuery } from '@/shared/lib/queries';
+import { itemQuery } from '@/shared/lib/queries';
+import { defineResource } from '@/shared/lib/resource';
 import { useQuery } from '@tanstack/react-query';
 import {
     courierStatsAction,
@@ -23,63 +23,72 @@ import {
     setCarrierStatusAction,
 } from './DeliveryStatus.actions';
 
-const deliveryQueries = {
-    all: ['deliveries'] as const,
-    list: (projectId: string, from?: Date, to?: Date) =>
-        listQuery(
-            [
-                ...deliveryQueries.all,
-                'list',
-                projectId,
-                from?.toISOString() ?? '',
-                to?.toISOString() ?? '',
-            ],
-            () => deliveriesAction({ projectId, from, to }),
-        ),
-    order: (projectId: string, orderId: string) =>
-        itemQuery([...deliveryQueries.all, 'order', projectId, orderId], () =>
-            orderDeliveryAction({ projectId, orderId }),
-        ),
-};
-
-export const useDeliveries = (opts: {
+interface ListOptions {
     projectId: string;
     from?: Date;
     to?: Date;
-}) => {
-    return useQuery(deliveryQueries.list(opts.projectId, opts.from, opts.to));
-};
+}
 
-export const useCourierStats = (opts: {
+interface CourierStatsOptions {
     projectId: string;
     from: Date;
     to: Date;
-}) => {
+}
+
+const deliveries = defineResource({
+    key: ['deliveries'],
+    list: {
+        action: deliveriesAction,
+        input: ({ projectId, from, to }: ListOptions) => ({
+            projectId,
+            from,
+            to,
+        }),
+    },
+    mutations: {
+        useCreateDelivery: createDeliveryAction,
+        useUpdateDelivery: updateDeliveryAction,
+        useAssignDelivery: assignDeliveryAction,
+        useTakeDelivery: takeDeliveryAction,
+        usePickUpDelivery: pickUpDeliveryAction,
+        useCompleteDelivery: completeDeliveryAction,
+        useFailDelivery: failDeliveryAction,
+        useRequeueDelivery: requeueDeliveryAction,
+        useCancelDelivery: cancelDeliveryAction,
+        useSetCarrierStatus: setCarrierStatusAction,
+    },
+});
+
+const courierStats = defineResource({
+    key: ['deliveries', 'courier-stats'],
+    list: {
+        action: courierStatsAction,
+        input: (opts: CourierStatsOptions) => opts,
+    },
+});
+
+export const { useList: useDeliveries } = deliveries;
+export const { useList: useCourierStats } = courierStats;
+
+export const useOrderDelivery = (projectId: string, orderId: string) => {
     return useQuery(
-        listQuery(
-            [
-                ...deliveryQueries.all,
-                'courier-stats',
-                opts.projectId,
-                opts.from.toISOString(),
-                opts.to.toISOString(),
-            ],
-            () => courierStatsAction(opts),
+        itemQuery(['deliveries', 'order', projectId, orderId], () =>
+            orderDeliveryAction({ projectId, orderId }),
         ),
     );
 };
 
-export const useOrderDelivery = (projectId: string, orderId: string) => {
-    return useQuery(deliveryQueries.order(projectId, orderId));
-};
-
-export const useCreateDelivery = makeMutation(createDeliveryAction);
-export const useUpdateDelivery = makeMutation(updateDeliveryAction);
-export const useAssignDelivery = makeMutation(assignDeliveryAction);
-export const useTakeDelivery = makeMutation(takeDeliveryAction);
-export const usePickUpDelivery = makeMutation(pickUpDeliveryAction);
-export const useCompleteDelivery = makeMutation(completeDeliveryAction);
-export const useFailDelivery = makeMutation(failDeliveryAction);
-export const useRequeueDelivery = makeMutation(requeueDeliveryAction);
-export const useCancelDelivery = makeMutation(cancelDeliveryAction);
-export const useSetCarrierStatus = makeMutation(setCarrierStatusAction);
+export const {
+    mutations: {
+        useCreateDelivery,
+        useUpdateDelivery,
+        useAssignDelivery,
+        useTakeDelivery,
+        usePickUpDelivery,
+        useCompleteDelivery,
+        useFailDelivery,
+        useRequeueDelivery,
+        useCancelDelivery,
+        useSetCarrierStatus,
+    },
+} = deliveries;

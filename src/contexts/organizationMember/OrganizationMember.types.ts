@@ -1,6 +1,12 @@
 import { enumValues } from '@/shared/lib/enum';
 import type { ProjectRecord } from '@/contexts/project/Projects.table';
-import { ALL_PERMISSIONS, Permission } from '@/contexts/user/User.types';
+import {
+    ALL_PERMISSIONS,
+    CATALOG_READ_PERMISSIONS,
+    DELIVERY_STAFF_PERMISSIONS,
+    ORDER_READ_PERMISSIONS,
+    Permission,
+} from '@/contexts/user/User.types';
 import type { UserRecord } from '@/contexts/user/Users.table';
 
 export const OrganizationRole = {
@@ -27,14 +33,11 @@ const ORG_ROLE_PERMISSIONS: Record<
         Permission.MANAGE_FINANCES,
         Permission.MANAGE_MEMBERS,
         Permission.VIEW_MEMBERS,
-        Permission.MANAGE_CATALOG,
-        Permission.VIEW_CATALOG,
-        Permission.MANAGE_ORDERS,
-        Permission.VIEW_ORDERS,
-        Permission.MANAGE_DELIVERIES,
-        Permission.VIEW_DELIVERIES,
         Permission.MANAGE_INTEGRATIONS,
         Permission.MANAGE_ROLES,
+        ...CATALOG_READ_PERMISSIONS,
+        ...ORDER_READ_PERMISSIONS,
+        ...DELIVERY_STAFF_PERMISSIONS,
     ]),
 
     [OrganizationRole.MEMBER]: new Set<Permission>([

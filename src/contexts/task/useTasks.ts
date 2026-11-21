@@ -1,8 +1,6 @@
 'use client';
 
-import { makeMutation } from '@/shared/lib/mutations';
-import { listQuery } from '@/shared/lib/queries';
-import { useQuery } from '@tanstack/react-query';
+import { defineResource } from '@/shared/lib/resource';
 import {
     createTaskAction,
     deleteTaskAction,
@@ -10,20 +8,22 @@ import {
     updateTaskAction,
 } from './Task.actions';
 
-const taskQueries = {
-    all: ['tasks'] as const,
-    list: (projectId: string) =>
-        listQuery(
-            [...taskQueries.all, 'list', projectId],
-            () => tasksAction({ projectId }),
-            { enabled: projectId.length > 0, staleTime: 15_000 },
-        ),
-};
+const tasks = defineResource({
+    key: ['tasks'],
+    list: {
+        action: tasksAction,
+        input: (projectId: string) => ({ projectId }),
+        enabled: (projectId) => projectId.length > 0,
+        staleTime: 15_000,
+    },
+    mutations: {
+        useCreateTask: createTaskAction,
+        useUpdateTask: updateTaskAction,
+        useDeleteTask: deleteTaskAction,
+    },
+});
 
-export const useTasksList = (projectId: string) => {
-    return useQuery(taskQueries.list(projectId));
-};
-
-export const useCreateTask = makeMutation(createTaskAction);
-export const useUpdateTask = makeMutation(updateTaskAction);
-export const useDeleteTask = makeMutation(deleteTaskAction);
+export const {
+    useList: useTasksList,
+    mutations: { useCreateTask, useUpdateTask, useDeleteTask },
+} = tasks;

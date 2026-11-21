@@ -1,10 +1,6 @@
 import { type ChangeEvent, useEffect, useRef, useState } from 'react';
-import {
-    type FieldPath,
-    type FieldValues,
-    useController,
-    useFormContext,
-} from 'react-hook-form';
+import type { FieldPath, FieldValues } from 'react-hook-form';
+import { useControlledField } from '../../useControlledField';
 import { MONEY_PATTERN, minorToText, textToMinor } from '../lib/money';
 
 export const useMoneyField = <
@@ -13,12 +9,9 @@ export const useMoneyField = <
 >(
     name: TName,
 ) => {
-    const { control } = useFormContext<TFieldValues>();
-
-    const {
-        field,
-        fieldState: { error, invalid },
-    } = useController({ name, control });
+    const { field, error, invalid } = useControlledField<TFieldValues, TName>(
+        name,
+    );
 
     const [rawValue, setRawValue] = useState(() => minorToText(field.value));
 

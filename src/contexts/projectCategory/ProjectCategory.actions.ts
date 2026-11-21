@@ -6,7 +6,12 @@ import {
     projectReadAction,
 } from '@/shared/api/action-client';
 import { ApplicationError } from '@/shared/api/errors';
-import { findInProject, insertOne, updateOne } from '@/shared/api/repository';
+import {
+    inProjectFinder,
+    insertOne,
+    listInProject,
+    updateOne,
+} from '@/shared/api/repository';
 import { slugify } from '@/shared/format/url';
 import { SLUG_PATTERN } from '@/shared/validation';
 import { products } from '@/contexts/product/Products.table';
@@ -15,10 +20,7 @@ import {
     Permission,
 } from '@/contexts/user/User.types';
 import { and, asc, count, eq, inArray, isNull } from 'drizzle-orm';
-import {
-    type ProjectCategoryRecord,
-    projectCategories,
-} from './ProjectCategories.table';
+import { projectCategories } from './ProjectCategories.table';
 import {
     assertCategorySlugFree,
     findCategoryDescendantIds,
@@ -31,39 +33,22 @@ import {
     UpdateCategoryActionInputSchema,
 } from './ProjectCategory.schema';
 
-const findCategoryInProject = (
-    id: string,
-    projectId: string,
-): Promise<ProjectCategoryRecord> => {
-    return findInProject(
-        projectCategories,
-        id,
-        projectId,
-        'Категория не найдена',
-    );
-};
+const findCategoryInProject = inProjectFinder(
+    projectCategories,
+    'Категория не найдена',
+);
 
 export const categoriesAction = projectReadAction(CATALOG_READ_PERMISSIONS)
     .inputSchema(CategoriesActionInputSchema)
-    .action(async ({ parsedInput: { projectId, includeInactive } }) => {
-        const baseFilter = and(
-            eq(projectCategories.projectId, projectId),
-            isNull(projectCategories.deletedAt),
-        );
-
-        return db
-            .select()
-            .from(projectCategories)
-            .where(
-                includeInactive
-                    ? baseFilter
-                    : and(baseFilter, eq(projectCategories.isActive, true)),
-            )
-            .orderBy(
+    .action(async ({ parsedInput: { projectId, includeInactive } }) =>
+        listInProject(projectCategories, projectId, {
+            includeInactive,
+            orderBy: [
                 asc(projectCategories.parentId),
                 asc(projectCategories.position),
-            );
-    });
+            ],
+        }),
+    );
 
 export const createCategoryAction = projectMutationAction(
     Permission.MANAGE_CATALOG,

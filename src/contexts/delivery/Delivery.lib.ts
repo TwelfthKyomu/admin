@@ -222,6 +222,16 @@ export const cancelActiveDelivery = async (
     );
 };
 
+export const assignedCourierWindowFilter = (window: EmployeeWindow) => {
+    return and(
+        eq(deliveries.projectId, window.projectId),
+        eq(deliveries.courierId, window.employeeId),
+        eq(deliveries.status, DeliveryStatus.ASSIGNED),
+        gte(deliveries.windowStart, window.startsAt),
+        lte(deliveries.windowEnd, window.endsAt),
+    );
+};
+
 export const moveCourierDeliveries = async (
     tx: Tx,
     window: EmployeeWindow & { toEmployeeId: string; byUserId: string },
@@ -229,15 +239,7 @@ export const moveCourierDeliveries = async (
     const moved = await tx
         .update(deliveries)
         .set({ courierId: window.toEmployeeId, assignedAt: new Date() })
-        .where(
-            and(
-                eq(deliveries.projectId, window.projectId),
-                eq(deliveries.courierId, window.employeeId),
-                eq(deliveries.status, DeliveryStatus.ASSIGNED),
-                gte(deliveries.windowStart, window.startsAt),
-                lte(deliveries.windowEnd, window.endsAt),
-            ),
-        )
+        .where(assignedCourierWindowFilter(window))
         .returning({ orderId: deliveries.orderId });
 
     await recordOrderEvents(

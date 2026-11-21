@@ -2,6 +2,7 @@
 
 import { db } from '@/infrastructure/database/client';
 import { projectReadAction } from '@/shared/api/action-client';
+import { listInProject } from '@/shared/api/repository';
 import { PAGE_SIZE_LARGE } from '@/shared/constants/default';
 import { variantComboLabel } from '@/contexts/product/Product.types';
 import { products } from '@/contexts/product/Products.table';
@@ -95,18 +96,13 @@ export const stockOverviewAction = projectReadAction(CATALOG_READ_PERMISSIONS)
 
 export const stockMovementsAction = projectReadAction(CATALOG_READ_PERMISSIONS)
     .inputSchema(StockMovementsActionInputSchema)
-    .action(async ({ parsedInput: { projectId, productId } }) => {
-        const filters = [eq(stockMovements.projectId, projectId)];
-
-        if (productId) filters.push(eq(stockMovements.productId, productId));
-
-        return db
-            .select()
-            .from(stockMovements)
-            .where(and(...filters))
-            .orderBy(desc(stockMovements.occurredAt))
-            .limit(PAGE_SIZE_LARGE);
-    });
+    .action(async ({ parsedInput: { projectId, productId } }) =>
+        listInProject(stockMovements, projectId, {
+            filters: productId ? [eq(stockMovements.productId, productId)] : [],
+            orderBy: [desc(stockMovements.occurredAt)],
+            limit: PAGE_SIZE_LARGE,
+        }),
+    );
 
 export const orderStockAction = projectReadAction(ORDER_READ_PERMISSIONS)
     .inputSchema(OrderStockActionInputSchema)

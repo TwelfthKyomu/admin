@@ -1,8 +1,6 @@
 'use client';
 
-import { makeMutation } from '@/shared/lib/mutations';
-import { listQuery } from '@/shared/lib/queries';
-import { useQuery } from '@tanstack/react-query';
+import { defineResource } from '@/shared/lib/resource';
 import {
     couponsAction,
     createCouponAction,
@@ -11,21 +9,27 @@ import {
     updateCouponAction,
 } from './Coupon.actions';
 
-const couponQueries = {
-    all: ['coupons'] as const,
-    list: (projectId: string) =>
-        listQuery(
-            [...couponQueries.all, 'list', projectId],
-            () => couponsAction({ projectId }),
-            { enabled: projectId.length > 0 },
-        ),
-};
+const coupons = defineResource({
+    key: ['coupons'],
+    list: {
+        action: couponsAction,
+        input: (projectId: string) => ({ projectId }),
+        enabled: (projectId) => projectId.length > 0,
+    },
+    mutations: {
+        useCreateCoupon: createCouponAction,
+        useUpdateCoupon: updateCouponAction,
+        useDeleteCoupon: deleteCouponAction,
+        useRedeemCoupon: redeemCouponAction,
+    },
+});
 
-export const useCouponsList = (projectId: string) => {
-    return useQuery(couponQueries.list(projectId));
-};
-
-export const useCreateCoupon = makeMutation(createCouponAction);
-export const useUpdateCoupon = makeMutation(updateCouponAction);
-export const useDeleteCoupon = makeMutation(deleteCouponAction);
-export const useRedeemCoupon = makeMutation(redeemCouponAction);
+export const {
+    useList: useCouponsList,
+    mutations: {
+        useCreateCoupon,
+        useUpdateCoupon,
+        useDeleteCoupon,
+        useRedeemCoupon,
+    },
+} = coupons;

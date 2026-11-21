@@ -3,7 +3,7 @@ import 'server-only';
 import { db, type Tx } from '@/infrastructure/database/client';
 import { ApplicationError } from '@/shared/api/errors';
 import {
-    findInProject,
+    inProjectFinder,
     insertOne,
     lockInProject,
 } from '@/shared/api/repository';
@@ -35,12 +35,7 @@ import {
 
 type OrderEventDraft = Omit<NewOrderEventRecord, 'orderId'>;
 
-export const findOrderInProject = (
-    id: string,
-    projectId: string,
-): Promise<OrderRecord> => {
-    return findInProject(orders, id, projectId, 'Заказ не найден');
-};
+export const findOrderInProject = inProjectFinder(orders, 'Заказ не найден');
 
 export const lockOrder = (
     tx: Tx,

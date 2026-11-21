@@ -2,7 +2,7 @@ import 'server-only';
 
 import { db, type Reader, type Tx } from '@/infrastructure/database/client';
 import { ApplicationError } from '@/shared/api/errors';
-import { findInProject } from '@/shared/api/repository';
+import { inProjectFinder } from '@/shared/api/repository';
 import type { StockTarget } from '@/contexts/stockMovement/StockMovement.types';
 import { and, asc, eq, isNull } from 'drizzle-orm';
 import { PRIMARY_WAREHOUSE_NAME } from './Warehouse.types';
@@ -43,12 +43,10 @@ export const listWarehouses = (
         .orderBy(asc(warehouses.position), asc(warehouses.createdAt));
 };
 
-export const findWarehouseInProject = (
-    id: string,
-    projectId: string,
-): Promise<WarehouseRecord> => {
-    return findInProject(warehouses, id, projectId, 'Склад не найден');
-};
+export const findWarehouseInProject = inProjectFinder(
+    warehouses,
+    'Склад не найден',
+);
 
 export const primaryWarehouseId = async (
     projectId: string,

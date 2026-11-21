@@ -1,8 +1,8 @@
 import 'server-only';
 
 import { db, type Tx } from '@/infrastructure/database/client';
-import { findInProject } from '@/shared/api/repository';
-import { and, asc, eq, inArray, isNull } from 'drizzle-orm';
+import { inProjectFinder, listInProject } from '@/shared/api/repository';
+import { asc, eq, inArray } from 'drizzle-orm';
 import {
     type LookItem,
     type ProjectLookRecord,
@@ -11,28 +11,19 @@ import {
     projectLooks,
 } from './Looks.table';
 
-export const findLookInProject = (
-    id: string,
-    projectId: string,
-): Promise<ProjectLookRecord> => {
-    return findInProject(projectLooks, id, projectId, 'Образ не найден');
-};
+export const findLookInProject = inProjectFinder(
+    projectLooks,
+    'Образ не найден',
+);
 
 export const loadProjectLooks = async (
     projectId: string,
     onlyActive: boolean,
 ): Promise<ProjectLookView[]> => {
-    const looks = await db
-        .select()
-        .from(projectLooks)
-        .where(
-            and(
-                eq(projectLooks.projectId, projectId),
-                isNull(projectLooks.deletedAt),
-                onlyActive ? eq(projectLooks.isActive, true) : undefined,
-            ),
-        )
-        .orderBy(asc(projectLooks.position), asc(projectLooks.createdAt));
+    const looks = await listInProject(projectLooks, projectId, {
+        includeInactive: !onlyActive,
+        orderBy: [asc(projectLooks.position), asc(projectLooks.createdAt)],
+    });
 
     const items = looks.length
         ? await db

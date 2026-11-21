@@ -46,6 +46,51 @@ export const findInProject = async <T extends ProjectScoped>(
     return row;
 };
 
+export const inProjectFinder = <T extends ProjectScoped>(
+    table: T,
+    notFound: string,
+) => {
+    return (id: string, projectId: string): Promise<InferSelectModel<T>> =>
+        findInProject(table, id, projectId, notFound);
+};
+
+type ListableProjectTable = ProjectScoped & { isActive?: PgColumn };
+
+export const listInProject = async <T extends ListableProjectTable>(
+    table: T,
+    projectId: string,
+    options?: {
+        includeInactive?: boolean;
+        filters?: SQL[];
+        orderBy?: SQL[];
+        limit?: number;
+    },
+): Promise<InferSelectModel<T>[]> => {
+    const conditions: (SQL | undefined)[] = [
+        eq(table.projectId, projectId),
+        alive(table),
+        ...(options?.filters ?? []),
+    ];
+
+    if (!options?.includeInactive && table.isActive) {
+        conditions.push(eq(table.isActive, true));
+    }
+
+    const query = db
+        .select()
+        .from(table as PgTable)
+        .where(and(...conditions))
+        .$dynamic();
+
+    const ordered = options?.orderBy?.length
+        ? query.orderBy(...options.orderBy)
+        : query;
+
+    const limited = options?.limit ? ordered.limit(options.limit) : ordered;
+
+    return (await limited) as InferSelectModel<T>[];
+};
+
 export const lockInProject = async <T extends ProjectScoped>(
     tx: Tx,
     table: T,

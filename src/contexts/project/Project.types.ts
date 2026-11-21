@@ -1,6 +1,11 @@
 import { enumValues } from '@/shared/lib/enum';
 import type { OrganizationRole } from '@/contexts/organizationMember/OrganizationMember.types';
-import { Permission } from '@/contexts/user/User.types';
+import {
+    CATALOG_READ_PERMISSIONS,
+    DELIVERY_STAFF_PERMISSIONS,
+    ORDER_READ_PERMISSIONS,
+    Permission,
+} from '@/contexts/user/User.types';
 
 export const ProjectType = {
     SHOP: 'shop',
@@ -28,24 +33,18 @@ const PROJECT_ROLE_PERMISSIONS: Record<ProjectRole, ReadonlySet<Permission>> = {
         Permission.MANAGE_FINANCES,
         Permission.MANAGE_MEMBERS,
         Permission.VIEW_MEMBERS,
-        Permission.MANAGE_CATALOG,
-        Permission.VIEW_CATALOG,
-        Permission.MANAGE_ORDERS,
-        Permission.VIEW_ORDERS,
-        Permission.MANAGE_DELIVERIES,
-        Permission.VIEW_DELIVERIES,
         Permission.MANAGE_INTEGRATIONS,
         Permission.MANAGE_ROLES,
+        ...CATALOG_READ_PERMISSIONS,
+        ...ORDER_READ_PERMISSIONS,
+        ...DELIVERY_STAFF_PERMISSIONS,
     ]),
 
     [ProjectRole.EDITOR]: new Set<Permission>([
         Permission.VIEW_MEMBERS,
-        Permission.MANAGE_CATALOG,
-        Permission.VIEW_CATALOG,
-        Permission.MANAGE_ORDERS,
-        Permission.VIEW_ORDERS,
-        Permission.MANAGE_DELIVERIES,
-        Permission.VIEW_DELIVERIES,
+        ...CATALOG_READ_PERMISSIONS,
+        ...ORDER_READ_PERMISSIONS,
+        ...DELIVERY_STAFF_PERMISSIONS,
     ]),
 
     [ProjectRole.VIEWER]: new Set<Permission>([

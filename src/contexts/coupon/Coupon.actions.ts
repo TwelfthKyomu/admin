@@ -7,14 +7,15 @@ import {
 } from '@/shared/api/action-client';
 import {
     assertUniqueInProject,
-    findInProject,
+    inProjectFinder,
     insertOne,
+    listInProject,
     softDeleteInProject,
     updateOne,
 } from '@/shared/api/repository';
 import { lockOrder } from '@/contexts/order/Order.lib';
 import { Permission } from '@/contexts/user/User.types';
-import { and, desc, eq, isNull } from 'drizzle-orm';
+import { desc, eq } from 'drizzle-orm';
 import { assertScopeInProject } from './Coupon.lib';
 import {
     CouponsActionInputSchema,
@@ -29,14 +30,9 @@ import {
     normalizeCouponCode,
 } from './Coupon.types';
 import { redeemCoupon } from './CouponRedemption.lib';
-import { type CouponRecord, coupons } from './Coupons.table';
+import { coupons } from './Coupons.table';
 
-const findCouponInProject = (
-    id: string,
-    projectId: string,
-): Promise<CouponRecord> => {
-    return findInProject(coupons, id, projectId, 'Купон не найден');
-};
+const findCouponInProject = inProjectFinder(coupons, 'Купон не найден');
 
 const assertCouponCodeFree = (
     projectId: string,
@@ -56,16 +52,9 @@ const assertCouponCodeFree = (
 export const couponsAction = projectReadAction(Permission.MANAGE_CATALOG)
     .inputSchema(CouponsActionInputSchema)
     .action(({ parsedInput: { projectId } }) =>
-        db
-            .select()
-            .from(coupons)
-            .where(
-                and(
-                    eq(coupons.projectId, projectId),
-                    isNull(coupons.deletedAt),
-                ),
-            )
-            .orderBy(desc(coupons.createdAt)),
+        listInProject(coupons, projectId, {
+            orderBy: [desc(coupons.createdAt)],
+        }),
     );
 
 export const createCouponAction = projectMutationAction(

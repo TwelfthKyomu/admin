@@ -1,8 +1,6 @@
 'use client';
 
-import { makeMutation } from '@/shared/lib/mutations';
-import { listQuery } from '@/shared/lib/queries';
-import { useQuery } from '@tanstack/react-query';
+import { defineResource } from '@/shared/lib/resource';
 import {
     deletePayoutAction,
     payrollPreviewAction,
@@ -15,25 +13,21 @@ interface PreviewOptions {
     to: Date;
 }
 
-const payrollQueries = {
-    all: ['payroll'] as const,
-    preview: ({ projectId, from, to }: PreviewOptions) =>
-        listQuery(
-            [
-                ...payrollQueries.all,
-                'preview',
-                projectId,
-                from.toISOString(),
-                to.toISOString(),
-            ],
-            () => payrollPreviewAction({ projectId, from, to }),
-            { enabled: projectId.length > 0, staleTime: 10_000 },
-        ),
-};
+const payroll = defineResource({
+    key: ['payroll'],
+    list: {
+        action: payrollPreviewAction,
+        input: (opts: PreviewOptions) => opts,
+        enabled: ({ projectId }: PreviewOptions) => projectId.length > 0,
+        staleTime: 10_000,
+    },
+    mutations: {
+        useRecordPayout: recordPayoutAction,
+        useDeletePayout: deletePayoutAction,
+    },
+});
 
-export const usePayrollPreview = (opts: PreviewOptions) => {
-    return useQuery(payrollQueries.preview(opts));
-};
-
-export const useRecordPayout = makeMutation(recordPayoutAction);
-export const useDeletePayout = makeMutation(deletePayoutAction);
+export const {
+    useList: usePayrollPreview,
+    mutations: { useRecordPayout, useDeletePayout },
+} = payroll;

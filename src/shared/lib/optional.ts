@@ -9,11 +9,17 @@ export type NullToOptional<T> = T extends Date
               {
                   [K in keyof T as null extends T[K]
                       ? K
-                      : never]?: NullToOptional<Exclude<T[K], null>>;
+                      : undefined extends T[K]
+                        ? K
+                        : never]?: NullToOptional<
+                      Exclude<T[K], null | undefined>
+                  >;
               } & {
                   [K in keyof T as null extends T[K]
                       ? never
-                      : K]: NullToOptional<T[K]>;
+                      : undefined extends T[K]
+                        ? never
+                        : K]: NullToOptional<T[K]>;
               }
           >
         : T;
@@ -33,7 +39,8 @@ const dropNulls = (value: unknown): unknown => {
     const result: Record<string, unknown> = {};
 
     for (const [key, field] of Object.entries(value)) {
-        if (field !== null) result[key] = dropNulls(field);
+        if (field !== null && field !== undefined)
+            result[key] = dropNulls(field);
     }
 
     return result;

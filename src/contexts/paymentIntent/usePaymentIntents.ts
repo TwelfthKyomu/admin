@@ -1,8 +1,6 @@
 'use client';
 
-import { makeMutation } from '@/shared/lib/mutations';
-import { listQuery } from '@/shared/lib/queries';
-import { useQuery } from '@tanstack/react-query';
+import { defineResource } from '@/shared/lib/resource';
 import {
     connectPaymentProviderAction,
     createPaymentIntentAction,
@@ -15,24 +13,29 @@ interface ListOptions {
     orderId?: string;
 }
 
-const paymentQueries = {
-    all: ['payments'] as const,
-    list: ({ projectId, orderId }: ListOptions) =>
-        listQuery(
-            [...paymentQueries.all, 'list', projectId, orderId ?? ''],
-            () => paymentIntentsAction({ projectId, orderId }),
-            { enabled: projectId.length > 0, staleTime: 5_000 },
-        ),
-};
+const payments = defineResource({
+    key: ['payments'],
+    list: {
+        action: paymentIntentsAction,
+        input: ({ projectId, orderId }: ListOptions) => ({
+            projectId,
+            orderId,
+        }),
+        enabled: ({ projectId }: ListOptions) => projectId.length > 0,
+        staleTime: 5_000,
+    },
+    mutations: {
+        useConnectPaymentProvider: connectPaymentProviderAction,
+        useCreatePaymentIntent: createPaymentIntentAction,
+        useRefundUnappliedIntent: refundUnappliedIntentAction,
+    },
+});
 
-export const usePaymentIntentsList = (opts: ListOptions) => {
-    return useQuery(paymentQueries.list(opts));
-};
-
-export const useConnectPaymentProvider = makeMutation(
-    connectPaymentProviderAction,
-);
-export const useCreatePaymentIntent = makeMutation(createPaymentIntentAction);
-export const useRefundUnappliedIntent = makeMutation(
-    refundUnappliedIntentAction,
-);
+export const {
+    useList: usePaymentIntentsList,
+    mutations: {
+        useConnectPaymentProvider,
+        useCreatePaymentIntent,
+        useRefundUnappliedIntent,
+    },
+} = payments;

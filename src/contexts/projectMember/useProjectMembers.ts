@@ -1,8 +1,6 @@
 'use client';
 
-import { makeMutation } from '@/shared/lib/mutations';
-import { listQuery } from '@/shared/lib/queries';
-import { useQuery } from '@tanstack/react-query';
+import { defineResource } from '@/shared/lib/resource';
 import {
     changeProjectMemberRoleAction,
     detachProjectMemberAction,
@@ -10,22 +8,25 @@ import {
     projectMembersAction,
 } from './ProjectMember.actions';
 
-const projectMemberQueries = {
-    all: ['project-members'] as const,
-    list: (projectId: string) =>
-        listQuery(
-            [...projectMemberQueries.all, 'list', projectId],
-            () => projectMembersAction({ projectId }),
-            { enabled: projectId.length > 0 },
-        ),
-};
+const projectMembers = defineResource({
+    key: ['project-members'],
+    list: {
+        action: projectMembersAction,
+        input: (projectId: string) => ({ projectId }),
+        enabled: (projectId) => projectId.length > 0,
+    },
+    mutations: {
+        useDetachProjectMember: detachProjectMemberAction,
+        useChangeProjectMemberRole: changeProjectMemberRoleAction,
+        useEnsureMemberSchedule: ensureMemberScheduleAction,
+    },
+});
 
-export const useProjectMembersList = (projectId: string) => {
-    return useQuery(projectMemberQueries.list(projectId));
-};
-
-export const useDetachProjectMember = makeMutation(detachProjectMemberAction);
-export const useChangeProjectMemberRole = makeMutation(
-    changeProjectMemberRoleAction,
-);
-export const useEnsureMemberSchedule = makeMutation(ensureMemberScheduleAction);
+export const {
+    useList: useProjectMembersList,
+    mutations: {
+        useDetachProjectMember,
+        useChangeProjectMemberRole,
+        useEnsureMemberSchedule,
+    },
+} = projectMembers;

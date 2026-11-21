@@ -1,13 +1,8 @@
-import {
-    type FieldPath,
-    type FieldPathValue,
-    type FieldValues,
-    useController,
-    useFormContext,
-} from 'react-hook-form';
+import type { FieldPath, FieldPathValue, FieldValues } from 'react-hook-form';
 import type { Option } from '@/shared/types';
 import { Select as BaseSelect } from '@/ui/Base';
 import { ControlledField } from '../Field';
+import { useControlledField } from '../useControlledField';
 
 interface SelectControlledProps<
     TFieldValues extends FieldValues,
@@ -40,12 +35,7 @@ const Select = <
     className,
     onValueChange,
 }: SelectControlledProps<TFieldValues, TName, TValue>) => {
-    const { control } = useFormContext<TFieldValues>();
-
-    const {
-        field,
-        fieldState: { error },
-    } = useController({ name, control });
+    const { field, error } = useControlledField<TFieldValues, TName>(name);
 
     return (
         <ControlledField

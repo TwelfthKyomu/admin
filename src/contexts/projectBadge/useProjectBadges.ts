@@ -1,8 +1,6 @@
 'use client';
 
-import { makeMutation } from '@/shared/lib/mutations';
-import { listQuery } from '@/shared/lib/queries';
-import { useQuery } from '@tanstack/react-query';
+import { defineResource } from '@/shared/lib/resource';
 import {
     createProjectBadgeAction,
     deleteProjectBadgeAction,
@@ -16,24 +14,29 @@ interface ListOptions {
     enabled?: boolean;
 }
 
-const projectBadgeQueries = {
-    all: ['project-badges'] as const,
-    list: ({
-        projectId,
-        includeInactive = false,
-        enabled = true,
-    }: ListOptions) =>
-        listQuery(
-            [...projectBadgeQueries.all, 'list', projectId, includeInactive],
-            () => projectBadgesAction({ projectId, includeInactive }),
-            { enabled: enabled && projectId.length > 0 },
-        ),
-};
+const projectBadges = defineResource({
+    key: ['project-badges'],
+    list: {
+        action: projectBadgesAction,
+        input: ({ projectId, includeInactive }: ListOptions) => ({
+            projectId,
+            includeInactive,
+        }),
+        enabled: ({ projectId, enabled = true }: ListOptions) =>
+            enabled && projectId.length > 0,
+    },
+    mutations: {
+        useCreateProjectBadge: createProjectBadgeAction,
+        useUpdateProjectBadge: updateProjectBadgeAction,
+        useDeleteProjectBadge: deleteProjectBadgeAction,
+    },
+});
 
-export const useProjectBadgesList = (opts: ListOptions) => {
-    return useQuery(projectBadgeQueries.list(opts));
-};
-
-export const useCreateProjectBadge = makeMutation(createProjectBadgeAction);
-export const useUpdateProjectBadge = makeMutation(updateProjectBadgeAction);
-export const useDeleteProjectBadge = makeMutation(deleteProjectBadgeAction);
+export const {
+    useList: useProjectBadgesList,
+    mutations: {
+        useCreateProjectBadge,
+        useUpdateProjectBadge,
+        useDeleteProjectBadge,
+    },
+} = projectBadges;

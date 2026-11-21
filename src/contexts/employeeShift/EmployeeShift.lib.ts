@@ -3,7 +3,7 @@ import 'server-only';
 import { db, type Reader, type Tx } from '@/infrastructure/database/client';
 import { ApplicationError } from '@/shared/api/errors';
 import { ownShiftsEmployeeId } from '@/shared/api/permission';
-import { findInProject } from '@/shared/api/repository';
+import { inProjectFinder } from '@/shared/api/repository';
 import { lockEmployees } from '@/contexts/organizationMember/OrganizationMember.lib';
 import {
     and,
@@ -32,12 +32,10 @@ import {
     type NewEmployeeShiftRecord,
 } from './EmployeeShifts.table';
 
-export const findShiftInProject = (
-    id: string,
-    projectId: string,
-): Promise<EmployeeShiftRecord> => {
-    return findInProject(employeeShifts, id, projectId, 'Смена не найдена');
-};
+export const findShiftInProject = inProjectFinder(
+    employeeShifts,
+    'Смена не найдена',
+);
 
 export const findOverlappingShifts = (
     executor: Reader,

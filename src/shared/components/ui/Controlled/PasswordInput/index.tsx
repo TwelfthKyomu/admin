@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { type FieldPath, type FieldValues, useController, useFormContext } from 'react-hook-form';
+import type { FieldPath, FieldValues } from 'react-hook-form';
 import {
     InputGroup,
     InputGroupAddon,
@@ -8,6 +8,7 @@ import {
 } from '@/ui/Base/InputGroup';
 import { Eye, EyeOff } from 'lucide-react';
 import { ControlledField } from '../Field';
+import { useControlledField } from '../useControlledField';
 
 interface PasswordInputProps<
     TFieldValues extends FieldValues,
@@ -28,15 +29,7 @@ export const PasswordInput = <
 }: PasswordInputProps<TFieldValues, TName>) => {
     const [show, setShow] = useState(false);
 
-    const { control } = useFormContext<TFieldValues>();
-
-    const {
-        field,
-        fieldState: { error, invalid },
-    } = useController({
-        name,
-        control,
-    });
+    const { field, error, invalid } = useControlledField<TFieldValues, TName>(name);
 
     return (
         <ControlledField

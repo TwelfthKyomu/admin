@@ -1,8 +1,6 @@
 'use client';
 
-import { makeMutation } from '@/shared/lib/mutations';
-import { listQuery } from '@/shared/lib/queries';
-import { useQuery } from '@tanstack/react-query';
+import { defineResource } from '@/shared/lib/resource';
 import {
     orderStockAction,
     stockMovementsAction,
@@ -20,41 +18,56 @@ interface MovementsOptions {
     productId?: string;
 }
 
-const stockQueries = {
-    all: ['stock'] as const,
-    overview: (projectId: string) =>
-        listQuery(
-            [...stockQueries.all, 'overview', projectId],
-            () => stockOverviewAction({ projectId }),
-            { enabled: projectId.length > 0, staleTime: 15_000 },
-        ),
-    movements: ({ projectId, productId }: MovementsOptions) =>
-        listQuery(
-            [...stockQueries.all, 'movements', projectId, productId ?? ''],
-            () => stockMovementsAction({ projectId, productId }),
-            { enabled: projectId.length > 0, staleTime: 15_000 },
-        ),
-    order: (projectId: string, orderId: string) =>
-        listQuery(
-            [...stockQueries.all, 'order', projectId, orderId],
-            () => orderStockAction({ projectId, orderId }),
-            { enabled: orderId.length > 0 },
-        ),
-};
+const stockOverview = defineResource({
+    key: ['stock', 'overview'],
+    list: {
+        action: stockOverviewAction,
+        input: (projectId: string) => ({ projectId }),
+        enabled: (projectId) => projectId.length > 0,
+        staleTime: 15_000,
+    },
+    mutations: {
+        useReceiveStock: receiveStockAction,
+        useWriteOffStock: writeOffStockAction,
+        useCountStock: countStockAction,
+        useTransferStock: transferStockAction,
+    },
+});
 
-export const useOrderStock = (projectId: string, orderId: string) => {
-    return useQuery(stockQueries.order(projectId, orderId));
-};
+const stockMovements = defineResource({
+    key: ['stock', 'movements'],
+    list: {
+        action: stockMovementsAction,
+        input: ({ projectId, productId }: MovementsOptions) => ({
+            projectId,
+            productId,
+        }),
+        enabled: ({ projectId }: MovementsOptions) => projectId.length > 0,
+        staleTime: 15_000,
+    },
+});
 
-export const useStockOverview = (projectId: string) => {
-    return useQuery(stockQueries.overview(projectId));
-};
+const orderStock = defineResource({
+    key: ['stock', 'order'],
+    list: {
+        action: orderStockAction,
+        input: (projectId: string, orderId: string) => ({
+            projectId,
+            orderId,
+        }),
+        enabled: (_projectId: string, orderId: string) => orderId.length > 0,
+    },
+});
 
-export const useStockMovements = (opts: MovementsOptions) => {
-    return useQuery(stockQueries.movements(opts));
-};
+export const { useList: useStockOverview } = stockOverview;
+export const { useList: useStockMovements } = stockMovements;
+export const { useList: useOrderStock } = orderStock;
 
-export const useReceiveStock = makeMutation(receiveStockAction);
-export const useWriteOffStock = makeMutation(writeOffStockAction);
-export const useCountStock = makeMutation(countStockAction);
-export const useTransferStock = makeMutation(transferStockAction);
+export const {
+    mutations: {
+        useReceiveStock,
+        useWriteOffStock,
+        useCountStock,
+        useTransferStock,
+    },
+} = stockOverview;

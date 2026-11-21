@@ -36,14 +36,9 @@ export interface TopOrderItemView {
     revenueAmount: number;
 }
 
-export interface CurrencyTotalsView {
-    currency: Currency;
-    revenueAmount: number;
-    refundedAmount: number;
-    ordersCount: number;
-    paidOrdersCount: number;
+export type CurrencyTotalsView = Omit<ProjectRevenueView, 'projectId'> & {
     avgOrderValueAmount: number;
-}
+};
 
 export interface DashboardStatsView {
     totals: CurrencyTotalsView[];

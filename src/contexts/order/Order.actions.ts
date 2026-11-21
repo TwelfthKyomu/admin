@@ -7,7 +7,7 @@ import {
 } from '@/shared/api/action-client';
 import { ApplicationError } from '@/shared/api/errors';
 import { visibleSalesEmployeeId } from '@/shared/api/permission';
-import { searchFilters } from '@/shared/api/repository';
+import { listInProject, searchFilters } from '@/shared/api/repository';
 import { findClientInProject } from '@/contexts/client/Client.lib';
 import { findOrderCouponCode } from '@/contexts/coupon/CouponRedemption.lib';
 import {
@@ -20,7 +20,7 @@ import {
     findWarehouseInProject,
     primaryWarehouseId,
 } from '@/contexts/warehouse/Warehouse.lib';
-import { and, asc, desc, eq, gte, inArray, lt, sum } from 'drizzle-orm';
+import { asc, desc, eq, gte, inArray, lt, type SQL, sum } from 'drizzle-orm';
 import { createOrderWithItems, findOrderInProject } from './Order.lib';
 import {
     CreateOrderActionInputSchema,
@@ -45,7 +45,7 @@ export const ordersAction = projectReadAction(ORDER_READ_PERMISSIONS)
     .action(async ({ parsedInput, ctx: { userId } }) => {
         const { projectId, ...options } = parsedInput;
         const ownEmployeeId = await visibleSalesEmployeeId(userId, projectId);
-        const filters = [eq(orders.projectId, projectId)];
+        const filters: SQL[] = [];
 
         if (options.statuses && options.statuses.length > 0) {
             filters.push(inArray(orders.status, options.statuses));
@@ -69,16 +69,14 @@ export const ordersAction = projectReadAction(ORDER_READ_PERMISSIONS)
             ]),
         );
 
-        const rows = await db
-            .select()
-            .from(orders)
-            .where(and(...filters))
-            .orderBy(desc(orders.createdAt))
-            .limit(
+        const rows = await listInProject(orders, projectId, {
+            filters,
+            orderBy: [desc(orders.createdAt)],
+            limit:
                 options.from && options.to
                     ? ORDERS_RANGE_LIMIT
                     : ORDERS_LIST_LIMIT,
-            );
+        });
 
         const counts = rows.length
             ? await db

@@ -1,8 +1,6 @@
 'use client';
 
-import { makeMutation } from '@/shared/lib/mutations';
-import { listQuery } from '@/shared/lib/queries';
-import { useQuery } from '@tanstack/react-query';
+import { defineResource } from '@/shared/lib/resource';
 import {
     bulkCreateShiftsAction,
     changeShiftStatusAction,
@@ -20,46 +18,45 @@ interface ListOptions {
     enabled?: boolean;
 }
 
-const shiftQueries = {
-    all: ['shifts'] as const,
-    list: ({ projectId, from, to, employeeId, enabled = true }: ListOptions) =>
-        listQuery(
-            [
-                ...shiftQueries.all,
-                'list',
-                projectId,
-                from?.toISOString() ?? '',
-                to?.toISOString() ?? '',
-                employeeId ?? '',
-            ],
-            () => shiftsAction({ projectId, from, to, employeeId }),
-            { enabled: enabled && projectId.length > 0 },
-        ),
-};
+const shifts = defineResource({
+    key: ['shifts'],
+    list: {
+        action: shiftsAction,
+        input: ({ projectId, from, to, employeeId }: ListOptions) => ({
+            projectId,
+            from,
+            to,
+            employeeId,
+        }),
+        enabled: ({ projectId, enabled = true }: ListOptions) =>
+            enabled && projectId.length > 0,
+    },
+    mutations: {
+        useSetShiftSeekingReplacement: setShiftSeekingReplacementAction,
+        useBulkCreateShifts: bulkCreateShiftsAction,
+        useChangeShiftStatus: changeShiftStatusAction,
+        useReassignShift: reassignShiftAction,
+    },
+});
 
-export const useShiftsList = (opts: ListOptions) => {
-    return useQuery(shiftQueries.list(opts));
-};
+const replacementShifts = defineResource({
+    key: ['replacement-shifts'],
+    list: {
+        action: replacementShiftsAction,
+        input: (projectId: string) => ({ projectId }),
+        enabled: (projectId) => projectId.length > 0,
+        staleTime: 15_000,
+    },
+});
 
-const replacementShiftQueries = {
-    all: ['replacement-shifts'] as const,
-    list: (projectId: string) =>
-        listQuery(
-            [...replacementShiftQueries.all, 'list', projectId],
-            () => replacementShiftsAction({ projectId }),
-            { enabled: projectId.length > 0, staleTime: 15_000 },
-        ),
-};
+export const { useList: useShiftsList } = shifts;
+export const { useList: useReplacementShifts } = replacementShifts;
 
-export const useReplacementShifts = (projectId: string) => {
-    return useQuery(replacementShiftQueries.list(projectId));
-};
-
-export const useSetShiftSeekingReplacement = makeMutation(
-    setShiftSeekingReplacementAction,
-);
-
-export const useBulkCreateShifts = makeMutation(bulkCreateShiftsAction);
-export const useChangeShiftStatus = makeMutation(changeShiftStatusAction);
-
-export const useReassignShift = makeMutation(reassignShiftAction);
+export const {
+    mutations: {
+        useSetShiftSeekingReplacement,
+        useBulkCreateShifts,
+        useChangeShiftStatus,
+        useReassignShift,
+    },
+} = shifts;

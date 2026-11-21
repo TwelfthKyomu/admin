@@ -8,8 +8,9 @@ import {
 import { ApplicationError } from '@/shared/api/errors';
 import {
     assertUniqueInProject,
-    findInProject,
+    inProjectFinder,
     insertOne,
+    listInProject,
     updateInProject,
 } from '@/shared/api/repository';
 import { productBadges } from '@/contexts/product/Products.table';
@@ -29,31 +30,18 @@ import {
     normalizeBadgeCode,
     PROJECT_BADGE_DEFAULT_COLOR,
 } from './ProjectBadge.types';
-import { type ProjectBadgeRecord, projectBadges } from './ProjectBadges.table';
+import { projectBadges } from './ProjectBadges.table';
 
-const findBadgeInProject = (
-    id: string,
-    projectId: string,
-): Promise<ProjectBadgeRecord> => {
-    return findInProject(projectBadges, id, projectId, 'Бейдж не найден');
-};
+const findBadgeInProject = inProjectFinder(projectBadges, 'Бейдж не найден');
 
 export const projectBadgesAction = projectReadAction(CATALOG_READ_PERMISSIONS)
     .inputSchema(ProjectBadgesActionInputSchema)
-    .action(async ({ parsedInput: { projectId, includeInactive } }) => {
-        const filters = [
-            eq(projectBadges.projectId, projectId),
-            isNull(projectBadges.deletedAt),
-        ];
-
-        if (!includeInactive) filters.push(eq(projectBadges.isActive, true));
-
-        return db
-            .select()
-            .from(projectBadges)
-            .where(and(...filters))
-            .orderBy(asc(projectBadges.position), asc(projectBadges.label));
-    });
+    .action(async ({ parsedInput: { projectId, includeInactive } }) =>
+        listInProject(projectBadges, projectId, {
+            includeInactive,
+            orderBy: [asc(projectBadges.position), asc(projectBadges.label)],
+        }),
+    );
 
 export const createProjectBadgeAction = projectMutationAction(
     Permission.MANAGE_CATALOG,

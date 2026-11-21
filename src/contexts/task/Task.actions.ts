@@ -9,6 +9,7 @@ import { ApplicationError } from '@/shared/api/errors';
 import {
     deleteInProject,
     insertOne,
+    listInProject,
     updateInProject,
 } from '@/shared/api/repository';
 import { mapDefined } from '@/shared/lib/utils';
@@ -19,7 +20,7 @@ import {
 import { nextTaskNumber } from '@/contexts/project/Project.lib';
 import { findActiveProjectMember } from '@/contexts/projectMember/ProjectMember.lib';
 import { Permission, TASK_WRITE_PERMISSIONS } from '@/contexts/user/User.types';
-import { desc, eq } from 'drizzle-orm';
+import { desc } from 'drizzle-orm';
 import {
     CreateTaskActionInputSchema,
     DeleteTaskActionInputSchema,
@@ -48,11 +49,9 @@ const assertAssigneeInProject = async (
 export const tasksAction = projectReadAction(Permission.VIEW_MEMBERS)
     .inputSchema(TasksActionInputSchema)
     .action(({ parsedInput }) =>
-        db
-            .select()
-            .from(tasks)
-            .where(eq(tasks.projectId, parsedInput.projectId))
-            .orderBy(desc(tasks.number)),
+        listInProject(tasks, parsedInput.projectId, {
+            orderBy: [desc(tasks.number)],
+        }),
     );
 
 export const createTaskAction = projectMutationAction(TASK_WRITE_PERMISSIONS)

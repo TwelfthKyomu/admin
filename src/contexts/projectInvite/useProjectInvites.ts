@@ -1,8 +1,7 @@
 'use client';
 
-import { makeMutation } from '@/shared/lib/mutations';
-import { listQuery } from '@/shared/lib/queries';
-import { useMutation, useQuery } from '@tanstack/react-query';
+import { defineResource } from '@/shared/lib/resource';
+import { useMutation } from '@tanstack/react-query';
 import {
     acceptProjectInviteAction,
     createProjectInviteAction,
@@ -10,23 +9,26 @@ import {
     revokeProjectInviteAction,
 } from './ProjectInvite.actions';
 
-const inviteQueries = {
-    all: ['project-invites'] as const,
-    list: (projectId: string) =>
-        listQuery(
-            [...inviteQueries.all, 'list', projectId],
-            () => projectInvitesAction({ projectId }),
-            { enabled: projectId.length > 0, staleTime: 15_000 },
-        ),
-};
+const invites = defineResource({
+    key: ['project-invites'],
+    list: {
+        action: projectInvitesAction,
+        input: (projectId: string) => ({ projectId }),
+        enabled: (projectId) => projectId.length > 0,
+        staleTime: 15_000,
+    },
+    mutations: {
+        useCreateProjectInvite: createProjectInviteAction,
+        useRevokeProjectInvite: revokeProjectInviteAction,
+    },
+});
 
-export const useProjectInvitesList = (projectId: string) => {
-    return useQuery(inviteQueries.list(projectId));
-};
-
-export const useCreateProjectInvite = makeMutation(createProjectInviteAction);
-export const useRevokeProjectInvite = makeMutation(revokeProjectInviteAction);
+export const { useList: useProjectInvitesList } = invites;
 
 export const useAcceptProjectInvite = () => {
     return useMutation({ mutationFn: acceptProjectInviteAction });
 };
+
+export const {
+    mutations: { useCreateProjectInvite, useRevokeProjectInvite },
+} = invites;

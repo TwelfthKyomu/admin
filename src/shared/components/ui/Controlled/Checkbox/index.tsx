@@ -1,5 +1,5 @@
 import type { ComponentProps } from 'react';
-import { type FieldPath, type FieldValues, useController, useFormContext } from 'react-hook-form';
+import type { FieldPath, FieldValues } from 'react-hook-form';
 import {
     Checkbox as BaseCheckbox,
     Field,
@@ -7,6 +7,7 @@ import {
     FieldDescription,
     FieldLabel,
 } from '@/ui/Base';
+import { useControlledField } from '../useControlledField';
 
 interface CheckboxControlledProps<
     TFieldValues extends FieldValues,
@@ -26,12 +27,7 @@ const Checkbox = <
     description,
     ...props
 }: CheckboxControlledProps<TFieldValues, TName>) => {
-    const { control } = useFormContext<TFieldValues>();
-
-    const {
-        field,
-        fieldState: { error, invalid },
-    } = useController({ name, control });
+    const { field, error, invalid } = useControlledField<TFieldValues, TName>(name);
 
     return (
         <Field

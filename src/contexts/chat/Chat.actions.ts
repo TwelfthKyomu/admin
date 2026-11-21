@@ -38,6 +38,17 @@ import {
     listThread,
 } from './ChatMessageList.lib';
 
+const withChannel = async <T>(
+    userId: string,
+    organizationId: string,
+    target: Parameters<typeof findChannel>[2],
+    load: (channelId: string) => Promise<T[]>,
+): Promise<T[]> => {
+    const channel = await findChannel(userId, organizationId, target);
+
+    return channel ? load(channel.id) : [];
+};
+
 export const chatChannelsAction = organizationMemberAction().action(
     async ({ ctx: { userId, organizationId, role } }) => {
         const canManage = isOrganizationManager(role);
@@ -74,65 +85,38 @@ export const chatContactsAction = organizationMemberAction().action(
 export const chatMessagesAction = organizationMemberAction()
     .inputSchema(ChatMessagesActionInputSchema)
     .action(
-        async ({
-            parsedInput: { target, limit },
-            ctx: { userId, organizationId },
-        }) => {
-            const channel = await findChannel(userId, organizationId, target);
-
-            if (!channel) return [];
-
-            return listChannelMessages(
-                channel.id,
-                userId,
-                limit ?? PAGE_SIZE_DEFAULT,
-            );
-        },
+        ({ parsedInput: { target, limit }, ctx: { userId, organizationId } }) =>
+            withChannel(userId, organizationId, target, (channelId) =>
+                listChannelMessages(
+                    channelId,
+                    userId,
+                    limit ?? PAGE_SIZE_DEFAULT,
+                ),
+            ),
     );
 
 export const chatPinnedAction = organizationMemberAction()
     .inputSchema(ChatTargetActionInputSchema)
-    .action(
-        async ({
-            parsedInput: { target },
-            ctx: { userId, organizationId },
-        }) => {
-            const channel = await findChannel(userId, organizationId, target);
-
-            if (!channel) return [];
-
-            return listPinnedMessages(channel.id, userId);
-        },
+    .action(({ parsedInput: { target }, ctx: { userId, organizationId } }) =>
+        withChannel(userId, organizationId, target, (channelId) =>
+            listPinnedMessages(channelId, userId),
+        ),
     );
 
 export const chatLinksAction = organizationMemberAction()
     .inputSchema(ChatTargetActionInputSchema)
-    .action(
-        async ({
-            parsedInput: { target },
-            ctx: { userId, organizationId },
-        }) => {
-            const channel = await findChannel(userId, organizationId, target);
-
-            if (!channel) return [];
-
-            return listChannelLinks(channel.id);
-        },
+    .action(({ parsedInput: { target }, ctx: { userId, organizationId } }) =>
+        withChannel(userId, organizationId, target, (channelId) =>
+            listChannelLinks(channelId),
+        ),
     );
 
 export const chatAttachmentsAction = organizationMemberAction()
     .inputSchema(ChatTargetActionInputSchema)
-    .action(
-        async ({
-            parsedInput: { target },
-            ctx: { userId, organizationId },
-        }) => {
-            const channel = await findChannel(userId, organizationId, target);
-
-            if (!channel) return [];
-
-            return listChannelAttachments(channel.id);
-        },
+    .action(({ parsedInput: { target }, ctx: { userId, organizationId } }) =>
+        withChannel(userId, organizationId, target, (channelId) =>
+            listChannelAttachments(channelId),
+        ),
     );
 
 export const chatMessageSearchAction = organizationMemberAction()

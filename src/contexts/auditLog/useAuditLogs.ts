@@ -1,19 +1,15 @@
 'use client';
 
-import { listQuery } from '@/shared/lib/queries';
-import { useQuery } from '@tanstack/react-query';
+import { defineResource } from '@/shared/lib/resource';
 import { auditLogAction } from './AuditLog.actions';
 
-const auditLogQueries = {
-    all: ['audit-log'] as const,
-    list: (organizationId: string) =>
-        listQuery(
-            [...auditLogQueries.all, 'list', organizationId],
-            () => auditLogAction({ organizationId }),
-            { enabled: organizationId.length > 0 },
-        ),
-};
+const auditLog = defineResource({
+    key: ['audit-log'],
+    list: {
+        action: auditLogAction,
+        input: (organizationId: string) => ({ organizationId }),
+        enabled: (organizationId) => organizationId.length > 0,
+    },
+});
 
-export const useAuditLogList = (organizationId: string) => {
-    return useQuery(auditLogQueries.list(organizationId));
-};
+export const { useList: useAuditLogList } = auditLog;

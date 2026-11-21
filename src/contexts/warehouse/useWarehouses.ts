@@ -1,8 +1,6 @@
 'use client';
 
-import { makeMutation } from '@/shared/lib/mutations';
-import { listQuery } from '@/shared/lib/queries';
-import { useQuery } from '@tanstack/react-query';
+import { defineResource } from '@/shared/lib/resource';
 import {
     createWarehouseAction,
     deleteWarehouseAction,
@@ -11,21 +9,27 @@ import {
     warehousesAction,
 } from './Warehouse.actions';
 
-const warehouseQueries = {
-    all: ['warehouses'] as const,
-    list: (projectId: string) =>
-        listQuery(
-            [...warehouseQueries.all, 'list', projectId],
-            () => warehousesAction({ projectId }),
-            { enabled: projectId.length > 0 },
-        ),
-};
+const warehouses = defineResource({
+    key: ['warehouses'],
+    list: {
+        action: warehousesAction,
+        input: (projectId: string) => ({ projectId }),
+        enabled: (projectId) => projectId.length > 0,
+    },
+    mutations: {
+        useCreateWarehouse: createWarehouseAction,
+        useUpdateWarehouse: updateWarehouseAction,
+        useDeleteWarehouse: deleteWarehouseAction,
+        useMakePrimaryWarehouse: makePrimaryWarehouseAction,
+    },
+});
 
-export const useWarehousesList = (projectId: string) => {
-    return useQuery(warehouseQueries.list(projectId));
-};
-
-export const useCreateWarehouse = makeMutation(createWarehouseAction);
-export const useUpdateWarehouse = makeMutation(updateWarehouseAction);
-export const useDeleteWarehouse = makeMutation(deleteWarehouseAction);
-export const useMakePrimaryWarehouse = makeMutation(makePrimaryWarehouseAction);
+export const {
+    useList: useWarehousesList,
+    mutations: {
+        useCreateWarehouse,
+        useUpdateWarehouse,
+        useDeleteWarehouse,
+        useMakePrimaryWarehouse,
+    },
+} = warehouses;

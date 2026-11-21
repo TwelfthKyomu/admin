@@ -1,7 +1,7 @@
 'use client';
 
-import { makeMutation } from '@/shared/lib/mutations';
 import { listQuery } from '@/shared/lib/queries';
+import { defineResource } from '@/shared/lib/resource';
 import { useQuery } from '@tanstack/react-query';
 import {
     createProjectAction,
@@ -11,24 +11,26 @@ import {
 } from './Project.actions';
 import { projectSetupAction } from './ProjectSetup.actions';
 
-const projectQueries = {
-    all: ['projects'] as const,
-    list: (organizationId: string) =>
-        listQuery(
-            [...projectQueries.all, 'list', organizationId],
-            () => projectsAction({ organizationId }),
-            { enabled: organizationId.length > 0 },
-        ),
-};
+const projects = defineResource({
+    key: ['projects'],
+    list: {
+        action: projectsAction,
+        input: (organizationId: string) => ({ organizationId }),
+        enabled: (organizationId) => organizationId.length > 0,
+    },
+    mutations: {
+        useCreateProject: createProjectAction,
+        useUpdateProject: updateProjectAction,
+        useDeleteProject: deleteProjectAction,
+    },
+});
 
-export const useProjectsList = (organizationId: string) => {
-    return useQuery(projectQueries.list(organizationId));
-};
+export const { useList: useProjectsList } = projects;
 
 export const useProjectSetup = () => {
     return useQuery(listQuery(['project-setup'], projectSetupAction));
 };
 
-export const useCreateProject = makeMutation(createProjectAction);
-export const useUpdateProject = makeMutation(updateProjectAction);
-export const useDeleteProject = makeMutation(deleteProjectAction);
+export const {
+    mutations: { useCreateProject, useUpdateProject, useDeleteProject },
+} = projects;

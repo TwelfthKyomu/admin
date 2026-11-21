@@ -1,6 +1,7 @@
-import { type FieldPath, type FieldValues, useController, useFormContext } from 'react-hook-form';
+import type { FieldPath, FieldValues } from 'react-hook-form';
 import { ColorPicker as BaseColorPicker } from '@/ui/Base/ColorPicker';
 import { ControlledField } from '../Field';
+import { useControlledField } from '../useControlledField';
 
 interface ColorPickerControlledProps<
     TFieldValues extends FieldValues,
@@ -21,12 +22,7 @@ const ColorPicker = <
     description,
     placeholder,
 }: ColorPickerControlledProps<TFieldValues, TName>) => {
-    const { control } = useFormContext<TFieldValues>();
-
-    const {
-        field,
-        fieldState: { error, invalid },
-    } = useController({ name, control });
+    const { field, error, invalid } = useControlledField<TFieldValues, TName>(name);
 
     const value = typeof field.value === 'string' ? field.value : '';
 

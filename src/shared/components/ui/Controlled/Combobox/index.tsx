@@ -1,13 +1,8 @@
-import {
-    type FieldPath,
-    type FieldPathValue,
-    type FieldValues,
-    useController,
-    useFormContext,
-} from 'react-hook-form';
+import type { FieldPath, FieldPathValue, FieldValues } from 'react-hook-form';
 import type { Option } from '@/shared/types';
 import { Combobox as BaseCombobox } from '@/ui/Base';
 import { ControlledField } from '../Field';
+import { useControlledField } from '../useControlledField';
 
 interface ComboboxControlledProps<
     TFieldValues extends FieldValues,
@@ -42,12 +37,7 @@ const Combobox = <
     emptyText,
     onValueChange,
 }: ComboboxControlledProps<TFieldValues, TName, TValue>) => {
-    const { control } = useFormContext<TFieldValues>();
-
-    const {
-        field,
-        fieldState: { error },
-    } = useController({ name, control });
+    const { field, error } = useControlledField<TFieldValues, TName>(name);
 
     return (
         <ControlledField

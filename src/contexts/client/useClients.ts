@@ -1,8 +1,6 @@
 'use client';
 
-import { makeMutation } from '@/shared/lib/mutations';
-import { listQuery } from '@/shared/lib/queries';
-import { useQuery } from '@tanstack/react-query';
+import { defineResource } from '@/shared/lib/resource';
 import {
     clientsAction,
     createClientAction,
@@ -16,24 +14,25 @@ interface ListOptions {
     enabled?: boolean;
 }
 
-const clientQueries = {
-    all: ['clients'] as const,
-    list: ({ projectId, search = '', limit, enabled = true }: ListOptions) =>
-        listQuery(
-            [...clientQueries.all, 'list', projectId, search, limit],
-            () =>
-                clientsAction({
-                    projectId,
-                    search: search || undefined,
-                    limit,
-                }),
-            { enabled: enabled && projectId.length > 0 },
-        ),
-};
+const clients = defineResource({
+    key: ['clients'],
+    list: {
+        action: clientsAction,
+        input: ({ projectId, search, limit }: ListOptions) => ({
+            projectId,
+            search: search || undefined,
+            limit,
+        }),
+        enabled: ({ projectId, enabled = true }: ListOptions) =>
+            enabled && projectId.length > 0,
+    },
+    mutations: {
+        useCreateClient: createClientAction,
+        useUpdateClient: updateClientAction,
+    },
+});
 
-export const useClientsList = (opts: ListOptions) => {
-    return useQuery(clientQueries.list(opts));
-};
-
-export const useCreateClient = makeMutation(createClientAction);
-export const useUpdateClient = makeMutation(updateClientAction);
+export const {
+    useList: useClientsList,
+    mutations: { useCreateClient, useUpdateClient },
+} = clients;

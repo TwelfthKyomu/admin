@@ -7,8 +7,9 @@ import {
 } from '@/shared/api/action-client';
 import { ApplicationError } from '@/shared/api/errors';
 import {
-    findInProject,
+    inProjectFinder,
     insertOne,
+    listInProject,
     searchFilters,
     softDeleteInProject,
     updateOne,
@@ -24,7 +25,7 @@ import {
     CATALOG_READ_PERMISSIONS,
     Permission,
 } from '@/contexts/user/User.types';
-import { and, asc, eq, isNull } from 'drizzle-orm';
+import { asc, eq } from 'drizzle-orm';
 import {
     assertBarcodesFree,
     assertCategoryCompatible,
@@ -49,38 +50,24 @@ import {
     normalizeProductOptions,
     ProductType,
 } from './Product.types';
-import { type ProductRecord, products } from './Products.table';
+import { products } from './Products.table';
 import { loadVariants, saveProductVariants } from './ProductVariant.lib';
 
-const findProductInProject = (
-    id: string,
-    projectId: string,
-): Promise<ProductRecord> => {
-    return findInProject(products, id, projectId, 'Товар не найден');
-};
+const findProductInProject = inProjectFinder(products, 'Товар не найден');
 
 export const productsAction = projectReadAction(CATALOG_READ_PERMISSIONS)
     .inputSchema(ProductsActionInputSchema)
     .action(async ({ parsedInput: { projectId, search } }) => {
-        const filters = [
-            eq(products.projectId, projectId),
-            isNull(products.deletedAt),
-        ];
-
-        filters.push(
-            ...searchFilters(search, [
+        const rows = await listInProject(products, projectId, {
+            includeInactive: true,
+            filters: searchFilters(search, [
                 products.name,
                 products.slug,
                 products.sku,
                 products.barcode,
             ]),
-        );
-
-        const rows = await db
-            .select()
-            .from(products)
-            .where(and(...filters))
-            .orderBy(asc(products.name));
+            orderBy: [asc(products.name)],
+        });
 
         const relationsOf = await loadProductRelations(
             rows.map((row) => row.id),

@@ -16,10 +16,10 @@ import {
     inArray,
     isNotNull,
     lt,
-    lte,
     sum,
 } from 'drizzle-orm';
 import { deliveries } from './Deliveries.table';
+import { assignedCourierWindowFilter } from './Delivery.lib';
 import {
     type CourierPeriodView,
     type CourierStatsView,
@@ -154,15 +154,7 @@ export const courierLoadInWindow = async (
     const [row] = await db
         .select({ count: count(), cashDue: sum(deliveries.cashDue) })
         .from(deliveries)
-        .where(
-            and(
-                eq(deliveries.projectId, window.projectId),
-                eq(deliveries.courierId, window.employeeId),
-                eq(deliveries.status, DeliveryStatus.ASSIGNED),
-                gte(deliveries.windowStart, window.startsAt),
-                lte(deliveries.windowEnd, window.endsAt),
-            ),
-        );
+        .where(assignedCourierWindowFilter(window));
 
     return { count: row?.count ?? 0, cashDue: Number(row?.cashDue ?? 0) };
 };

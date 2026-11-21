@@ -1,13 +1,16 @@
 'use server';
 
-import { db } from '@/infrastructure/database/client';
 import { checkBucket } from '@/infrastructure/storage/uploads';
 import {
     projectMutationAction,
     projectReadAction,
 } from '@/shared/api/action-client';
 import { ApplicationError } from '@/shared/api/errors';
-import { insertOne, updateInProject } from '@/shared/api/repository';
+import {
+    insertOne,
+    listInProject,
+    updateInProject,
+} from '@/shared/api/repository';
 import { getErrorMessage } from '@/shared/lib/errors';
 import { encryptCredentials } from '@/shared/security/encryption';
 import { isPublicHttpUrl } from '@/shared/security/public-url';
@@ -21,7 +24,7 @@ import {
     Permission,
 } from '@/contexts/user/User.types';
 import { createHash, randomBytes } from 'node:crypto';
-import { asc, eq } from 'drizzle-orm';
+import { asc } from 'drizzle-orm';
 import { findProjectBucket } from './Integration.lib';
 import {
     ConnectStorageActionInputSchema,
@@ -57,11 +60,10 @@ export const integrationsAction = projectReadAction(
 )
     .inputSchema(IntegrationsActionInputSchema)
     .action(async ({ parsedInput: { projectId } }) => {
-        const rows = await db
-            .select()
-            .from(projectIntegrations)
-            .where(eq(projectIntegrations.projectId, projectId))
-            .orderBy(asc(projectIntegrations.createdAt));
+        const rows = await listInProject(projectIntegrations, projectId, {
+            includeInactive: true,
+            orderBy: [asc(projectIntegrations.createdAt)],
+        });
 
         return rows.map(rowToView);
     });

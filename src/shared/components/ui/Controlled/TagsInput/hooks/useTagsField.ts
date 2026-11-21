@@ -1,10 +1,6 @@
 import { type KeyboardEvent, useState } from 'react';
-import {
-    type FieldPath,
-    type FieldValues,
-    useController,
-    useFormContext,
-} from 'react-hook-form';
+import type { FieldPath, FieldValues } from 'react-hook-form';
+import { useControlledField } from '../../useControlledField';
 
 export const useTagsField = <
     TFieldValues extends FieldValues,
@@ -12,12 +8,9 @@ export const useTagsField = <
 >(
     name: TName,
 ) => {
-    const { control } = useFormContext<TFieldValues>();
-
-    const {
-        field,
-        fieldState: { error, invalid },
-    } = useController({ name, control });
+    const { field, error, invalid } = useControlledField<TFieldValues, TName>(
+        name,
+    );
 
     const [draft, setDraft] = useState('');
     const tags: string[] = field.value ?? [];

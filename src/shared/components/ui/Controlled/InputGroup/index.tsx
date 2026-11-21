@@ -1,7 +1,8 @@
 import type { ComponentProps, ReactNode } from 'react';
-import { type FieldPath, type FieldValues, useController, useFormContext } from 'react-hook-form';
+import type { FieldPath, FieldValues } from 'react-hook-form';
 import { InputGroupField } from '@/ui/Base/InputGroup';
 import { ControlledField } from '../Field';
+import { useControlledField } from '../useControlledField';
 
 export interface InputGroupTransform {
     format: (value: unknown) => string;
@@ -37,12 +38,7 @@ const InputGroup = <
     transform = identity,
     ...props
 }: InputGroupControlledProps<TFieldValues, TName>) => {
-    const { control } = useFormContext<TFieldValues>();
-
-    const {
-        field,
-        fieldState: { error, invalid },
-    } = useController({ name, control });
+    const { field, error, invalid } = useControlledField<TFieldValues, TName>(name);
 
     return (
         <ControlledField

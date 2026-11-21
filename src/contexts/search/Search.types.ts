@@ -1,29 +1,26 @@
-import type { Currency } from '@/shared/constants/currency';
+import type { ClientRecord } from '@/contexts/client/Clients.table';
+import type { OrderRecord } from '@/contexts/order/Orders.table';
+import type { ProductRecord } from '@/contexts/product/Products.table';
 
-export interface SearchOrderHit {
-    id: string;
-    projectId: string;
-    customerName: string | null;
-    customerPhone: string | null;
-    totalAmount: number;
-    currency: Currency;
-}
+export type SearchOrderHit = Pick<
+    OrderRecord,
+    | 'id'
+    | 'projectId'
+    | 'customerName'
+    | 'customerPhone'
+    | 'totalAmount'
+    | 'currency'
+>;
 
-export interface SearchClientHit {
-    id: string;
-    projectId: string;
-    firstName: string;
-    lastName: string | null;
-    phone: string | null;
-    email: string | null;
-}
+export type SearchClientHit = Pick<
+    ClientRecord,
+    'id' | 'projectId' | 'firstName' | 'lastName' | 'phone' | 'email'
+>;
 
-export interface SearchProductHit {
-    id: string;
-    projectId: string;
-    name: string;
-    sku: string;
-}
+export type SearchProductHit = Pick<
+    ProductRecord,
+    'id' | 'projectId' | 'name' | 'sku'
+>;
 
 export interface SearchResults {
     orders: SearchOrderHit[];

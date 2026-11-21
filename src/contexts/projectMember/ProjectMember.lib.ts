@@ -1,7 +1,7 @@
 import 'server-only';
 
 import { db } from '@/infrastructure/database/client';
-import { findInProject } from '@/shared/api/repository';
+import { inProjectFinder } from '@/shared/api/repository';
 import { and, eq, isNull } from 'drizzle-orm';
 import {
     type ProjectMemberRecord,
@@ -27,14 +27,7 @@ export const findActiveProjectMember = async (
     return member ?? null;
 };
 
-export const findProjectMemberInProject = (
-    memberId: string,
-    projectId: string,
-): Promise<ProjectMemberRecord> => {
-    return findInProject(
-        projectMembers,
-        memberId,
-        projectId,
-        'Участник не найден',
-    );
-};
+export const findProjectMemberInProject = inProjectFinder(
+    projectMembers,
+    'Участник не найден',
+);

@@ -1,8 +1,6 @@
 'use client';
 
-import { makeMutation } from '@/shared/lib/mutations';
-import { listQuery } from '@/shared/lib/queries';
-import { useQuery } from '@tanstack/react-query';
+import { defineResource } from '@/shared/lib/resource';
 import {
     createProductAction,
     deleteProductAction,
@@ -17,21 +15,31 @@ interface ListOptions {
     enabled?: boolean;
 }
 
-const productQueries = {
-    all: ['products'] as const,
-    list: ({ projectId, search = '', enabled = true }: ListOptions) =>
-        listQuery(
-            [...productQueries.all, 'list', projectId, search],
-            () => productsAction({ projectId, search: search || undefined }),
-            { enabled: enabled && projectId.length > 0 },
-        ),
-};
+const products = defineResource({
+    key: ['products'],
+    list: {
+        action: productsAction,
+        input: ({ projectId, search }: ListOptions) => ({
+            projectId,
+            search: search || undefined,
+        }),
+        enabled: ({ projectId, enabled = true }: ListOptions) =>
+            enabled && projectId.length > 0,
+    },
+    mutations: {
+        useCreateProduct: createProductAction,
+        useUpdateProduct: updateProductAction,
+        useDeleteProduct: deleteProductAction,
+        useImportProducts: importProductsAction,
+    },
+});
 
-export const useProductsList = (opts: ListOptions) => {
-    return useQuery(productQueries.list(opts));
-};
-
-export const useCreateProduct = makeMutation(createProductAction);
-export const useUpdateProduct = makeMutation(updateProductAction);
-export const useDeleteProduct = makeMutation(deleteProductAction);
-export const useImportProducts = makeMutation(importProductsAction);
+export const {
+    useList: useProductsList,
+    mutations: {
+        useCreateProduct,
+        useUpdateProduct,
+        useDeleteProduct,
+        useImportProducts,
+    },
+} = products;

@@ -1,8 +1,6 @@
 'use client';
 
-import { makeMutation } from '@/shared/lib/mutations';
-import { listQuery } from '@/shared/lib/queries';
-import { useQuery } from '@tanstack/react-query';
+import { defineResource } from '@/shared/lib/resource';
 import {
     categoriesAction,
     createCategoryAction,
@@ -16,24 +14,25 @@ interface ListOptions {
     enabled?: boolean;
 }
 
-const categoryQueries = {
-    all: ['categories'] as const,
-    list: ({
-        projectId,
-        includeInactive = false,
-        enabled = true,
-    }: ListOptions) =>
-        listQuery(
-            [...categoryQueries.all, 'list', projectId, includeInactive],
-            () => categoriesAction({ projectId, includeInactive }),
-            { enabled: enabled && projectId.length > 0 },
-        ),
-};
+const categories = defineResource({
+    key: ['categories'],
+    list: {
+        action: categoriesAction,
+        input: ({ projectId, includeInactive }: ListOptions) => ({
+            projectId,
+            includeInactive,
+        }),
+        enabled: ({ projectId, enabled = true }: ListOptions) =>
+            enabled && projectId.length > 0,
+    },
+    mutations: {
+        useCreateCategory: createCategoryAction,
+        useUpdateCategory: updateCategoryAction,
+        useDeleteCategory: deleteCategoryAction,
+    },
+});
 
-export const useCategoriesList = (opts: ListOptions) => {
-    return useQuery(categoryQueries.list(opts));
-};
-
-export const useCreateCategory = makeMutation(createCategoryAction);
-export const useUpdateCategory = makeMutation(updateCategoryAction);
-export const useDeleteCategory = makeMutation(deleteCategoryAction);
+export const {
+    useList: useCategoriesList,
+    mutations: { useCreateCategory, useUpdateCategory, useDeleteCategory },
+} = categories;
